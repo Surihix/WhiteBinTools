@@ -44,7 +44,6 @@ namespace WhiteBinTools
             Console.WriteLine("on whether the compressed size or the file size when its in the archive, is equal");
             Console.WriteLine("to the size of the file that is being replaced.");
 
-            Console.ReadLine();
             Environment.Exit(0);
         }
     }
