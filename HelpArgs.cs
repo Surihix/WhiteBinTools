@@ -16,6 +16,7 @@ namespace WhiteBinTools
             Console.WriteLine("-uf = Unpack a single file from the bin file");
             Console.WriteLine("-rf = Repack a single file into the bin file");
             Console.WriteLine("-rfm = Repack multiple files into the bin file");
+            Console.WriteLine("-f = Unpack file paths from filelist");
             Console.WriteLine("");
             Console.WriteLine("");
             Console.WriteLine("Examples with 13-[1] game code:");
@@ -28,6 +29,8 @@ namespace WhiteBinTools
                 @" ""unpacked_folder_name""" + @" ""chr\pc\c201\bin\c201.win32.trb""");
             Console.WriteLine("To repack multiple files: WhiteBinTools 1 -rfm " + @"""filelist.bin""" + @" ""whitebin.bin"""
                 + @" ""unpacked_folder_name""");
+            Console.WriteLine("");
+            Console.WriteLine("To unpack file paths: WhiteBinTools 1 -f " + @"""filelist.bin""");
             Console.WriteLine("");
             Console.WriteLine("");
             Console.WriteLine("Filelist file and the white bin file or the unpacked folder has to be specified");
@@ -42,7 +45,7 @@ namespace WhiteBinTools
             Console.WriteLine("The single file and the multiple files repacking options will inject the file");
             Console.WriteLine("at the original position in the archive or append the file at the end depending");
             Console.WriteLine("on whether the compressed size or the file size when its in the archive, is equal");
-            Console.WriteLine("to the size of the file that is being replaced.");
+            Console.WriteLine("or less than the size of the file that is being replaced.");
 
             Environment.Exit(0);
         }

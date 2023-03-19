@@ -59,6 +59,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BinUnpkFilePaths.cs" />
     <Compile Include="BinRepack.cs" />
     <Compile Include="BinRpkAFile.cs" />
     <Compile Include="BinRpkMoreFiles.cs" />

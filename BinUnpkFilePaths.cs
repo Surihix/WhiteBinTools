@@ -5,60 +5,49 @@ using System.Text;
 
 namespace WhiteBinTools
 {
-    internal class BinUnpack
+    internal class BinUnpkFilePaths
     {
-        private static readonly object _lockObject = new object();
-        public static void Unpack(int GameCode, string FilelistFile, string WhiteBinFile)
+        public static void UnpkFilelist(int GameCode, string FilelistFile)
         {
-            // Check if the filelist file and the white image bin file exists
+            // Check if the filelist file exists
             if (!File.Exists(FilelistFile))
             {
                 Core.LogMsgs("Error: Filelist file specified in the argument is missing");
                 Core.ErrorExit("");
             }
-            if (!File.Exists(WhiteBinFile))
-            {
-                Core.LogMsgs("Error: Image bin file specified in the argument is missing");
-                Core.ErrorExit("");
-            }
 
 
-            // Set the filelist and the white image bin file names
+            // Set the filelist file and folder names
             var FilelistName = Path.GetFileName(FilelistFile);
-            var WhiteBinName = Path.GetFileName(WhiteBinFile);
+            var UnpackedFolderName = FilelistName.Replace(".win32.bin", "_win32").Replace(".ps3.bin", "_ps3").
+                Replace(".x360.bin", "_x360");
 
 
-            // Set directories and file paths for the filelist files and the white bin files
+            // Set directories and file paths for the filelist file
+            // and the extracted chunk files
             var InFilelistFilePath = Path.GetFullPath(FilelistFile);
-            var InBinFilePath = Path.GetFullPath(WhiteBinFile);
             var InFilelistFileDir = Path.GetDirectoryName(InFilelistFilePath);
-            var InBinFileDir = Path.GetDirectoryName(InBinFilePath);
             var TmpDcryptFilelistFile = InFilelistFileDir + "\\filelist_tmp.bin";
-            var Extract_dir_Name = Path.GetFileNameWithoutExtension(WhiteBinFile).Replace(".win32", "_win32").
-                Replace(".ps3", "_ps3").Replace(".x360", "_x360");
-            var Extract_dir = InBinFileDir + "\\" + Extract_dir_Name;
-            var DefaultChunksExtDir = Extract_dir + "\\_chunks";
-            var ChunkFile = DefaultChunksExtDir + "\\chunk_";
+
+            var ChunksExtDir = InFilelistFileDir + "\\" + UnpackedFolderName + "_paths";
+            var ChunkFile = ChunksExtDir + "\\chunk_";
 
 
-            // Check and delete backup filelist file if it exists
+            // Check and delete backup filelist file, the chunk
+            // files and extracted chunk file directory if it exists
             Core.IfFileExistsDel(FilelistFile + ".bak");
 
-            // Check and delete extracted directory if they exist in the
-            // folder where they are supposed to be extracted
-            if (Directory.Exists(Extract_dir))
+            if (Directory.Exists(ChunksExtDir))
             {
-                Console.WriteLine("Detected previous unpack. deleting....");
-                Directory.Delete(Extract_dir, true);
-                Console.Clear();
+                Directory.Delete(ChunksExtDir, true);
             }
-
-            Directory.CreateDirectory(Extract_dir);
-            Directory.CreateDirectory(DefaultChunksExtDir);
+            Directory.CreateDirectory(ChunksExtDir);
 
 
             // Store a list of unencrypted filelist files
-            string[] UnEncryptedFilelists = { "movielista.win32.bin", "movielistv.win32.bin", "movielist.win32.bin" };
+            string[] UnEncryptedFilelists = { "movielista.win32.bin", "movielistv.win32.bin", "movielist.win32.bin", 
+                "filelist_sound_pack.win32.bin", "filelist_sound_pack.win32_us.bin", "filelist_sound_pack_fixed.win32.bin", 
+                "filelist_sound_pack_fixed.win32_us.bin",  };
 
 
             // Check for encryption header in the filelist file, if the
@@ -81,6 +70,7 @@ namespace WhiteBinTools
                     }
                 }
             }
+
 
             // Check if the ffxiiicrypt tool is present in the filelist directory
             // and if it doesn't exist copy it to the directory from the app
@@ -113,17 +103,11 @@ namespace WhiteBinTools
                 switch (GameCode)
                 {
                     case 1:
-                        lock (_lockObject)
-                        {
-                            Core.LogMsgs("Game is set to 13-1");
-                        }
+                        Core.LogMsgs("Game is set to 13-1");
                         break;
 
                     case 2:
-                        lock (_lockObject)
-                        {
-                            Core.LogMsgs("Game is set to 13-2 / 13-LR");
-                        }
+                        Core.LogMsgs("Game is set to 13-2 / 13-LR");
 
                         if (!UnEncryptedFilelists.Contains(FilelistName))
                         {
@@ -172,12 +156,8 @@ namespace WhiteBinTools
                         var ChunkInfo_size = chunksStartPos - chunksInfoStartPos;
                         TotalChunks = ChunkInfo_size / 12;
 
-                        lock (_lockObject)
-                        {
-                            Core.LogMsgs("TotalChunks: " + TotalChunks);
-                            Core.LogMsgs("No of files: " + TotalFiles);
-                            Core.LogMsgs("\n");
-                        }
+                        Core.LogMsgs("TotalChunks: " + TotalChunks);
+                        Core.LogMsgs("No of files: " + TotalFiles);
 
                         // Make a memorystream for holding all Chunks info
                         using (MemoryStream ChunkInfoStream = new MemoryStream())
@@ -229,127 +209,65 @@ namespace WhiteBinTools
                 }
 
 
-                // Extracting files section 
+                // Write all file paths strings
+                // to a text file
                 ChunkFNameCount = 0;
-                var CountDuplicate = 1;
-                for (int ch = 0; ch < TotalChunks; ch++)
+                for (int cf = 0; cf < TotalChunks; cf++)
                 {
-                    // Get the total number of files in a chunk file by counting the number of times
+                    // Get the total number of entries in a chunk file by counting the number of times
                     // an null character occurs in the chunk file
-                    var FilesInChunkCount = (uint)0;
-                    using (StreamReader FileCountReader = new StreamReader(DefaultChunksExtDir + "/chunk_" +
-                        ChunkFNameCount))
+                    var EntriesInChunk = (uint)0;
+                    using (StreamReader FileCountReader = new StreamReader(ChunksExtDir + "/chunk_" + ChunkFNameCount))
                     {
                         while (!FileCountReader.EndOfStream)
                         {
                             var CurrentNullChar = FileCountReader.Read();
                             if (CurrentNullChar == 0)
                             {
-                                FilesInChunkCount++;
+                                EntriesInChunk++;
                             }
                         }
                     }
 
                     // Open a chunk file for reading
-                    using (FileStream CurrentChunk = new FileStream(ChunkFile + ChunkFNameCount, FileMode.Open,
+                    using (FileStream CurrentChunk = new FileStream(ChunkFile + ChunkFNameCount, FileMode.Open, 
                         FileAccess.Read))
                     {
-                        using (BinaryReader ChunkStringReader = new BinaryReader(CurrentChunk))
+                        using (FileStream CurrentChunkTxt = new FileStream(ChunkFile + ChunkFNameCount + ".txt",
+                            FileMode.Append, FileAccess.Write))
                         {
-                            var ChunkStringReaderPos = (uint)0;
-                            for (int f = 0; f < FilesInChunkCount; f++)
+                            using (StreamWriter EntriesWriter = new StreamWriter(CurrentChunkTxt))
                             {
-                                ChunkStringReader.BaseStream.Position = ChunkStringReaderPos;
-                                var ParsedString = new StringBuilder();
-                                char GetParsedString;
-                                while ((GetParsedString = ChunkStringReader.ReadChar()) != default)
+                                using (BinaryReader ChunkStringReader = new BinaryReader(CurrentChunk))
                                 {
-                                    ParsedString.Append(GetParsedString);
-                                }
-                                var Parsed = ParsedString.ToString();
-
-                                if (Parsed.StartsWith("end"))
-                                {
-                                    break;
-                                }
-
-                                string[] data = Parsed.Split(':');
-                                var Pos = Convert.ToUInt32(data[0], 16) * 2048;
-                                var UncmpSize = Convert.ToUInt32(data[1], 16);
-                                var CmpSize = Convert.ToUInt32(data[2], 16);
-                                var MainPath = data[3].Replace("/", "\\");
-
-                                var DirectoryPath = Path.GetDirectoryName(MainPath);
-                                var FileName = Path.GetFileName(MainPath);
-                                var FullFilePath = Extract_dir + "\\" + DirectoryPath + "\\" + FileName;
-                                var CompressedState = false;
-                                var UnpackedState = "";
-
-                                if (!UncmpSize.Equals(CmpSize))
-                                {
-                                    CompressedState = true;
-                                    UnpackedState = "Decompressed";
-                                }
-                                else
-                                {
-                                    CompressedState = false;
-                                    UnpackedState = "Copied";
-                                }
-
-                                using (FileStream Bin = new FileStream(WhiteBinFile, FileMode.Open, FileAccess.Read))
-                                {
-                                    if (!Directory.Exists(Extract_dir + "\\" + DirectoryPath))
+                                    var ChunkStringReaderPos = (uint)0;
+                                    for (int e = 0; e < EntriesInChunk; e++)
                                     {
-                                        Directory.CreateDirectory(Extract_dir + "\\" + DirectoryPath);
-                                    }
-                                    if (File.Exists(FullFilePath))
-                                    {
-                                        File.Delete(FullFilePath);
-                                        CountDuplicate++;
-                                    }
+                                        ChunkStringReader.BaseStream.Position = ChunkStringReaderPos;
+                                        var ParsedString = new StringBuilder();
+                                        char GetParsedString;
+                                        while ((GetParsedString = ChunkStringReader.ReadChar()) != default)
+                                        {
+                                            ParsedString.Append(GetParsedString);
+                                        }
+                                        var Parsed = ParsedString.ToString();
 
-                                    switch (CompressedState)
-                                    {
-                                        case true:
-                                            using (MemoryStream CmpData = new MemoryStream())
-                                            {
-                                                Bin.CopyTo(CmpData, Pos, CmpSize);
+                                        EntriesWriter.WriteLine(Parsed);
 
-                                                using (FileStream OutFile = new FileStream(FullFilePath, FileMode.OpenOrCreate,
-                                                    FileAccess.ReadWrite))
-                                                {
-                                                    CmpData.Seek(0, SeekOrigin.Begin);
-                                                    ZlibLibrary.ZlibDecompress(CmpData, OutFile);
-                                                }
-                                            }
-                                            break;
-
-                                        case false:
-                                            using (FileStream OutFile = new FileStream(FullFilePath, FileMode.OpenOrCreate,
-                                                FileAccess.Write))
-                                            {
-                                                OutFile.Seek(0, SeekOrigin.Begin);
-                                                Bin.CopyTo(OutFile, Pos, UncmpSize);
-                                            }
-                                            break;
+                                        ChunkStringReaderPos = (uint)ChunkStringReader.BaseStream.Position;
                                     }
                                 }
-
-                                lock (_lockObject)
-                                {
-                                    Core.LogMsgs(UnpackedState + " " + Extract_dir_Name + "\\" + MainPath);
-                                }
-
-                                ChunkStringReaderPos = (uint)ChunkStringReader.BaseStream.Position;
                             }
                         }
                     }
 
+                    File.Delete(ChunkFile + ChunkFNameCount);
                     ChunkFNameCount++;
                 }
 
-                Directory.Delete(DefaultChunksExtDir, true);
 
+                // Restore old filefile file if game code is
+                // set to 2 and if the filelist file is not encrypted
                 if (GameCode.Equals(2))
                 {
                     if (!UnEncryptedFilelists.Contains(FilelistName))
@@ -359,28 +277,12 @@ namespace WhiteBinTools
                     }
                 }
 
-
-                lock (_lockObject)
-                {
-                    Core.LogMsgs("\n");
-                    Console.WriteLine("Finished extracting file " + WhiteBinName);
-                    if (CountDuplicate > 1)
-                    {
-                        Core.LogMsgs(CountDuplicate + " duplicate file(s)");
-                    }
-                }
-
+                Core.LogMsgs("\n");
+                Core.LogMsgs("Extracted " + TotalChunks + " chunk files");
                 Console.ReadLine();
-                Environment.Exit(0);
             }
             catch (Exception ex)
             {
-                if (File.Exists(FilelistFile + ".bak"))
-                {
-                    File.Delete(FilelistFile);
-                    File.Move(FilelistFile + ".bak", FilelistFile);
-                }
-
                 Core.LogMsgs("Error: " + ex);
                 Core.ErrorExit("");
             }

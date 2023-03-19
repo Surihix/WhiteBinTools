@@ -106,7 +106,7 @@ namespace WhiteBinTools
 
                         if (EncHeaderNumber == 501232760)
                         {
-                            Core.LogMsgs("Error: Detected encrypted filelist file. set the correct game code to handle " +
+                            Core.LogMsgs("Error: Detected encrypted filelist file. set the game code to 2 for handling " +
                                 "this type of filelist");
                             Core.ErrorExit("");
                         }
