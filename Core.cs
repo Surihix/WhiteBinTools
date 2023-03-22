@@ -15,7 +15,6 @@ namespace WhiteBinTools
                 Help.ShowCommands();
             }
 
-
             try
             {
                 // Basic arguments
