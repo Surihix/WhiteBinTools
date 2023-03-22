@@ -2,9 +2,9 @@
 
 namespace WhiteBinTools
 {
-    internal class HelpArgs
+    internal class Help
     {
-        public static void HelpMsgs()
+        public static void ShowCommands()
         {
             Console.WriteLine("Game Codes:");
             Console.WriteLine("1 = 13-1");

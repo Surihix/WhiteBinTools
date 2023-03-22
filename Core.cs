@@ -12,7 +12,7 @@ namespace WhiteBinTools
             {
                 Console.WriteLine("Warning: Enough arguments not specified");
                 Console.WriteLine("");
-                HelpArgs.HelpMsgs();
+                Help.ShowCommands();
             }
 
 
