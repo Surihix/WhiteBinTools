@@ -47,6 +47,14 @@ namespace WhiteBinTools
                 IfFileExistsDel("log.txt");
                 var TotalArgCount = args.Length;
 
+                string[] ActionList = { "-u", "-uf", "-r", "-rf", "-rfm", "-f" };
+
+                if (!ActionList.Contains(ToolAction))
+                {
+                    Console.WriteLine("Warning: Invalid tool action specified");
+                    Help.ShowCommands();
+                }
+
                 switch (ToolAction)
                 {
                     case "-u":

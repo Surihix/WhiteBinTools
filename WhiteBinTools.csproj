@@ -67,7 +67,7 @@
     <Compile Include="BinUnpkAFile.cs" />
     <Compile Include="Core.cs" />
     <Compile Include="CryptProcess.cs" />
-    <Compile Include="HelpArgs.cs" />
+    <Compile Include="Help.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StreamExtension.cs" />
     <Compile Include="ZlibLibrary.cs" />
