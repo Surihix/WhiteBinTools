@@ -133,7 +133,7 @@ namespace WhiteBinTools
 
                             var CryptFilelistCode = " filelist";
 
-                            CryptProcess.FFXiiiCryptTool(InFilelistFileDir, " -d ", "\"" + TmpDcryptFilelistFile + "\"",
+                            Core.FFXiiiCryptTool(InFilelistFileDir, " -d ", "\"" + TmpDcryptFilelistFile + "\"",
                                 ref CryptFilelistCode);
 
                             File.Move(FilelistFile, FilelistFile + ".bak");
@@ -357,6 +357,9 @@ namespace WhiteBinTools
 
                 Directory.Delete(DefaultChunksExtDir, true);
 
+
+                // Restore old filefile file if game code is
+                // set to 2 and if the filelist file is not encrypted
                 if (GameCode.Equals(2))
                 {
                     if (!UnEncryptedFilelists.Contains(FilelistName))
@@ -385,9 +388,6 @@ namespace WhiteBinTools
                         }
                     }
                 }
-
-                Console.ReadLine();
-                Environment.Exit(0);
             }
             catch (Exception ex)
             {

@@ -17,11 +17,9 @@ namespace WhiteBinTools
             }
 
 
-            // Set the filelist file and folder names
+            // Set the filelist file names
             var FilelistName = Path.GetFileName(FilelistFile);
-            var UnpackedFolderName = FilelistName.Replace(".win32.bin", "_win32").Replace(".ps3.bin", "_ps3").
-                Replace(".x360.bin", "_x360");
-
+            var FilelistOutName = Path.GetFileNameWithoutExtension(FilelistFile);
 
             // Set directories and file paths for the filelist file
             // and the extracted chunk files
@@ -29,8 +27,9 @@ namespace WhiteBinTools
             var InFilelistFileDir = Path.GetDirectoryName(InFilelistFilePath);
             var TmpDcryptFilelistFile = InFilelistFileDir + "\\filelist_tmp.bin";
 
-            var ChunksExtDir = InFilelistFileDir + "\\" + UnpackedFolderName + "_paths";
+            var ChunksExtDir = InFilelistFileDir + "\\" + "_chunks";
             var ChunkFile = ChunksExtDir + "\\chunk_";
+            var OutChunkFile = InFilelistFileDir + "\\" + FilelistOutName + ".txt";
 
 
             // Check and delete backup filelist file, the chunk
@@ -47,7 +46,7 @@ namespace WhiteBinTools
             // Store a list of unencrypted filelist files
             string[] UnEncryptedFilelists = { "movielista.win32.bin", "movielistv.win32.bin", "movielist.win32.bin", 
                 "filelist_sound_pack.win32.bin", "filelist_sound_pack.win32_us.bin", "filelist_sound_pack_fixed.win32.bin", 
-                "filelist_sound_pack_fixed.win32_us.bin",  };
+                "filelist_sound_pack_fixed.win32_us.bin" };
 
 
             // Check for encryption header in the filelist file, if the
@@ -117,7 +116,7 @@ namespace WhiteBinTools
 
                             var CryptFilelistCode = " filelist";
 
-                            CryptProcess.FFXiiiCryptTool(InFilelistFileDir, " -d ", "\"" + TmpDcryptFilelistFile + "\"",
+                            Core.FFXiiiCryptTool(InFilelistFileDir, " -d ", "\"" + TmpDcryptFilelistFile + "\"",
                                 ref CryptFilelistCode);
 
                             File.Move(FilelistFile, FilelistFile + ".bak");
@@ -156,7 +155,6 @@ namespace WhiteBinTools
                         var ChunkInfo_size = chunksStartPos - chunksInfoStartPos;
                         TotalChunks = ChunkInfo_size / 12;
 
-                        Core.LogMsgs("TotalChunks: " + TotalChunks);
                         Core.LogMsgs("No of files: " + TotalFiles);
 
                         // Make a memorystream for holding all Chunks info
@@ -230,13 +228,11 @@ namespace WhiteBinTools
                     }
 
                     // Open a chunk file for reading
-                    using (FileStream CurrentChunk = new FileStream(ChunkFile + ChunkFNameCount, FileMode.Open, 
-                        FileAccess.Read))
+                    using (FileStream CurrentChunk = new FileStream(ChunkFile + ChunkFNameCount, FileMode.Open, FileAccess.Read))
                     {
-                        using (FileStream CurrentChunkTxt = new FileStream(ChunkFile + ChunkFNameCount + ".txt",
-                            FileMode.Append, FileAccess.Write))
+                        using (FileStream OutChunk = new FileStream(OutChunkFile, FileMode.Append, FileAccess.Write))
                         {
-                            using (StreamWriter EntriesWriter = new StreamWriter(CurrentChunkTxt))
+                            using (StreamWriter EntriesWriter = new StreamWriter(OutChunk))
                             {
                                 using (BinaryReader ChunkStringReader = new BinaryReader(CurrentChunk))
                                 {
@@ -265,6 +261,8 @@ namespace WhiteBinTools
                     ChunkFNameCount++;
                 }
 
+                Directory.Delete(ChunksExtDir, true);
+
 
                 // Restore old filefile file if game code is
                 // set to 2 and if the filelist file is not encrypted
@@ -277,9 +275,8 @@ namespace WhiteBinTools
                     }
                 }
 
-                Core.LogMsgs("\n");
-                Core.LogMsgs("Extracted " + TotalChunks + " chunk files");
-                Console.ReadLine();
+
+                Core.LogMsgs("\nExtracted filepaths to " + FilelistOutName + ".txt file");
             }
             catch (Exception ex)
             {

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Buffers.Binary;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -151,7 +150,7 @@ namespace WhiteBinTools
 
                             File.Copy(FilelistFile, TmpDcryptFilelistFile);
 
-                            CryptProcess.FFXiiiCryptTool(InFilelistFileDir, " -d ", "\"" + TmpDcryptFilelistFile + "\"",
+                            Core.FFXiiiCryptTool(InFilelistFileDir, " -d ", "\"" + TmpDcryptFilelistFile + "\"",
                                 ref CryptFilelistCode);
 
                             File.Move(FilelistFile, BackupOldFilelistFile);
@@ -290,7 +289,7 @@ namespace WhiteBinTools
                                 {
                                     // Create a new chunk file with append mode for writing updated values back to the 
                                     // filelist file
-                                    using (FileStream UpdChunk = new FileStream(NewChunkFile + ChunkFNameCount, 
+                                    using (FileStream UpdChunk = new FileStream(NewChunkFile + ChunkFNameCount,
                                         FileMode.Append, FileAccess.Write))
                                     {
                                         using (StreamWriter UpdChunkStrings = new StreamWriter(UpdChunk))
@@ -409,9 +408,9 @@ namespace WhiteBinTools
                                                 }
 
                                                 FilePos /= 2048;
-                                                DecToHex(FilePos, ref AsciFilePos);
-                                                DecToHex(UcmpSize, ref AsciUcmpSize);
-                                                DecToHex(CmpSize, ref AsciCmpSize);
+                                                Core.DecToHex(FilePos, ref AsciFilePos);
+                                                Core.DecToHex(UcmpSize, ref AsciUcmpSize);
+                                                Core.DecToHex(CmpSize, ref AsciCmpSize);
 
                                                 var NewUpdatedPath = AsciFilePos + ":" + AsciUcmpSize + ":" + AsciCmpSize + ":" +
                                                     MainPath + "\0";
@@ -481,7 +480,7 @@ namespace WhiteBinTools
 
                                     // Get each file strings start position in a chunk and update the position
                                     // value in the info section of the new filelist file
-                                    using (FileStream FileStrings = new FileStream(NewChunkFile + ChunkFNameCount, 
+                                    using (FileStream FileStrings = new FileStream(NewChunkFile + ChunkFNameCount,
                                         FileMode.Open, FileAccess.Read))
                                     {
                                         using (BinaryReader FileStringsReader = new BinaryReader(FileStrings))
@@ -504,11 +503,8 @@ namespace WhiteBinTools
                                                     }
                                                 }
 
-                                                NewFilelistWriter.BaseStream.Position = FileInfoWriterPos;
-                                                byte[] AdjustFilePosInChunk = new byte[2];
-                                                BinaryPrimitives.WriteUInt16LittleEndian(AdjustFilePosInChunk,
-                                                    FilePosInChunkToWrite);
-                                                NewFilelistWriter.Write(AdjustFilePosInChunk);
+                                                Core.AdjustBytesUInt16(NewFilelistWriter, FileInfoWriterPos,
+                                                    out byte[] AdjustFilePosInChunk, FilePosInChunkToWrite);
 
                                                 FileStringsReader.BaseStream.Position = FilePosInChunk;
                                                 var ParsedVal = new StringBuilder();
@@ -540,7 +536,7 @@ namespace WhiteBinTools
                                     ZlibLibrary.ZlibCompress(NewChunkFile + ChunkFNameCount, TmpCmpChunkFile,
                                         Ionic.Zlib.CompressionLevel.Level9);
 
-                                    using (FileStream CmpChunkDataStream = new FileStream(TmpCmpChunkFile, 
+                                    using (FileStream CmpChunkDataStream = new FileStream(TmpCmpChunkFile,
                                         FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
                                     {
                                         CmpChunkDataStream.Seek(0, SeekOrigin.Begin);
@@ -551,20 +547,12 @@ namespace WhiteBinTools
                                     }
                                     File.Delete(TmpCmpChunkFile);
 
-                                    NewFilelistWriter.BaseStream.Position = ChunkInfoWriterPos;
-                                    byte[] AdjustChunkUnCmpSize = new byte[4];
-                                    BinaryPrimitives.WriteUInt32LittleEndian(AdjustChunkUnCmpSize, ChunkUncmpSize);
-                                    NewFilelistWriter.Write(AdjustChunkUnCmpSize);
-
-                                    NewFilelistWriter.BaseStream.Position = ChunkInfoWriterPos + 4;
-                                    byte[] AdjustChunkCmpSize = new byte[4];
-                                    BinaryPrimitives.WriteUInt32LittleEndian(AdjustChunkCmpSize, ChunkCmpSize);
-                                    NewFilelistWriter.Write(AdjustChunkCmpSize);
-
-                                    NewFilelistWriter.BaseStream.Position = ChunkInfoWriterPos + 8;
-                                    byte[] AdjustChunkStart = new byte[4];
-                                    BinaryPrimitives.WriteUInt32LittleEndian(AdjustChunkStart, ChunkStartVal);
-                                    NewFilelistWriter.Write(AdjustChunkStart);
+                                    Core.AdjustBytesUInt32(NewFilelistWriter, ChunkInfoWriterPos, 
+                                        out byte[] AdjustChunkUnCmpSize, ChunkUncmpSize);
+                                    Core.AdjustBytesUInt32(NewFilelistWriter, ChunkInfoWriterPos + 4, 
+                                        out byte[] AdjustChunkCmpSize, ChunkCmpSize);
+                                    Core.AdjustBytesUInt32(NewFilelistWriter, ChunkInfoWriterPos + 8, 
+                                        out byte[] AdjustChunkStart, ChunkStartVal);
 
                                     var NewChunkStartVal = ChunkStartVal + ChunkCmpSize;
                                     ChunkStartVal = NewChunkStartVal;
@@ -598,7 +586,8 @@ namespace WhiteBinTools
                 File.Move(NewFileListFile, FilelistFile);
 
 
-                // Re Encrypt filelist file and add the neccessary encryption header if the game code is set to 2
+                // Re Encrypt filelist file and add the neccessary encryption header
+                // if the game code is set to 2
                 if (GameCode.Equals(2))
                 {
                     if (!UnEncryptedFilelists.Contains(FilelistName))
@@ -656,10 +645,8 @@ namespace WhiteBinTools
                                             FilelistSize = NewSize;
                                         }
 
-                                        EncryptedFilelistWriter.BaseStream.Position = 16;
-                                        byte[] AdjTotalFilelistSize = new byte[4];
-                                        BinaryPrimitives.WriteUInt32BigEndian(AdjTotalFilelistSize, FilelistSize);
-                                        EncryptedFilelistWriter.Write(AdjTotalFilelistSize);
+                                        Core.AdjustBytesUInt32(EncryptedFilelistWriter, 16, out byte[] AdjTotalFilelistSize,
+                                            FilelistSize);
 
                                         EncryptedFilelist.Seek(0, SeekOrigin.Begin);
                                         MaxFilelistSize = (uint)EncryptedFilelist.Length;
@@ -679,10 +666,10 @@ namespace WhiteBinTools
 
                         // Write checksum to the filelist file
                         var CryptAsciiSize = "";
-                        DecToHex(MaxFilelistSize, ref CryptAsciiSize);
+                        Core.DecToHex(MaxFilelistSize, ref CryptAsciiSize);
                         var CheckSumActionArg = " 000" + CryptAsciiSize + CryptCheckSumCode;
 
-                        CryptProcess.FFXiiiCryptTool(InFilelistFileDir, " -c ", "\"" + FilelistFile + "\"", 
+                        Core.FFXiiiCryptTool(InFilelistFileDir, " -c ", "\"" + FilelistFile + "\"",
                             ref CheckSumActionArg);
                         Core.LogMsgs("\nWrote new checksum to the filelist");
 
@@ -693,18 +680,17 @@ namespace WhiteBinTools
                         File.Delete(TmpDcryptFilelistFile);
 
                         // Encrypt the filelist file                 
-                        CryptProcess.FFXiiiCryptTool(InFilelistFileDir, " -e ", "\"" + FilelistFile + "\"", 
+                        Core.FFXiiiCryptTool(InFilelistFileDir, " -e ", "\"" + FilelistFile + "\"",
                             ref CryptFilelistCode);
                         Core.LogMsgs("\nEncrypted filelist file");
                     }
                 }
 
 
-                Core.LogMsgs("\nFinished repacking files to white bin");
-                Console.ReadLine();
+                Core.LogMsgs("\nFinished repacking files to " + WhiteBinName);
             }
             catch (Exception ex)
-            {                
+            {
                 if (File.Exists(FilelistFile + ".bak"))
                 {
                     File.Delete(FilelistFile);
@@ -714,11 +700,6 @@ namespace WhiteBinTools
                 Core.LogMsgs("Error: " + ex);
                 Core.ErrorExit("");
             }
-        }
-
-        static void DecToHex(uint DecValue, ref string HexValue)
-        {
-            HexValue = DecValue.ToString("x");
         }
     }
 }

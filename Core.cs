@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Buffers.Binary;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -18,6 +20,7 @@ namespace WhiteBinTools
             try
             {
                 // Basic arguments
+                // Assign the arguments to the proper variables
                 var argument_1 = Convert.ToInt16(args[0]);
                 var argument_2 = args[1].ToLower();
                 var argument_3 = args[2];
@@ -33,63 +36,64 @@ namespace WhiteBinTools
                 var FilelistFileVar = argument_3;
                 var WhiteBinOrDirVar = argument_4;
 
-                // Additional argument for specific file
-                // also used to spoof the argument for 
-                // -rfm tool action
-                var WhiteFilePathVar = "";
-                if (args.Length > 4)
-                {
-                    var argument_5 = args[4];
-                    WhiteFilePathVar = argument_5;
-                }
-
-                IfFileExistsDel("log.txt");
-                var TotalArgCount = args.Length;
-
-                string[] ActionList = { "-u", "-uf", "-r", "-rf", "-rfm", "-f" };
+                // Check argument 1 and 2
+                string[] ActionList = { "-u", "-r", "-f", "-uf", "-rf", "-rfm" };
+                int[] GameCodesList = { 1, 2 };
 
                 if (!ActionList.Contains(ToolAction))
                 {
                     Console.WriteLine("Warning: Invalid tool action specified");
                     Help.ShowCommands();
                 }
+                if (!GameCodesList.Contains(GameCodeVar))
+                {
+                    Console.WriteLine("Warning: Specified game code is incorrect");
+                    Help.ShowCommands();
+                }
+
+                // Additional argument for handling a specific file
+                // Also used for directory argument for -rfm tool action
+                var WhiteFilePathOrDirVar = "";
+                if (args.Length > 4)
+                {
+                    var argument_5 = args[4];
+                    WhiteFilePathOrDirVar = argument_5;
+                }
+
+                IfFileExistsDel("log.txt");
+                var TotalArgCount = args.Length;
+
 
                 switch (ToolAction)
                 {
                     case "-u":
                         CheckArguments(ref TotalArgCount, 3);
-                        CheckGameCode(ref GameCodeVar);
                         BinUnpack.Unpack(GameCodeVar, FilelistFileVar, WhiteBinOrDirVar);
-                        break;
-
-                    case "-uf":
-                        CheckArguments(ref TotalArgCount, 5);
-                        CheckGameCode(ref GameCodeVar);
-                        BinUnpkAFile.UnpackFile(GameCodeVar, FilelistFileVar, WhiteBinOrDirVar, WhiteFilePathVar);
                         break;
 
                     case "-r":
                         CheckArguments(ref TotalArgCount, 3);
-                        CheckGameCode(ref GameCodeVar);
                         BinRepack.Repack(GameCodeVar, FilelistFileVar, WhiteBinOrDirVar);
-                        break;
-
-                    case "-rf":
-                        CheckArguments(ref TotalArgCount, 5);
-                        CheckGameCode(ref GameCodeVar);
-                        BinRpkAFile.RepackFile(GameCodeVar, FilelistFileVar, WhiteBinOrDirVar, WhiteFilePathVar);
-                        break;
-
-                    case "-rfm":
-                        CheckArguments(ref TotalArgCount, 5);
-                        CheckGameCode(ref GameCodeVar);
-                        BinRpkMoreFiles.RepackMoreFiles(GameCodeVar, FilelistFileVar, WhiteBinOrDirVar, WhiteFilePathVar);
                         break;
 
                     case "-f":
                         CheckArguments(ref TotalArgCount, 2);
-                        CheckGameCode(ref GameCodeVar);
                         BinUnpkFilePaths.UnpkFilelist(GameCodeVar, FilelistFileVar);
+                        break;
+
+                    case "-uf":
+                        CheckArguments(ref TotalArgCount, 5);
+                        BinUnpkAFile.UnpackFile(GameCodeVar, FilelistFileVar, WhiteBinOrDirVar, WhiteFilePathOrDirVar);
+                        break;
+
+                    case "-rf":
+                        CheckArguments(ref TotalArgCount, 5);
+                        BinRpkAFile.RepackFile(GameCodeVar, FilelistFileVar, WhiteBinOrDirVar, WhiteFilePathOrDirVar);
+                        break;
+
+                    case "-rfm":
+                        CheckArguments(ref TotalArgCount, 5);
+                        BinRpkMoreFiles.RepackMoreFiles(GameCodeVar, FilelistFileVar, WhiteBinOrDirVar, WhiteFilePathOrDirVar);
                         break;
 
                     default:
@@ -110,17 +114,6 @@ namespace WhiteBinTools
             if (TotalLength < requiredLength)
             {
                 LogMsgs("Error: Specified action requires one or more arguments");
-                ErrorExit("");
-            }
-        }
-
-        static void CheckGameCode(ref short GameCodeVal)
-        {
-            short[] GameCodes = { 1, 2 };
-
-            if (!GameCodes.Contains(GameCodeVal))
-            {
-                LogMsgs("Error: Specified game code is incorrect");
                 ErrorExit("");
             }
         }
@@ -147,6 +140,42 @@ namespace WhiteBinTools
             {
                 File.Delete(FilePath);
             }
+        }
+
+        public static void FFXiiiCryptTool(string CryptDir, string Action, string FileListName, ref string ActionType)
+        {
+            using (Process xiiiCrypt = new Process())
+            {
+                xiiiCrypt.StartInfo.WorkingDirectory = CryptDir;
+                xiiiCrypt.StartInfo.FileName = "ffxiiicrypt.exe";
+                xiiiCrypt.StartInfo.Arguments = Action + FileListName + ActionType;
+                xiiiCrypt.StartInfo.UseShellExecute = true;
+                xiiiCrypt.Start();
+                xiiiCrypt.WaitForExit();
+            }
+        }
+
+        public static void DecToHex(uint DecValue, ref string HexValue)
+        {
+            HexValue = DecValue.ToString("x");
+        }
+
+        public static void AdjustBytesUInt16(BinaryWriter WriterName, int WriterPos, out byte[] AdjustByteVar, 
+            ushort NewAdjustVar)
+        {
+            WriterName.BaseStream.Position = WriterPos;
+            AdjustByteVar = new byte[2];
+            BinaryPrimitives.WriteUInt16LittleEndian(AdjustByteVar, NewAdjustVar);
+            WriterName.Write(AdjustByteVar);
+        }
+
+        public static void AdjustBytesUInt32(BinaryWriter WriterName, uint WriterPos, out byte[] AdjustByteVar, 
+            uint NewAdjustVar)
+        {
+            WriterName.BaseStream.Position = WriterPos;
+            AdjustByteVar = new byte[4];
+            BinaryPrimitives.WriteUInt32LittleEndian(AdjustByteVar, NewAdjustVar);
+            WriterName.Write(AdjustByteVar);
         }
     }
 }
