@@ -22,7 +22,7 @@ namespace WhiteBinTools
                 // Basic arguments
                 // Assign the arguments to the proper variables
                 var argument_1 = Convert.ToInt16(args[0]);
-                var argument_2 = args[1].ToLower();
+                var argument_2 = args[1];
                 var argument_3 = args[2];
 
                 var argument_4 = "";
