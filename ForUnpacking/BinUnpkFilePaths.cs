@@ -12,8 +12,8 @@ namespace WhiteBinTools
             // Check if the filelist file exists
             if (!File.Exists(FilelistFile))
             {
-                Core.LogMsgs("Error: Filelist file specified in the argument is missing");
-                Core.ErrorExit("");
+                CmnMethods.LogMsgs("Error: Filelist file specified in the argument is missing");
+                CmnMethods.ErrorExit("");
             }
 
 
@@ -34,7 +34,7 @@ namespace WhiteBinTools
 
             // Check and delete backup filelist file, the chunk
             // files and extracted chunk file directory if it exists
-            Core.IfFileExistsDel(FilelistFile + ".bak");
+            CmnMethods.IfFileExistsDel(FilelistFile + ".bak");
 
             if (Directory.Exists(ChunksExtDir))
             {
@@ -62,9 +62,9 @@ namespace WhiteBinTools
 
                         if (EncHeaderNumber == 501232760)
                         {
-                            Core.LogMsgs("Error: Detected encrypted filelist file. set the game code to 2 for handling " +
+                            CmnMethods.LogMsgs("Error: Detected encrypted filelist file. set the game code to 2 for handling " +
                                 "this type of filelist");
-                            Core.ErrorExit("");
+                            CmnMethods.ErrorExit("");
                         }
                     }
                 }
@@ -87,9 +87,9 @@ namespace WhiteBinTools
                     }
                     else
                     {
-                        Core.LogMsgs("Error: Unable to locate ffxiiicrypt tool in the main app folder to " +
+                        CmnMethods.LogMsgs("Error: Unable to locate ffxiiicrypt tool in the main app folder to " +
                             "decrypt the filelist file");
-                        Core.ErrorExit("");
+                        CmnMethods.ErrorExit("");
                     }
                 }
             }
@@ -102,21 +102,21 @@ namespace WhiteBinTools
                 switch (GameCode)
                 {
                     case 1:
-                        Core.LogMsgs("Game is set to 13-1");
+                        CmnMethods.LogMsgs("Game is set to 13-1");
                         break;
 
                     case 2:
-                        Core.LogMsgs("Game is set to 13-2 / 13-LR");
+                        CmnMethods.LogMsgs("Game is set to 13-2 / 13-LR");
 
                         if (!UnEncryptedFilelists.Contains(FilelistName))
                         {
-                            Core.IfFileExistsDel(TmpDcryptFilelistFile);
+                            CmnMethods.IfFileExistsDel(TmpDcryptFilelistFile);
 
                             File.Copy(FilelistFile, TmpDcryptFilelistFile);
 
                             var CryptFilelistCode = " filelist";
 
-                            Core.FFXiiiCryptTool(InFilelistFileDir, " -d ", "\"" + TmpDcryptFilelistFile + "\"",
+                            CmnMethods.FFXiiiCryptTool(InFilelistFileDir, " -d ", "\"" + TmpDcryptFilelistFile + "\"",
                                 ref CryptFilelistCode);
 
                             File.Move(FilelistFile, FilelistFile + ".bak");
@@ -155,7 +155,7 @@ namespace WhiteBinTools
                         var ChunkInfo_size = chunksStartPos - chunksInfoStartPos;
                         TotalChunks = ChunkInfo_size / 12;
 
-                        Core.LogMsgs("No of files: " + TotalFiles);
+                        CmnMethods.LogMsgs("No of files: " + TotalFiles);
 
                         // Make a memorystream for holding all Chunks info
                         using (MemoryStream ChunkInfoStream = new MemoryStream())
@@ -276,12 +276,12 @@ namespace WhiteBinTools
                 }
 
 
-                Core.LogMsgs("\nExtracted filepaths to " + FilelistOutName + ".txt file");
+                CmnMethods.LogMsgs("\nExtracted filepaths to " + FilelistOutName + ".txt file");
             }
             catch (Exception ex)
             {
-                Core.LogMsgs("Error: " + ex);
-                Core.ErrorExit("");
+                CmnMethods.LogMsgs("Error: " + ex);
+                CmnMethods.ErrorExit("");
             }
         }
     }

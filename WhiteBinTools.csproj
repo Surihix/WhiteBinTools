@@ -62,12 +62,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BinUnpkFilePaths.cs" />
-    <Compile Include="BinRepack.cs" />
-    <Compile Include="BinRpkAFile.cs" />
-    <Compile Include="BinRpkMoreFiles.cs" />
-    <Compile Include="BinUnpack.cs" />
-    <Compile Include="BinUnpkAFile.cs" />
+    <Compile Include="CmnMethods.cs" />
+    <Compile Include="ForUnpacking\BinUnpkFilePaths.cs" />
+    <Compile Include="ForRepacking\BinRepack.cs" />
+    <Compile Include="ForRepacking\BinRpkAFile.cs" />
+    <Compile Include="ForRepacking\BinRpkMoreFiles.cs" />
+    <Compile Include="ForUnpacking\BinUnpack.cs" />
+    <Compile Include="ForUnpacking\BinUnpkAFile.cs" />
     <Compile Include="Core.cs" />
     <Compile Include="Help.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

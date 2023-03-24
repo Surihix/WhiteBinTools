@@ -5,21 +5,21 @@ using System.Text;
 
 namespace WhiteBinTools
 {
-    internal class BinUnpack
+    internal class BinUnpkAFile
     {
         private static readonly object _lockObject = new object();
-        public static void Unpack(int GameCode, string FilelistFile, string WhiteBinFile)
+        public static void UnpackFile(int GameCode, string FilelistFile, string WhiteBinFile, string WhiteFilePath)
         {
             // Check if the filelist file and the white image bin file exists
             if (!File.Exists(FilelistFile))
             {
-                Core.LogMsgs("Error: Filelist file specified in the argument is missing");
-                Core.ErrorExit("");
+                CmnMethods.LogMsgs("Error: Filelist file specified in the argument is missing");
+                CmnMethods.ErrorExit("");
             }
             if (!File.Exists(WhiteBinFile))
             {
-                Core.LogMsgs("Error: Image bin file specified in the argument is missing");
-                Core.ErrorExit("");
+                CmnMethods.LogMsgs("Error: Image bin file specified in the argument is missing");
+                CmnMethods.ErrorExit("");
             }
 
 
@@ -42,7 +42,7 @@ namespace WhiteBinTools
 
 
             // Check and delete backup filelist file if it exists
-            Core.IfFileExistsDel(FilelistFile + ".bak");
+            CmnMethods.IfFileExistsDel(FilelistFile + ".bak");
 
             // Check and delete extracted directory if they exist in the
             // folder where they are supposed to be extracted
@@ -74,9 +74,9 @@ namespace WhiteBinTools
 
                         if (EncHeaderNumber == 501232760)
                         {
-                            Core.LogMsgs("Error: Detected encrypted filelist file. set the game code to 2 for handling " +
+                            CmnMethods.LogMsgs("Error: Detected encrypted filelist file. set the game code to 2 for handling " +
                                 "this type of filelist");
-                            Core.ErrorExit("");
+                            CmnMethods.ErrorExit("");
                         }
                     }
                 }
@@ -98,9 +98,9 @@ namespace WhiteBinTools
                     }
                     else
                     {
-                        Core.LogMsgs("Error: Unable to locate ffxiiicrypt tool in the main app folder to " +
+                        CmnMethods.LogMsgs("Error: Unable to locate ffxiiicrypt tool in the main app folder to " +
                             "decrypt the filelist file");
-                        Core.ErrorExit("");
+                        CmnMethods.ErrorExit("");
                     }
                 }
             }
@@ -115,25 +115,25 @@ namespace WhiteBinTools
                     case 1:
                         lock (_lockObject)
                         {
-                            Core.LogMsgs("Game is set to 13-1");
+                            CmnMethods.LogMsgs("Game is set to 13-1");
                         }
                         break;
 
                     case 2:
                         lock (_lockObject)
                         {
-                            Core.LogMsgs("Game is set to 13-2 / 13-LR");
+                            CmnMethods.LogMsgs("Game is set to 13-2 / 13-LR");
                         }
 
                         if (!UnEncryptedFilelists.Contains(FilelistName))
                         {
-                            Core.IfFileExistsDel(TmpDcryptFilelistFile);
+                            CmnMethods.IfFileExistsDel(TmpDcryptFilelistFile);
 
                             File.Copy(FilelistFile, TmpDcryptFilelistFile);
 
                             var CryptFilelistCode = " filelist";
 
-                            Core.FFXiiiCryptTool(InFilelistFileDir, " -d ", "\"" + TmpDcryptFilelistFile + "\"",
+                            CmnMethods.FFXiiiCryptTool(InFilelistFileDir, " -d ", "\"" + TmpDcryptFilelistFile + "\"",
                                 ref CryptFilelistCode);
 
                             File.Move(FilelistFile, FilelistFile + ".bak");
@@ -174,9 +174,9 @@ namespace WhiteBinTools
 
                         lock (_lockObject)
                         {
-                            Core.LogMsgs("TotalChunks: " + TotalChunks);
-                            Core.LogMsgs("No of files: " + TotalFiles);
-                            Core.LogMsgs("\n");
+                            CmnMethods.LogMsgs("TotalChunks: " + TotalChunks);
+                            CmnMethods.LogMsgs("No of files: " + TotalFiles);
+                            CmnMethods.LogMsgs("\n");
                         }
 
                         // Make a memorystream for holding all Chunks info
@@ -232,6 +232,7 @@ namespace WhiteBinTools
                 // Extracting files section 
                 ChunkFNameCount = 0;
                 var CountDuplicate = 1;
+                var HasExtracted = false;
                 for (int ch = 0; ch < TotalChunks; ch++)
                 {
                     // Get the total number of files in a chunk file by counting the number of times
@@ -296,48 +297,54 @@ namespace WhiteBinTools
                                     UnpackedState = "Copied";
                                 }
 
-                                using (FileStream Bin = new FileStream(WhiteBinFile, FileMode.Open, FileAccess.Read))
+                                // Extract a specific file
+                                if (MainPath.Equals(WhiteFilePath))
                                 {
-                                    if (!Directory.Exists(Extract_dir + "\\" + DirectoryPath))
+                                    using (FileStream Bin = new FileStream(WhiteBinFile, FileMode.Open, FileAccess.Read))
                                     {
-                                        Directory.CreateDirectory(Extract_dir + "\\" + DirectoryPath);
-                                    }
-                                    if (File.Exists(FullFilePath))
-                                    {
-                                        File.Delete(FullFilePath);
-                                        CountDuplicate++;
-                                    }
+                                        if (!Directory.Exists(Extract_dir + "\\" + DirectoryPath))
+                                        {
+                                            Directory.CreateDirectory(Extract_dir + "\\" + DirectoryPath);
+                                        }
+                                        if (File.Exists(FullFilePath))
+                                        {
+                                            File.Delete(FullFilePath);
+                                            CountDuplicate++;
+                                        }
 
-                                    switch (CompressedState)
-                                    {
-                                        case true:
-                                            using (MemoryStream CmpData = new MemoryStream())
-                                            {
-                                                Bin.CopyTo(CmpData, Pos, CmpSize);
-
-                                                using (FileStream OutFile = new FileStream(FullFilePath, FileMode.OpenOrCreate,
-                                                    FileAccess.ReadWrite))
+                                        switch (CompressedState)
+                                        {
+                                            case true:
+                                                using (MemoryStream CmpData = new MemoryStream())
                                                 {
-                                                    CmpData.Seek(0, SeekOrigin.Begin);
-                                                    ZlibLibrary.ZlibDecompress(CmpData, OutFile);
+                                                    Bin.CopyTo(CmpData, Pos, CmpSize);
+
+                                                    using (FileStream OutFile = new FileStream(FullFilePath,
+                                                        FileMode.OpenOrCreate, FileAccess.ReadWrite))
+                                                    {
+                                                        CmpData.Seek(0, SeekOrigin.Begin);
+                                                        ZlibLibrary.ZlibDecompress(CmpData, OutFile);
+                                                    }
                                                 }
-                                            }
-                                            break;
+                                                break;
 
-                                        case false:
-                                            using (FileStream OutFile = new FileStream(FullFilePath, FileMode.OpenOrCreate,
-                                                FileAccess.Write))
-                                            {
-                                                OutFile.Seek(0, SeekOrigin.Begin);
-                                                Bin.CopyTo(OutFile, Pos, UncmpSize);
-                                            }
-                                            break;
+                                            case false:
+                                                using (FileStream OutFile = new FileStream(FullFilePath, FileMode.OpenOrCreate,
+                                                    FileAccess.Write))
+                                                {
+                                                    OutFile.Seek(0, SeekOrigin.Begin);
+                                                    Bin.CopyTo(OutFile, Pos, UncmpSize);
+                                                }
+                                                break;
+                                        }
                                     }
-                                }
 
-                                lock (_lockObject)
-                                {
-                                    Core.LogMsgs(UnpackedState + " " + Extract_dir_Name + "\\" + MainPath);
+                                    HasExtracted = true;
+
+                                    lock (_lockObject)
+                                    {
+                                        CmnMethods.LogMsgs(UnpackedState + " " + Extract_dir_Name + "\\" + MainPath);
+                                    }
                                 }
 
                                 ChunkStringReaderPos = (uint)ChunkStringReader.BaseStream.Position;
@@ -365,11 +372,20 @@ namespace WhiteBinTools
 
                 lock (_lockObject)
                 {
-                    Core.LogMsgs("\n");
-                    Console.WriteLine("Finished extracting file " + WhiteBinName);
-                    if (CountDuplicate > 1)
+                    if (HasExtracted.Equals(false))
                     {
-                        Core.LogMsgs(CountDuplicate + " duplicate file(s)");
+                        CmnMethods.LogMsgs("Specified file does not exist. please specify the correct file path");
+                        Console.WriteLine("");
+                        Console.WriteLine("Finished extracting file " + WhiteBinName);
+                    }
+                    else
+                    {
+                        CmnMethods.LogMsgs("\n");
+                        Console.WriteLine("Finished extracting file " + WhiteBinName);
+                        if (CountDuplicate > 1)
+                        {
+                            CmnMethods.LogMsgs(CountDuplicate + " duplicate file(s)");
+                        }
                     }
                 }
             }
@@ -381,8 +397,8 @@ namespace WhiteBinTools
                     File.Move(FilelistFile + ".bak", FilelistFile);
                 }
 
-                Core.LogMsgs("Error: " + ex);
-                Core.ErrorExit("");
+                CmnMethods.LogMsgs("Error: " + ex);
+                CmnMethods.ErrorExit("");
             }
         }
     }

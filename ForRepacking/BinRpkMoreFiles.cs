@@ -13,18 +13,18 @@ namespace WhiteBinTools
             // Check if the filelist file and the unpacked directory exists
             if (!File.Exists(FilelistFile))
             {
-                Core.LogMsgs("Error: Filelist file specified in the argument is missing");
-                Core.ErrorExit("");
+                CmnMethods.LogMsgs("Error: Filelist file specified in the argument is missing");
+                CmnMethods.ErrorExit("");
             }
             if (!File.Exists(WhiteBinFile))
             {
-                Core.LogMsgs("Error: Unpacked directory specified in the argument is missing");
-                Core.ErrorExit("");
+                CmnMethods.LogMsgs("Error: Unpacked directory specified in the argument is missing");
+                CmnMethods.ErrorExit("");
             }
             if (!Directory.Exists(Extracted_Dir))
             {
-                Core.LogMsgs("Error: Unpacked directory specified in the argument is missing");
-                Core.ErrorExit("");
+                CmnMethods.LogMsgs("Error: Unpacked directory specified in the argument is missing");
+                CmnMethods.ErrorExit("");
             }
 
 
@@ -56,11 +56,11 @@ namespace WhiteBinTools
 
             // Check and delete the white bin file, backup filelist file,
             // and other files if it exists in the respective directories
-            Core.IfFileExistsDel(BackupOldFilelistFile);
-            Core.IfFileExistsDel(TmpDcryptFilelistFile);
-            Core.IfFileExistsDel("_encryptionHeader.bin");
-            Core.IfFileExistsDel(TmpCmpDataFile);
-            Core.IfFileExistsDel(TmpCmpChunkFile);
+            CmnMethods.IfFileExistsDel(BackupOldFilelistFile);
+            CmnMethods.IfFileExistsDel(TmpDcryptFilelistFile);
+            CmnMethods.IfFileExistsDel("_encryptionHeader.bin");
+            CmnMethods.IfFileExistsDel(TmpCmpDataFile);
+            CmnMethods.IfFileExistsDel(TmpCmpChunkFile);
 
             // Check and delete extracted directory if they exist in the
             // folder where they are supposed to be extracted
@@ -94,9 +94,9 @@ namespace WhiteBinTools
 
                         if (EncHeaderNumber == 501232760)
                         {
-                            Core.LogMsgs("Error: Detected encrypted filelist file. set the game code to 2 for handling " +
+                            CmnMethods.LogMsgs("Error: Detected encrypted filelist file. set the game code to 2 for handling " +
                                 "this type of filelist");
-                            Core.ErrorExit("");
+                            CmnMethods.ErrorExit("");
                         }
                     }
                 }
@@ -118,9 +118,9 @@ namespace WhiteBinTools
                     }
                     else
                     {
-                        Core.LogMsgs("Error: Unable to locate ffxiiicrypt tool in the main app folder to " +
+                        CmnMethods.LogMsgs("Error: Unable to locate ffxiiicrypt tool in the main app folder to " +
                             "decrypt the filelist file");
-                        Core.ErrorExit("");
+                        CmnMethods.ErrorExit("");
                     }
                 }
             }
@@ -135,23 +135,23 @@ namespace WhiteBinTools
                     case 1:
                         lock (_lockObject)
                         {
-                            Core.LogMsgs("Game is set to 13-1");
+                            CmnMethods.LogMsgs("Game is set to 13-1");
                         }
                         break;
 
                     case 2:
                         lock (_lockObject)
                         {
-                            Core.LogMsgs("Game is set to 13-2 / 13-LR");
+                            CmnMethods.LogMsgs("Game is set to 13-2 / 13-LR");
                         }
 
                         if (!UnEncryptedFilelists.Contains(FilelistName))
                         {
-                            Core.IfFileExistsDel(TmpDcryptFilelistFile);
+                            CmnMethods.IfFileExistsDel(TmpDcryptFilelistFile);
 
                             File.Copy(FilelistFile, TmpDcryptFilelistFile);
 
-                            Core.FFXiiiCryptTool(InFilelistFileDir, " -d ", "\"" + TmpDcryptFilelistFile + "\"",
+                            CmnMethods.FFXiiiCryptTool(InFilelistFileDir, " -d ", "\"" + TmpDcryptFilelistFile + "\"",
                                 ref CryptFilelistCode);
 
                             File.Move(FilelistFile, BackupOldFilelistFile);
@@ -209,9 +209,9 @@ namespace WhiteBinTools
 
                         lock (_lockObject)
                         {
-                            Core.LogMsgs("TotalChunks: " + TotalChunks);
-                            Core.LogMsgs("No of files: " + TotalFiles);
-                            Core.LogMsgs("\n");
+                            CmnMethods.LogMsgs("TotalChunks: " + TotalChunks);
+                            CmnMethods.LogMsgs("No of files: " + TotalFiles);
+                            CmnMethods.LogMsgs("\n");
                         }
 
                         // Make a memorystream for holding all Chunks info
@@ -505,15 +505,15 @@ namespace WhiteBinTools
 
                                                     lock (_lockObject)
                                                     {
-                                                        Core.LogMsgs(PackedState + " " + WhiteBinFolderName + "/" + MainPath +
+                                                        CmnMethods.LogMsgs(PackedState + " " + WhiteBinFolderName + "/" + MainPath +
                                                             PackedAs);
                                                     }
                                                 }
 
                                                 NewFilePos /= 2048;
-                                                Core.DecToHex(NewFilePos, ref AsciFilePos);
-                                                Core.DecToHex(NewUcmpSize, ref AsciUcmpSize);
-                                                Core.DecToHex(NewCmpSize, ref AsciCmpSize);
+                                                CmnMethods.DecToHex(NewFilePos, ref AsciFilePos);
+                                                CmnMethods.DecToHex(NewUcmpSize, ref AsciUcmpSize);
+                                                CmnMethods.DecToHex(NewCmpSize, ref AsciCmpSize);
 
                                                 var NewUpdatedPath = AsciFilePos + ":" + AsciUcmpSize + ":" + AsciCmpSize + ":" +
                                                     MainPath + "\0";
@@ -602,7 +602,7 @@ namespace WhiteBinTools
                                                     }
                                                 }
 
-                                                Core.AdjustBytesUInt16(NewFilelistWriter, FileInfoWriterPos,
+                                                CmnMethods.AdjustBytesUInt16(NewFilelistWriter, FileInfoWriterPos,
                                                     out byte[] AdjustFilePosInChunk, FilePosInChunkToWrite);
 
                                                 FileStringsReader.BaseStream.Position = FilePosInChunk;
@@ -646,11 +646,11 @@ namespace WhiteBinTools
                                     }
                                     File.Delete(TmpCmpChunkFile);
 
-                                    Core.AdjustBytesUInt32(NewFilelistWriter, ChunkInfoWriterPos,
+                                    CmnMethods.AdjustBytesUInt32(NewFilelistWriter, ChunkInfoWriterPos,
                                         out byte[] AdjustChunkUnCmpSize, ChunkUncmpSize);
-                                    Core.AdjustBytesUInt32(NewFilelistWriter, ChunkInfoWriterPos + 4,
+                                    CmnMethods.AdjustBytesUInt32(NewFilelistWriter, ChunkInfoWriterPos + 4,
                                         out byte[] AdjustChunkCmpSize, ChunkCmpSize);
-                                    Core.AdjustBytesUInt32(NewFilelistWriter, ChunkInfoWriterPos + 8,
+                                    CmnMethods.AdjustBytesUInt32(NewFilelistWriter, ChunkInfoWriterPos + 8,
                                         out byte[] AdjustChunkStart, ChunkStartVal);
 
                                     var NewChunkStartVal = ChunkStartVal + ChunkCmpSize;
@@ -743,7 +743,7 @@ namespace WhiteBinTools
                                             FilelistSize = NewSize;
                                         }
 
-                                        Core.AdjustBytesUInt32(EncryptedFilelistWriter, 16, out byte[] AdjTotalFilelistSize,
+                                        CmnMethods.AdjustBytesUInt32(EncryptedFilelistWriter, 16, out byte[] AdjTotalFilelistSize,
                                             FilelistSize);
 
                                         EncryptedFilelist.Seek(0, SeekOrigin.Begin);
@@ -764,12 +764,12 @@ namespace WhiteBinTools
 
                         // Write checksum to the filelist file
                         var CryptAsciiSize = "";
-                        Core.DecToHex(MaxFilelistSize, ref CryptAsciiSize);
+                        CmnMethods.DecToHex(MaxFilelistSize, ref CryptAsciiSize);
                         var CheckSumActionArg = " 000" + CryptAsciiSize + CryptCheckSumCode;
 
-                        Core.FFXiiiCryptTool(InFilelistFileDir, " -c ", "\"" + FilelistFile + "\"",
+                        CmnMethods.FFXiiiCryptTool(InFilelistFileDir, " -c ", "\"" + FilelistFile + "\"",
                             ref CheckSumActionArg);
-                        Core.LogMsgs("\nWrote new checksum to the filelist");
+                        CmnMethods.LogMsgs("\nWrote new checksum to the filelist");
 
                         // Delete the encryption header data file
                         File.Delete("_encryptionHeader.bin");
@@ -778,14 +778,14 @@ namespace WhiteBinTools
                         File.Delete(TmpDcryptFilelistFile);
 
                         // Encrypt the filelist file                 
-                        Core.FFXiiiCryptTool(InFilelistFileDir, " -e ", "\"" + FilelistFile + "\"",
+                        CmnMethods.FFXiiiCryptTool(InFilelistFileDir, " -e ", "\"" + FilelistFile + "\"",
                             ref CryptFilelistCode);
-                        Core.LogMsgs("\nEncrypted filelist file");
+                        CmnMethods.LogMsgs("\nEncrypted filelist file");
                     }
                 }
 
 
-                Core.LogMsgs("\nFinished repacking files to " + WhiteBinFile);
+                CmnMethods.LogMsgs("\nFinished repacking files to " + WhiteBinFile);
             }
             catch (Exception ex)
             {
@@ -795,8 +795,8 @@ namespace WhiteBinTools
                     File.Move(FilelistFile + ".bak", FilelistFile);
                 }
 
-                Core.LogMsgs("Error: " + ex);
-                Core.ErrorExit("");
+                CmnMethods.LogMsgs("Error: " + ex);
+                CmnMethods.ErrorExit("");
             }
         }
     }

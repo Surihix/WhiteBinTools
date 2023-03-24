@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Buffers.Binary;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 
 namespace WhiteBinTools
@@ -60,122 +57,52 @@ namespace WhiteBinTools
                     WhiteFilePathOrDirVar = argument_5;
                 }
 
-                IfFileExistsDel("log.txt");
+                CmnMethods.IfFileExistsDel("log.txt");
                 var TotalArgCount = args.Length;
 
 
                 switch (ToolAction)
                 {
                     case "-u":
-                        CheckArguments(ref TotalArgCount, 3);
+                        CmnMethods.CheckArguments(ref TotalArgCount, 3);
                         BinUnpack.Unpack(GameCodeVar, FilelistFileVar, WhiteBinOrDirVar);
                         break;
 
                     case "-r":
-                        CheckArguments(ref TotalArgCount, 3);
+                        CmnMethods.CheckArguments(ref TotalArgCount, 3);
                         BinRepack.Repack(GameCodeVar, FilelistFileVar, WhiteBinOrDirVar);
                         break;
 
                     case "-f":
-                        CheckArguments(ref TotalArgCount, 2);
+                        CmnMethods.CheckArguments(ref TotalArgCount, 2);
                         BinUnpkFilePaths.UnpkFilelist(GameCodeVar, FilelistFileVar);
                         break;
 
                     case "-uf":
-                        CheckArguments(ref TotalArgCount, 5);
+                        CmnMethods.CheckArguments(ref TotalArgCount, 5);
                         BinUnpkAFile.UnpackFile(GameCodeVar, FilelistFileVar, WhiteBinOrDirVar, WhiteFilePathOrDirVar);
                         break;
 
                     case "-rf":
-                        CheckArguments(ref TotalArgCount, 5);
+                        CmnMethods.CheckArguments(ref TotalArgCount, 5);
                         BinRpkAFile.RepackFile(GameCodeVar, FilelistFileVar, WhiteBinOrDirVar, WhiteFilePathOrDirVar);
                         break;
 
                     case "-rfm":
-                        CheckArguments(ref TotalArgCount, 5);
+                        CmnMethods.CheckArguments(ref TotalArgCount, 5);
                         BinRpkMoreFiles.RepackMoreFiles(GameCodeVar, FilelistFileVar, WhiteBinOrDirVar, WhiteFilePathOrDirVar);
                         break;
 
                     default:
-                        LogMsgs("Error: Proper tool action is not specified");
-                        ErrorExit("");
+                        CmnMethods.LogMsgs("Error: Proper tool action is not specified");
+                        CmnMethods.ErrorExit("");
                         break;
                 }
             }
             catch (Exception ex)
             {
-                ErrorExit("Error: " + ex);
+                CmnMethods.ErrorExit("Error: " + ex);
             }
-        }
-
-
-        static void CheckArguments(ref int TotalLength, int requiredLength)
-        {
-            if (TotalLength < requiredLength)
-            {
-                LogMsgs("Error: Specified action requires one or more arguments");
-                ErrorExit("");
-            }
-        }
-
-        public static void LogMsgs(string LogInfo)
-        {
-            Console.WriteLine(LogInfo);
-            using (StreamWriter LogWriter = new StreamWriter("log.txt", append: true))
-            {
-                LogWriter.WriteLine(LogInfo);
-            }
-        }
-
-        public static void ErrorExit(string ErrorMsg)
-        {
-            Console.WriteLine(ErrorMsg);
-            Console.ReadLine();
-            Environment.Exit(0);
-        }
-
-        public static void IfFileExistsDel(string FilePath)
-        {
-            if (File.Exists(FilePath))
-            {
-                File.Delete(FilePath);
-            }
-        }
-
-        public static void FFXiiiCryptTool(string CryptDir, string Action, string FileListName, ref string ActionType)
-        {
-            using (Process xiiiCrypt = new Process())
-            {
-                xiiiCrypt.StartInfo.WorkingDirectory = CryptDir;
-                xiiiCrypt.StartInfo.FileName = "ffxiiicrypt.exe";
-                xiiiCrypt.StartInfo.Arguments = Action + FileListName + ActionType;
-                xiiiCrypt.StartInfo.UseShellExecute = true;
-                xiiiCrypt.Start();
-                xiiiCrypt.WaitForExit();
-            }
-        }
-
-        public static void DecToHex(uint DecValue, ref string HexValue)
-        {
-            HexValue = DecValue.ToString("x");
-        }
-
-        public static void AdjustBytesUInt16(BinaryWriter WriterName, int WriterPos, out byte[] AdjustByteVar, 
-            ushort NewAdjustVar)
-        {
-            WriterName.BaseStream.Position = WriterPos;
-            AdjustByteVar = new byte[2];
-            BinaryPrimitives.WriteUInt16LittleEndian(AdjustByteVar, NewAdjustVar);
-            WriterName.Write(AdjustByteVar);
-        }
-
-        public static void AdjustBytesUInt32(BinaryWriter WriterName, uint WriterPos, out byte[] AdjustByteVar, 
-            uint NewAdjustVar)
-        {
-            WriterName.BaseStream.Position = WriterPos;
-            AdjustByteVar = new byte[4];
-            BinaryPrimitives.WriteUInt32LittleEndian(AdjustByteVar, NewAdjustVar);
-            WriterName.Write(AdjustByteVar);
         }
     }
 }
