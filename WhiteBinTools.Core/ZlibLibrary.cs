@@ -1,9 +1,9 @@
 ﻿using Ionic.Zlib;
 using System.IO;
 
-namespace WhiteBinTools
+namespace WhiteBinTools.Core
 {
-    internal class ZlibLibrary
+    public class ZlibLibrary
     {
         public static void ZlibDecompress(Stream CmpStreamName, Stream OutStreamName)
         {
