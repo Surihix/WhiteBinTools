@@ -5,6 +5,8 @@ VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WhiteBinTools", "WhiteBinTools.csproj", "{EB703E50-869D-4C24-947B-0FBFB607B9C8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WhiteBinTools.Core", "WhiteBinTools.Core\WhiteBinTools.Core.csproj", "{11FB43E0-55F4-48B4-9A8E-DA9EEC55412F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{EB703E50-869D-4C24-947B-0FBFB607B9C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EB703E50-869D-4C24-947B-0FBFB607B9C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EB703E50-869D-4C24-947B-0FBFB607B9C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11FB43E0-55F4-48B4-9A8E-DA9EEC55412F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11FB43E0-55F4-48B4-9A8E-DA9EEC55412F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11FB43E0-55F4-48B4-9A8E-DA9EEC55412F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11FB43E0-55F4-48B4-9A8E-DA9EEC55412F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

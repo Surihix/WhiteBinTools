@@ -3,27 +3,22 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace WhiteBinTools
-{
-    internal class BinRpkAFile
-    {
+namespace WhiteBinTools.Core {
+    public class BinRpkMoreFiles {
         private static readonly object _lockObject = new object();
-        public static void RepackFile(int GameCode, string FilelistFile, string WhiteBinFile, string WhiteFilePath)
-        {
-            // Replace the slashes to ones that are similar to what is used for
-            // the file path strings in the chunks
-            WhiteFilePath = WhiteFilePath.Replace("\\", "/");
-
+        public static void RepackMoreFiles(int GameCode, string FilelistFile, string WhiteBinFile, string Extracted_Dir) {
             // Check if the filelist file and the unpacked directory exists
-            if (!File.Exists(FilelistFile))
-            {
-                Core.LogMsgs("Error: Filelist file specified in the argument is missing");
-                Core.ErrorExit("");
+            if (!File.Exists(FilelistFile)) {
+                Utils.LogMsgs("Error: Filelist file specified in the argument is missing");
+                Utils.ErrorExit("");
             }
-            if (!File.Exists(WhiteBinFile))
-            {
-                Core.LogMsgs("Error: Unpacked directory specified in the argument is missing");
-                Core.ErrorExit("");
+            if (!File.Exists(WhiteBinFile)) {
+                Utils.LogMsgs("Error: Unpacked directory specified in the argument is missing");
+                Utils.ErrorExit("");
+            }
+            if (!Directory.Exists(Extracted_Dir)) {
+                Utils.LogMsgs("Error: Unpacked directory specified in the argument is missing");
+                Utils.ErrorExit("");
             }
 
 
@@ -35,10 +30,7 @@ namespace WhiteBinTools
             var InFilelistFilePath = Path.GetFullPath(FilelistFile);
             var InFilelistFileDir = Path.GetDirectoryName(InFilelistFilePath);
 
-            var Extracted_DirName = Path.GetFileName(WhiteBinFile).Replace(".win32.bin", "_win32").Replace(".ps3.bin", "_ps3").
-                Replace(".x360.bin", "_x360");
-            var WhiteBinFolderName = Path.GetFileName(Extracted_DirName);
-            var Extracted_Dir = InFilelistFileDir + "\\" + Extracted_DirName;
+            var WhiteBinFolderName = Path.GetFileName(Extracted_Dir);
 
             var BackupOldFilelistFile = InFilelistFileDir + "\\" + FilelistName + ".bak";
             var TmpDcryptFilelistFile = InFilelistFileDir + "\\filelist_tmp.bin";
@@ -58,31 +50,20 @@ namespace WhiteBinTools
 
             // Check and delete the white bin file, backup filelist file,
             // and other files if it exists in the respective directories
-            Core.IfFileExistsDel(BackupOldFilelistFile);
-            Core.IfFileExistsDel(TmpDcryptFilelistFile);
-            Core.IfFileExistsDel("_encryptionHeader.bin");
-            Core.IfFileExistsDel(TmpCmpDataFile);
-            Core.IfFileExistsDel(TmpCmpChunkFile);
+            Utils.IfFileExistsDel(BackupOldFilelistFile);
+            Utils.IfFileExistsDel(TmpDcryptFilelistFile);
+            Utils.IfFileExistsDel("_encryptionHeader.bin");
+            Utils.IfFileExistsDel(TmpCmpDataFile);
+            Utils.IfFileExistsDel(TmpCmpChunkFile);
 
-
-            // Check if the extracted directory for this white bin
-            // and filelist exists
-            if (!Directory.Exists(Extracted_Dir))
-            {
-                Core.LogMsgs("Error: Extracted directory is missing");
-                Core.ErrorExit("Extracted directory is missing");
-            }
-
-            // Check and delete extracted chunk directory if they exist in the
+            // Check and delete extracted directory if they exist in the
             // folder where they are supposed to be extracted
-            if (Directory.Exists(DefaultChunksExtDir))
-            {
+            if (Directory.Exists(DefaultChunksExtDir)) {
                 Directory.Delete(DefaultChunksExtDir, true);
             }
             Directory.CreateDirectory(DefaultChunksExtDir);
 
-            if (Directory.Exists(NewChunksExtDir))
-            {
+            if (Directory.Exists(NewChunksExtDir)) {
                 Directory.Delete(NewChunksExtDir, true);
             }
             Directory.CreateDirectory(NewChunksExtDir);
@@ -94,20 +75,16 @@ namespace WhiteBinTools
 
             // Check for encryption header in the filelist file, if the
             // game code is set to 1
-            if (GameCode.Equals(1))
-            {
-                using (FileStream CheckEncHeader = new FileStream(FilelistFile, FileMode.Open, FileAccess.Read))
-                {
-                    using (BinaryReader EncHeaderReader = new BinaryReader(CheckEncHeader))
-                    {
+            if (GameCode.Equals(1)) {
+                using (FileStream CheckEncHeader = new FileStream(FilelistFile, FileMode.Open, FileAccess.Read)) {
+                    using (BinaryReader EncHeaderReader = new BinaryReader(CheckEncHeader)) {
                         EncHeaderReader.BaseStream.Position = 20;
                         var EncHeaderNumber = EncHeaderReader.ReadUInt32();
 
-                        if (EncHeaderNumber == 501232760)
-                        {
-                            Core.LogMsgs("Error: Detected encrypted filelist file. set the game code to 2 for handling " +
+                        if (EncHeaderNumber == 501232760) {
+                            Utils.LogMsgs("Error: Detected encrypted filelist file. set the game code to 2 for handling " +
                                 "this type of filelist");
-                            Core.ErrorExit("");
+                            Utils.ErrorExit("");
                         }
                     }
                 }
@@ -116,53 +93,43 @@ namespace WhiteBinTools
             // Check if the ffxiiicrypt tool is present in the filelist directory
             // and if it doesn't exist copy it to the directory from the app
             // directory if it doesn't exist
-            if (GameCode.Equals(2))
-            {
-                if (!File.Exists(InFilelistFileDir + "\\ffxiiicrypt.exe"))
-                {
-                    if (File.Exists("ffxiiicrypt.exe"))
-                    {
-                        if (!File.Exists(InFilelistFileDir + "\\ffxiiicrypt.exe"))
-                        {
+            if (GameCode.Equals(2)) {
+                if (!File.Exists(InFilelistFileDir + "\\ffxiiicrypt.exe")) {
+                    if (File.Exists("ffxiiicrypt.exe")) {
+                        if (!File.Exists(InFilelistFileDir + "\\ffxiiicrypt.exe")) {
                             File.Copy("ffxiiicrypt.exe", InFilelistFileDir + "\\ffxiiicrypt.exe");
                         }
                     }
-                    else
-                    {
-                        Core.LogMsgs("Error: Unable to locate ffxiiicrypt tool in the main app folder to " +
+                    else {
+                        Utils.LogMsgs("Error: Unable to locate ffxiiicrypt tool in the main app folder to " +
                             "decrypt the filelist file");
-                        Core.ErrorExit("");
+                        Utils.ErrorExit("");
                     }
                 }
             }
 
 
-            try
-            {
+            try {
                 // According to the game code and the filelist name, decide whether
                 // to decrypt and trim the filelist file for extraction
-                switch (GameCode)
-                {
+                switch (GameCode) {
                     case 1:
-                        lock (_lockObject)
-                        {
-                            Core.LogMsgs("Game is set to 13-1");
+                        lock (_lockObject) {
+                            Utils.LogMsgs("Game is set to 13-1");
                         }
                         break;
 
                     case 2:
-                        lock (_lockObject)
-                        {
-                            Core.LogMsgs("Game is set to 13-2 / 13-LR");
+                        lock (_lockObject) {
+                            Utils.LogMsgs("Game is set to 13-2 / 13-LR");
                         }
 
-                        if (!UnEncryptedFilelists.Contains(FilelistName))
-                        {
-                            Core.IfFileExistsDel(TmpDcryptFilelistFile);
+                        if (!UnEncryptedFilelists.Contains(FilelistName)) {
+                            Utils.IfFileExistsDel(TmpDcryptFilelistFile);
 
                             File.Copy(FilelistFile, TmpDcryptFilelistFile);
 
-                            Core.FFXiiiCryptTool(InFilelistFileDir, " -d ", "\"" + TmpDcryptFilelistFile + "\"",
+                            Utils.FFXiiiCryptTool(InFilelistFileDir, " -d ", "\"" + TmpDcryptFilelistFile + "\"",
                                 ref CryptFilelistCode);
 
                             File.Move(FilelistFile, BackupOldFilelistFile);
@@ -170,19 +137,16 @@ namespace WhiteBinTools
                             // Copy the decrypted filelist data from offset 32 onwards
                             // from the temp file that you renamed after decrypted, to a file
                             // that is with the same name as the original filelist name
-                            using (FileStream ToAdjust = new FileStream(TmpDcryptFilelistFile, FileMode.Open, FileAccess.Read))
-                            {
+                            using (FileStream ToAdjust = new FileStream(TmpDcryptFilelistFile, FileMode.Open, FileAccess.Read)) {
                                 // Store the filelist data in a separate filelist file
                                 using (FileStream Adjusted = new FileStream(FilelistFile, FileMode.OpenOrCreate,
-                                    FileAccess.Write))
-                                {
+                                    FileAccess.Write)) {
                                     ToAdjust.Seek(32, SeekOrigin.Begin);
                                     ToAdjust.CopyTo(Adjusted);
 
                                     // Store the encryption header data in a separate file
                                     using (FileStream EncryptedHeader = new FileStream("_encryptionHeader.bin",
-                                        FileMode.OpenOrCreate, FileAccess.Write))
-                                    {
+                                        FileMode.OpenOrCreate, FileAccess.Write)) {
                                         ToAdjust.Seek(0, SeekOrigin.Begin);
                                         byte[] EncryptionBuffer = new byte[32];
                                         var EncryptionBytesRead = ToAdjust.Read(EncryptionBuffer, 0,
@@ -206,10 +170,8 @@ namespace WhiteBinTools
                 var LastChunkFileNumber = (uint)1000;
 
                 // Set the values to the initialised variables
-                using (FileStream BaseFilelist = new FileStream(FilelistFile, FileMode.Open, FileAccess.Read))
-                {
-                    using (BinaryReader BaseFilelistReader = new BinaryReader(BaseFilelist))
-                    {
+                using (FileStream BaseFilelist = new FileStream(FilelistFile, FileMode.Open, FileAccess.Read)) {
+                    using (BinaryReader BaseFilelistReader = new BinaryReader(BaseFilelist)) {
                         BaseFilelistReader.BaseStream.Position = 0;
                         chunksInfoStartPos = BaseFilelistReader.ReadUInt32();
                         chunksStartPos = BaseFilelistReader.ReadUInt32();
@@ -218,48 +180,41 @@ namespace WhiteBinTools
                         var ChunkInfo_size = chunksStartPos - chunksInfoStartPos;
                         TotalChunks = ChunkInfo_size / 12;
 
-                        lock (_lockObject)
-                        {
-                            Core.LogMsgs("TotalChunks: " + TotalChunks);
-                            Core.LogMsgs("No of files: " + TotalFiles);
-                            Core.LogMsgs("\n");
+                        lock (_lockObject) {
+                            Utils.LogMsgs("TotalChunks: " + TotalChunks);
+                            Utils.LogMsgs("No of files: " + TotalFiles);
+                            Utils.LogMsgs("\n");
                         }
 
                         // Make a memorystream for holding all Chunks info
-                        using (MemoryStream ChunkInfoStream = new MemoryStream())
-                        {
+                        using (MemoryStream ChunkInfoStream = new MemoryStream()) {
                             BaseFilelist.Seek(chunksInfoStartPos, SeekOrigin.Begin);
                             byte[] ChunkInfoBuffer = new byte[ChunkInfo_size];
                             var ChunkBytesRead = BaseFilelist.Read(ChunkInfoBuffer, 0, ChunkInfoBuffer.Length);
                             ChunkInfoStream.Write(ChunkInfoBuffer, 0, ChunkBytesRead);
 
                             // Make memorystream for all Chunks compressed data
-                            using (MemoryStream ChunkStream = new MemoryStream())
-                            {
+                            using (MemoryStream ChunkStream = new MemoryStream()) {
                                 BaseFilelist.Seek(chunksStartPos, SeekOrigin.Begin);
                                 BaseFilelist.CopyTo(ChunkStream);
 
                                 // Open a binary reader and read each chunk's info and
                                 // dump them as separate files
-                                using (BinaryReader ChunkInfoReader = new BinaryReader(ChunkInfoStream))
-                                {
+                                using (BinaryReader ChunkInfoReader = new BinaryReader(ChunkInfoStream)) {
                                     var ChunkInfoReadVal = (uint)0;
-                                    for (int c = 0; c < TotalChunks; c++)
-                                    {
+                                    for (int c = 0; c < TotalChunks; c++) {
                                         ChunkInfoReader.BaseStream.Position = ChunkInfoReadVal + 4;
                                         var ChunkCmpSize = ChunkInfoReader.ReadUInt32();
                                         var ChunkDataStart = ChunkInfoReader.ReadUInt32();
 
                                         ChunkStream.Seek(ChunkDataStart, SeekOrigin.Begin);
-                                        using (MemoryStream ChunkToDcmp = new MemoryStream())
-                                        {
+                                        using (MemoryStream ChunkToDcmp = new MemoryStream()) {
                                             byte[] ChunkBuffer = new byte[ChunkCmpSize];
                                             var ReadCmpBytes = ChunkStream.Read(ChunkBuffer, 0, ChunkBuffer.Length);
                                             ChunkToDcmp.Write(ChunkBuffer, 0, ReadCmpBytes);
 
                                             using (FileStream ChunksOutStream = new FileStream(DefChunkFile + ChunkFNameCount,
-                                                FileMode.OpenOrCreate, FileAccess.ReadWrite))
-                                            {
+                                                FileMode.OpenOrCreate, FileAccess.ReadWrite)) {
                                                 ChunkToDcmp.Seek(0, SeekOrigin.Begin);
                                                 ZlibLibrary.ZlibDecompress(ChunkToDcmp, ChunksOutStream);
                                             }
@@ -276,18 +231,14 @@ namespace WhiteBinTools
                         // Compress each file into the white image archive section
                         // Open a chunk file and start the repacking process
                         ChunkFNameCount = 0;
-                        for (int ch = 0; ch < TotalChunks; ch++)
-                        {
+                        for (int ch = 0; ch < TotalChunks; ch++) {
                             // Get the total number of files in a chunk file by counting the number of times
                             // an null character occurs in the chunk file
                             var FilesInChunkCount = (uint)0;
-                            using (StreamReader FileCountReader = new StreamReader(DefChunkFile + ChunkFNameCount))
-                            {
-                                while (!FileCountReader.EndOfStream)
-                                {
+                            using (StreamReader FileCountReader = new StreamReader(DefChunkFile + ChunkFNameCount)) {
+                                while (!FileCountReader.EndOfStream) {
                                     var CurrentNullChar = FileCountReader.Read();
-                                    if (CurrentNullChar == 0)
-                                    {
+                                    if (CurrentNullChar == 0) {
                                         FilesInChunkCount++;
                                     }
                                 }
@@ -295,33 +246,26 @@ namespace WhiteBinTools
 
                             // Open a chunk file for reading
                             using (FileStream CurrentChunk = new FileStream(DefChunkFile + ChunkFNameCount, FileMode.Open,
-                                FileAccess.Read))
-                            {
-                                using (BinaryReader ChunkStringReader = new BinaryReader(CurrentChunk))
-                                {
+                                FileAccess.Read)) {
+                                using (BinaryReader ChunkStringReader = new BinaryReader(CurrentChunk)) {
                                     // Create a new chunk file with append mode for writing updated values back to the 
                                     // filelist file
                                     using (FileStream UpdChunk = new FileStream(NewChunkFile + ChunkFNameCount,
-                                        FileMode.Append, FileAccess.Write))
-                                    {
-                                        using (StreamWriter UpdChunkStrings = new StreamWriter(UpdChunk))
-                                        {
+                                        FileMode.Append, FileAccess.Write)) {
+                                        using (StreamWriter UpdChunkStrings = new StreamWriter(UpdChunk)) {
 
                                             // Compress files in a chunk into the archive 
                                             var ChunkStringReaderPos = (uint)0;
-                                            for (int f = 0; f < FilesInChunkCount; f++)
-                                            {
+                                            for (int f = 0; f < FilesInChunkCount; f++) {
                                                 ChunkStringReader.BaseStream.Position = ChunkStringReaderPos;
                                                 var ParsedString = new StringBuilder();
                                                 char GetParsedString;
-                                                while ((GetParsedString = ChunkStringReader.ReadChar()) != default)
-                                                {
+                                                while ((GetParsedString = ChunkStringReader.ReadChar()) != default) {
                                                     ParsedString.Append(GetParsedString);
                                                 }
                                                 var Parsed = ParsedString.ToString();
 
-                                                if (Parsed.StartsWith("end"))
-                                                {
+                                                if (Parsed.StartsWith("end")) {
                                                     UpdChunkStrings.Write("end\0");
                                                     LastChunkFileNumber = ChunkFNameCount;
                                                     break;
@@ -349,42 +293,36 @@ namespace WhiteBinTools
                                                 var PackedAs = "";
                                                 var CompressedState = false;
 
-                                                if (!OgUSize.Equals(OgCSize))
-                                                {
+                                                if (!OgUSize.Equals(OgCSize)) {
                                                     CompressedState = true;
                                                     PackedState = "Compressed";
                                                 }
-                                                else
-                                                {
+                                                else {
                                                     CompressedState = false;
                                                     PackedState = "Copied";
                                                 }
 
-                                                // Repack a specific file
-                                                if (MainPath.Equals(WhiteFilePath))
-                                                {
+                                                // Repack a specific file if it
+                                                // exists in the directory
+                                                if (File.Exists(FullFilePath)) {
                                                     using (FileStream CleanBin = new FileStream(WhiteBinFile, FileMode.Open,
-                                                        FileAccess.Write))
-                                                    {
+                                                        FileAccess.Write)) {
                                                         CleanBin.Seek(OgFilePos, SeekOrigin.Begin);
-                                                        for (int pad = 0; pad < OgCSize; pad++)
-                                                        {
+                                                        for (int pad = 0; pad < OgCSize; pad++) {
                                                             CleanBin.WriteByte(0);
                                                         }
                                                     }
 
                                                     // According to the compressed state, compress or
                                                     // copy the file
-                                                    switch (CompressedState)
-                                                    {
+                                                    switch (CompressedState) {
                                                         case true:
                                                             // Compress the file and get its uncompressed
                                                             // and compressed size
                                                             var CreateFile = File.Create(TmpCmpDataFile);
                                                             CreateFile.Close();
 
-                                                            ZlibLibrary.ZlibCompress(FullFilePath, TmpCmpDataFile,
-                                                                Ionic.Zlib.CompressionLevel.Level9);
+                                                            ZlibLibrary.ZlibCompress(FullFilePath, TmpCmpDataFile, Ionic.Zlib.CompressionLevel.Level9);
 
                                                             FileInfo UcmpDataInfo = new FileInfo(FullFilePath);
                                                             NewUcmpSize = (uint)UcmpDataInfo.Length;
@@ -396,47 +334,40 @@ namespace WhiteBinTools
                                                             // decide whether to inject or append the
                                                             // compressed file
                                                             using (FileStream CmpDataStream = new FileStream(TmpCmpDataFile,
-                                                                    FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
-                                                            {
+                                                                    FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite)) {
                                                                 // If file is smaller or same as original, then inject
                                                                 // the file at the original position
-                                                                if (NewCmpSize < OgCSize || NewCmpSize.Equals(OgCSize))
-                                                                {
+                                                                if (NewCmpSize < OgCSize || NewCmpSize.Equals(OgCSize)) {
                                                                     PackedAs = " (Injected)";
                                                                     NewFilePos = OgFilePos;
 
                                                                     using (FileStream InjectWhiteBin =
-                                                                        new FileStream(WhiteBinFile,
-                                                                        FileMode.Open, FileAccess.Write))
-                                                                    {
+                                                                        new FileStream(WhiteBinFile, FileMode.Open,
+                                                                        FileAccess.Write)) {
                                                                         InjectWhiteBin.Seek(OgFilePos, SeekOrigin.Begin);
                                                                         CmpDataStream.CopyTo(InjectWhiteBin);
                                                                     }
                                                                 }
-                                                                else
-                                                                {
+                                                                else {
                                                                     // If file is larger, then append
                                                                     // the file at the end
                                                                     using (FileStream AppendWhiteBin =
                                                                         new FileStream(WhiteBinFile, FileMode.Append,
-                                                                        FileAccess.Write))
-                                                                    {
+                                                                        FileAccess.Write)) {
                                                                         PackedAs = " (Appended)";
                                                                         NewFilePos = (uint)AppendWhiteBin.Length;
 
                                                                         // Check if file position is divisible by 2048
                                                                         // and if its not divisible, add in null bytes
                                                                         // till next closest divisible number
-                                                                        if (NewFilePos % 2048 != 0)
-                                                                        {
+                                                                        if (NewFilePos % 2048 != 0) {
                                                                             var Remainder = NewFilePos % 2048;
                                                                             var IncreaseBytes = 2048 - Remainder;
                                                                             var NewPos = NewFilePos + IncreaseBytes;
                                                                             var PadNulls = NewPos - NewFilePos;
 
                                                                             AppendWhiteBin.Seek(NewFilePos, SeekOrigin.Begin);
-                                                                            for (int pad = 0; pad < PadNulls; pad++)
-                                                                            {
+                                                                            for (int pad = 0; pad < PadNulls; pad++) {
                                                                                 AppendWhiteBin.WriteByte(0);
                                                                             }
                                                                             NewFilePos = (uint)AppendWhiteBin.Length;
@@ -459,47 +390,40 @@ namespace WhiteBinTools
                                                             // Open the file in a stream and decide whether
                                                             // to inject or append the compressed file
                                                             using (FileStream CopyTypeFileStream = new FileStream(FullFilePath,
-                                                                FileMode.Open, FileAccess.Read))
-                                                            {
+                                                                FileMode.Open, FileAccess.Read)) {
                                                                 // If file is smaller or same as original, then inject
                                                                 // the file at the original position
-                                                                if (NewUcmpSize < OgUSize || NewUcmpSize == OgUSize)
-                                                                {
+                                                                if (NewUcmpSize < OgUSize || NewUcmpSize == OgUSize) {
                                                                     PackedAs = " (Injected)";
                                                                     NewFilePos = OgFilePos;
 
                                                                     using (FileStream InjectWhiteBin =
                                                                         new FileStream(WhiteBinFile, FileMode.Open,
-                                                                        FileAccess.Write))
-                                                                    {
+                                                                        FileAccess.Write)) {
                                                                         InjectWhiteBin.Seek(OgFilePos, SeekOrigin.Begin);
                                                                         CopyTypeFileStream.CopyTo(InjectWhiteBin);
                                                                     }
                                                                 }
-                                                                else
-                                                                {
+                                                                else {
                                                                     // If file is larger, then append
                                                                     // the file at the end
                                                                     using (FileStream AppendWhiteBin =
-                                                                        new FileStream(WhiteBinFile,
-                                                                        FileMode.Append, FileAccess.Write))
-                                                                    {
+                                                                        new FileStream(WhiteBinFile, FileMode.Append,
+                                                                        FileAccess.Write)) {
                                                                         PackedAs = " (Appended)";
                                                                         NewFilePos = (uint)AppendWhiteBin.Length;
 
                                                                         // Check if file position is divisible by 2048
                                                                         // and if its not divisible, add in null bytes
                                                                         // till next closest divisible number
-                                                                        if (NewFilePos % 2048 != 0)
-                                                                        {
+                                                                        if (NewFilePos % 2048 != 0) {
                                                                             var Remainder = NewFilePos % 2048;
                                                                             var IncreaseBytes = 2048 - Remainder;
                                                                             var NewPos = NewFilePos + IncreaseBytes;
                                                                             var PadNulls = NewPos - NewFilePos;
 
                                                                             AppendWhiteBin.Seek(NewFilePos, SeekOrigin.Begin);
-                                                                            for (int pad = 0; pad < PadNulls; pad++)
-                                                                            {
+                                                                            for (int pad = 0; pad < PadNulls; pad++) {
                                                                                 AppendWhiteBin.WriteByte(0);
                                                                             }
                                                                             NewFilePos = (uint)AppendWhiteBin.Length;
@@ -513,17 +437,16 @@ namespace WhiteBinTools
                                                             break;
                                                     }
 
-                                                    lock (_lockObject)
-                                                    {
-                                                        Core.LogMsgs(PackedState + " " + WhiteBinFolderName + "/" + MainPath +
+                                                    lock (_lockObject) {
+                                                        Utils.LogMsgs(PackedState + " " + WhiteBinFolderName + "/" + MainPath +
                                                             PackedAs);
                                                     }
                                                 }
 
                                                 NewFilePos /= 2048;
-                                                Core.DecToHex(NewFilePos, ref AsciFilePos);
-                                                Core.DecToHex(NewUcmpSize, ref AsciUcmpSize);
-                                                Core.DecToHex(NewCmpSize, ref AsciCmpSize);
+                                                Utils.DecToHex(NewFilePos, ref AsciFilePos);
+                                                Utils.DecToHex(NewUcmpSize, ref AsciUcmpSize);
+                                                Utils.DecToHex(NewCmpSize, ref AsciCmpSize);
 
                                                 var NewUpdatedPath = AsciFilePos + ":" + AsciUcmpSize + ":" + AsciCmpSize + ":" +
                                                     MainPath + "\0";
@@ -543,10 +466,8 @@ namespace WhiteBinTools
                         // Fileinfo updating and chunk compression section
                         // Copy the base filelist file's data into the new filelist file till the chunk data begins
                         var AppendAt = (uint)0;
-                        using (FileStream NewFilelist = new FileStream(NewFileListFile, FileMode.Append, FileAccess.Write))
-                        {
-                            using (BinaryWriter NewFilelistWriter = new BinaryWriter(NewFilelist))
-                            {
+                        using (FileStream NewFilelist = new FileStream(NewFileListFile, FileMode.Append, FileAccess.Write)) {
+                            using (BinaryWriter NewFilelistWriter = new BinaryWriter(NewFilelist)) {
                                 BaseFilelist.Seek(0, SeekOrigin.Begin);
                                 byte[] NewFilelistBuffer = new byte[chunksStartPos];
                                 var NewFilelistBytesRead = BaseFilelist.Read(NewFilelistBuffer, 0, NewFilelistBuffer.Length);
@@ -559,67 +480,55 @@ namespace WhiteBinTools
                                 var ChunkUncmpSize = (uint)0;
                                 var ChunkStartVal = (uint)0;
                                 var FileInfoWriterPos = 18;
-                                if (GameCode.Equals(2))
-                                {
+                                if (GameCode.Equals(2)) {
                                     // Change Fileinfo writer position
                                     // according to the game code 
                                     FileInfoWriterPos = 16;
                                 }
-                                for (int Ac = 0; Ac < TotalChunks; Ac++)
-                                {
+                                for (int Ac = 0; Ac < TotalChunks; Ac++) {
                                     // Get total number of files in the chunk and decrease the filecount by 1 if the 
                                     // the lastchunk number matches with the current chunk number running in this for loop
                                     var FilesInChunkCount = (uint)0;
-                                    using (StreamReader FileCountReader = new StreamReader(NewChunkFile + ChunkFNameCount))
-                                    {
-                                        while (!FileCountReader.EndOfStream)
-                                        {
+                                    using (StreamReader FileCountReader = new StreamReader(NewChunkFile + ChunkFNameCount)) {
+                                        while (!FileCountReader.EndOfStream) {
                                             var CurrentNullChar = FileCountReader.Read();
-                                            if (CurrentNullChar == 0)
-                                            {
+                                            if (CurrentNullChar == 0) {
                                                 FilesInChunkCount++;
                                             }
                                         }
                                     }
 
-                                    if (LastChunkFileNumber.Equals(ChunkFNameCount))
-                                    {
+                                    if (LastChunkFileNumber.Equals(ChunkFNameCount)) {
                                         FilesInChunkCount--;
                                     }
 
                                     // Get each file strings start position in a chunk and update the position
                                     // value in the info section of the new filelist file
                                     using (FileStream FileStrings = new FileStream(NewChunkFile + ChunkFNameCount,
-                                        FileMode.Open, FileAccess.Read))
-                                    {
-                                        using (BinaryReader FileStringsReader = new BinaryReader(FileStrings))
-                                        {
+                                        FileMode.Open, FileAccess.Read)) {
+                                        using (BinaryReader FileStringsReader = new BinaryReader(FileStrings)) {
                                             var FilePosInChunk = (UInt16)0;
                                             var FilePosInChunkToWrite = (UInt16)0;
-                                            for (int Fic = 0; Fic < FilesInChunkCount; Fic++)
-                                            {
+                                            for (int Fic = 0; Fic < FilesInChunkCount; Fic++) {
                                                 // According to the game code, check how to
                                                 // write the value and then set the appropriate
                                                 // converted value to write
-                                                if (GameCode.Equals(2))
-                                                {
+                                                if (GameCode.Equals(2)) {
                                                     BaseFilelistReader.BaseStream.Position = FileInfoWriterPos;
                                                     var CheckVal = BaseFilelistReader.ReadUInt16();
 
-                                                    if (CheckVal > 32767)
-                                                    {
+                                                    if (CheckVal > 32767) {
                                                         FilePosInChunkToWrite = (ushort)(FilePosInChunkToWrite + 32768);
                                                     }
                                                 }
 
-                                                Core.AdjustBytesUInt16(NewFilelistWriter, FileInfoWriterPos,
+                                                Utils.AdjustBytesUInt16(NewFilelistWriter, FileInfoWriterPos,
                                                     out byte[] AdjustFilePosInChunk, FilePosInChunkToWrite);
 
                                                 FileStringsReader.BaseStream.Position = FilePosInChunk;
                                                 var ParsedVal = new StringBuilder();
                                                 char GetParsedVal;
-                                                while ((GetParsedVal = FileStringsReader.ReadChar()) != default)
-                                                {
+                                                while ((GetParsedVal = FileStringsReader.ReadChar()) != default) {
                                                     ParsedVal.Append(GetParsedVal);
                                                 }
 
@@ -642,12 +551,10 @@ namespace WhiteBinTools
                                     var CreateChunkFile = File.Create(TmpCmpChunkFile);
                                     CreateChunkFile.Close();
 
-                                    ZlibLibrary.ZlibCompress(NewChunkFile + ChunkFNameCount, TmpCmpChunkFile,
-                                        Ionic.Zlib.CompressionLevel.Level9);
+                                    ZlibLibrary.ZlibCompress(NewChunkFile + ChunkFNameCount, TmpCmpChunkFile, Ionic.Zlib.CompressionLevel.Level9);
 
                                     using (FileStream CmpChunkDataStream = new FileStream(TmpCmpChunkFile,
-                                        FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
-                                    {
+                                        FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite)) {
                                         CmpChunkDataStream.Seek(0, SeekOrigin.Begin);
                                         CmpChunkDataStream.CopyTo(NewFilelist);
 
@@ -656,11 +563,11 @@ namespace WhiteBinTools
                                     }
                                     File.Delete(TmpCmpChunkFile);
 
-                                    Core.AdjustBytesUInt32(NewFilelistWriter, ChunkInfoWriterPos,
+                                    Utils.AdjustBytesUInt32(NewFilelistWriter, ChunkInfoWriterPos,
                                         out byte[] AdjustChunkUnCmpSize, ChunkUncmpSize);
-                                    Core.AdjustBytesUInt32(NewFilelistWriter, ChunkInfoWriterPos + 4,
+                                    Utils.AdjustBytesUInt32(NewFilelistWriter, ChunkInfoWriterPos + 4,
                                         out byte[] AdjustChunkCmpSize, ChunkCmpSize);
-                                    Core.AdjustBytesUInt32(NewFilelistWriter, ChunkInfoWriterPos + 8,
+                                    Utils.AdjustBytesUInt32(NewFilelistWriter, ChunkInfoWriterPos + 8,
                                         out byte[] AdjustChunkStart, ChunkStartVal);
 
                                     var NewChunkStartVal = ChunkStartVal + ChunkCmpSize;
@@ -680,12 +587,10 @@ namespace WhiteBinTools
 
                 // Make a backup of the old filelist file according to the game code 
                 // and if that filelist file is inside the unencrypted filelist array
-                if (GameCode.Equals(1))
-                {
+                if (GameCode.Equals(1)) {
                     File.Copy(FilelistFile, BackupOldFilelistFile);
                 }
-                if (UnEncryptedFilelists.Contains(FilelistName))
-                {
+                if (UnEncryptedFilelists.Contains(FilelistName)) {
                     File.Copy(FilelistFile, BackupOldFilelistFile);
                 }
 
@@ -696,10 +601,8 @@ namespace WhiteBinTools
 
 
                 // Re Encrypt filelist file and add the neccessary encryption header if the game code is set to 2
-                if (GameCode.Equals(2))
-                {
-                    if (!UnEncryptedFilelists.Contains(FilelistName))
-                    {
+                if (GameCode.Equals(2)) {
+                    if (!UnEncryptedFilelists.Contains(FilelistName)) {
                         var MaxFilelistSize = (uint)0;
 
                         // Rename the filelist file to temp filelist name
@@ -709,27 +612,22 @@ namespace WhiteBinTools
                         // the filelist file 
                         // Open the final filelist
                         using (FileStream EncryptedFilelist = new FileStream(FilelistFile, FileMode.Append,
-                            FileAccess.Write))
-                        {
-                            using (BinaryWriter EncryptedFilelistWriter = new BinaryWriter(EncryptedFilelist))
-                            {
+                            FileAccess.Write)) {
+                            using (BinaryWriter EncryptedFilelistWriter = new BinaryWriter(EncryptedFilelist)) {
                                 // Encryption header copy
                                 using (FileStream EncryptedData = new FileStream("_encryptionHeader.bin", FileMode.Open,
-                                    FileAccess.Read))
-                                {
+                                    FileAccess.Read)) {
                                     EncryptedData.Seek(0, SeekOrigin.Begin);
                                     EncryptedData.CopyTo(EncryptedFilelist);
 
                                     // NewFilelist data copy 
                                     using (FileStream NewFilelistData = new FileStream(TmpDcryptFilelistFile, FileMode.Open,
-                                        FileAccess.Read))
-                                    {
+                                        FileAccess.Read)) {
                                         var FilelistSize = (uint)NewFilelistData.Length;
                                         NewFilelistData.Seek(0, SeekOrigin.Begin);
                                         NewFilelistData.CopyTo(EncryptedFilelist);
 
-                                        if (FilelistSize % 8 != 0)
-                                        {
+                                        if (FilelistSize % 8 != 0) {
                                             // Get remainder from the division and
                                             // reduce the remainder with 8. set that
                                             // reduced value to a variable
@@ -745,15 +643,14 @@ namespace WhiteBinTools
                                             var PaddingNulls = NewSize - FilelistSize;
 
                                             EncryptedFilelist.Seek((uint)EncryptedFilelist.Length, SeekOrigin.Begin);
-                                            for (int padding = 0; padding < PaddingNulls; padding++)
-                                            {
+                                            for (int padding = 0; padding < PaddingNulls; padding++) {
                                                 EncryptedFilelist.WriteByte(0);
                                             }
 
                                             FilelistSize = NewSize;
                                         }
 
-                                        Core.AdjustBytesUInt32(EncryptedFilelistWriter, 16, out byte[] AdjTotalFilelistSize,
+                                        Utils.AdjustBytesUInt32(EncryptedFilelistWriter, 16, out byte[] AdjTotalFilelistSize,
                                             FilelistSize);
 
                                         EncryptedFilelist.Seek(0, SeekOrigin.Begin);
@@ -763,8 +660,7 @@ namespace WhiteBinTools
                                         EncryptedFilelistWriter.Write(FilelistSize);
 
                                         EncryptedFilelist.Seek((uint)EncryptedFilelist.Length, SeekOrigin.Begin);
-                                        for (int n = 0; n < 12; n++)
-                                        {
+                                        for (int n = 0; n < 12; n++) {
                                             EncryptedFilelist.WriteByte(0);
                                         }
                                     }
@@ -774,12 +670,12 @@ namespace WhiteBinTools
 
                         // Write checksum to the filelist file
                         var CryptAsciiSize = "";
-                        Core.DecToHex(MaxFilelistSize, ref CryptAsciiSize);
+                        Utils.DecToHex(MaxFilelistSize, ref CryptAsciiSize);
                         var CheckSumActionArg = " 000" + CryptAsciiSize + CryptCheckSumCode;
 
-                        Core.FFXiiiCryptTool(InFilelistFileDir, " -c ", "\"" + FilelistFile + "\"",
+                        Utils.FFXiiiCryptTool(InFilelistFileDir, " -c ", "\"" + FilelistFile + "\"",
                             ref CheckSumActionArg);
-                        Core.LogMsgs("\nWrote new checksum to the filelist");
+                        Utils.LogMsgs("\nWrote new checksum to the filelist");
 
                         // Delete the encryption header data file
                         File.Delete("_encryptionHeader.bin");
@@ -788,25 +684,23 @@ namespace WhiteBinTools
                         File.Delete(TmpDcryptFilelistFile);
 
                         // Encrypt the filelist file                 
-                        Core.FFXiiiCryptTool(InFilelistFileDir, " -e ", "\"" + FilelistFile + "\"",
+                        Utils.FFXiiiCryptTool(InFilelistFileDir, " -e ", "\"" + FilelistFile + "\"",
                             ref CryptFilelistCode);
-                        Core.LogMsgs("\nEncrypted filelist file");
+                        Utils.LogMsgs("\nEncrypted filelist file");
                     }
                 }
 
 
-                Core.LogMsgs("\nFinished repacking file to " + WhiteBinFile);
+                Utils.LogMsgs("\nFinished repacking files to " + WhiteBinFile);
             }
-            catch (Exception ex)
-            {
-                if (File.Exists(FilelistFile + ".bak"))
-                {
+            catch (Exception ex) {
+                if (File.Exists(FilelistFile + ".bak")) {
                     File.Delete(FilelistFile);
                     File.Move(FilelistFile + ".bak", FilelistFile);
                 }
 
-                Core.LogMsgs("Error: " + ex);
-                Core.ErrorExit("");
+                Utils.LogMsgs("Error: " + ex);
+                Utils.ErrorExit("");
             }
         }
     }
