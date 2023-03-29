@@ -7,6 +7,8 @@ namespace WhiteBinTools
     {
         static void Main(string[] args)
         {
+            // Check for arg length to check if the app is 
+            // launched with either of the help switches
             if (args.Length < 1)
             {
                 Console.WriteLine("Warning: Enough arguments not specified");
@@ -20,6 +22,8 @@ namespace WhiteBinTools
             }
 
 
+            // Check for arg length for checking if the app is
+            // launched with any of the supported tool functions
             if (args.Length < 2)
             {
                 Console.WriteLine("Warning: Enough arguments not specified");

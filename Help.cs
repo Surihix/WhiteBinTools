@@ -18,6 +18,8 @@ namespace WhiteBinTools
             Console.WriteLine("-rf = Repack a single file into the bin file");
             Console.WriteLine("-rfm = Repack multiple files into the bin file");
             Console.WriteLine("");
+            Console.WriteLine("-? or -h = Display this help page");
+            Console.WriteLine("");
             Console.WriteLine("");
             Console.WriteLine("Examples with 13-1 game code:");
             Console.WriteLine("To unpack: WhiteBinTools -ff131 -u " + @"""filelist.bin""" + @" ""whitebin.bin""");
