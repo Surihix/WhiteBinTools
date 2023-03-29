@@ -8,7 +8,7 @@ namespace WhiteBinTools
     internal class BinRpkAFile
     {
         private static readonly object _lockObject = new object();
-        public static void RepackFile(int GameCode, string FilelistFile, string WhiteBinFile, string WhiteFilePath)
+        public static void RepackFile(string GameCode, string FilelistFile, string WhiteBinFile, string WhiteFilePath)
         {
             // Replace the slashes to ones that are similar to what is used for
             // the file path strings in the chunks
@@ -94,7 +94,7 @@ namespace WhiteBinTools
 
             // Check for encryption header in the filelist file, if the
             // game code is set to 1
-            if (GameCode.Equals(1))
+            if (GameCode.Equals("-ff131"))
             {
                 using (FileStream CheckEncHeader = new FileStream(FilelistFile, FileMode.Open, FileAccess.Read))
                 {
@@ -116,7 +116,7 @@ namespace WhiteBinTools
             // Check if the ffxiiicrypt tool is present in the filelist directory
             // and if it doesn't exist copy it to the directory from the app
             // directory if it doesn't exist
-            if (GameCode.Equals(2))
+            if (GameCode.Equals("-ff132"))
             {
                 if (!File.Exists(InFilelistFileDir + "\\ffxiiicrypt.exe"))
                 {
@@ -143,14 +143,14 @@ namespace WhiteBinTools
                 // to decrypt and trim the filelist file for extraction
                 switch (GameCode)
                 {
-                    case 1:
+                    case "-ff131":
                         lock (_lockObject)
                         {
                             CmnMethods.LogMsgs("Game is set to 13-1");
                         }
                         break;
 
-                    case 2:
+                    case "-ff132":
                         lock (_lockObject)
                         {
                             CmnMethods.LogMsgs("Game is set to 13-2 / 13-LR");
@@ -559,7 +559,7 @@ namespace WhiteBinTools
                                 var ChunkUncmpSize = (uint)0;
                                 var ChunkStartVal = (uint)0;
                                 var FileInfoWriterPos = 18;
-                                if (GameCode.Equals(2))
+                                if (GameCode.Equals("-ff132"))
                                 {
                                     // Change Fileinfo writer position
                                     // according to the game code 
@@ -601,7 +601,7 @@ namespace WhiteBinTools
                                                 // According to the game code, check how to
                                                 // write the value and then set the appropriate
                                                 // converted value to write
-                                                if (GameCode.Equals(2))
+                                                if (GameCode.Equals("-ff132"))
                                                 {
                                                     BaseFilelistReader.BaseStream.Position = FileInfoWriterPos;
                                                     var CheckVal = BaseFilelistReader.ReadUInt16();
@@ -680,7 +680,7 @@ namespace WhiteBinTools
 
                 // Make a backup of the old filelist file according to the game code 
                 // and if that filelist file is inside the unencrypted filelist array
-                if (GameCode.Equals(1))
+                if (GameCode.Equals("-ff131"))
                 {
                     File.Copy(FilelistFile, BackupOldFilelistFile);
                 }
@@ -696,7 +696,7 @@ namespace WhiteBinTools
 
 
                 // Re Encrypt filelist file and add the neccessary encryption header if the game code is set to 2
-                if (GameCode.Equals(2))
+                if (GameCode.Equals("-ff132"))
                 {
                     if (!UnEncryptedFilelists.Contains(FilelistName))
                     {

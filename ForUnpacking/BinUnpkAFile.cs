@@ -8,7 +8,7 @@ namespace WhiteBinTools
     internal class BinUnpkAFile
     {
         private static readonly object _lockObject = new object();
-        public static void UnpackFile(int GameCode, string FilelistFile, string WhiteBinFile, string WhiteFilePath)
+        public static void UnpackFile(string GameCode, string FilelistFile, string WhiteBinFile, string WhiteFilePath)
         {
             // Check if the filelist file and the white image bin file exists
             if (!File.Exists(FilelistFile))
@@ -63,7 +63,7 @@ namespace WhiteBinTools
 
             // Check for encryption header in the filelist file, if the
             // game code is set to 1
-            if (GameCode.Equals(1))
+            if (GameCode.Equals("-ff131"))
             {
                 using (FileStream CheckEncHeader = new FileStream(FilelistFile, FileMode.Open, FileAccess.Read))
                 {
@@ -85,7 +85,7 @@ namespace WhiteBinTools
             // Check if the ffxiiicrypt tool is present in the filelist directory
             // and if it doesn't exist copy it to the directory from the app
             // directory if it doesn't exist
-            if (GameCode.Equals(2))
+            if (GameCode.Equals("-ff132"))
             {
                 if (!File.Exists(InFilelistFileDir + "\\ffxiiicrypt.exe"))
                 {
@@ -112,14 +112,14 @@ namespace WhiteBinTools
                 // to decrypt and trim the filelist file for extraction
                 switch (GameCode)
                 {
-                    case 1:
+                    case "-ff131":
                         lock (_lockObject)
                         {
                             CmnMethods.LogMsgs("Game is set to 13-1");
                         }
                         break;
 
-                    case 2:
+                    case "-ff132":
                         lock (_lockObject)
                         {
                             CmnMethods.LogMsgs("Game is set to 13-2 / 13-LR");
@@ -360,7 +360,7 @@ namespace WhiteBinTools
 
                 // Restore old filefile file if game code is
                 // set to 2 and if the filelist file is not encrypted
-                if (GameCode.Equals(2))
+                if (GameCode.Equals("-ff132"))
                 {
                     if (!UnEncryptedFilelists.Contains(FilelistName))
                     {

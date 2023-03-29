@@ -7,6 +7,19 @@ namespace WhiteBinTools
     {
         static void Main(string[] args)
         {
+            if (args.Length < 1)
+            {
+                Console.WriteLine("Warning: Enough arguments not specified");
+                Console.WriteLine("");
+                Environment.Exit(0);
+            }
+
+            if (args[0].Contains("-h") || args[0].Contains("-?"))
+            {
+                Help.ShowCommands();
+            }
+
+
             if (args.Length < 2)
             {
                 Console.WriteLine("Warning: Enough arguments not specified");
@@ -18,7 +31,7 @@ namespace WhiteBinTools
             {
                 // Basic arguments
                 // Assign the arguments to the proper variables
-                var argument_1 = Convert.ToInt16(args[0]);
+                var argument_1 = args[0];
                 var argument_2 = args[1];
                 var argument_3 = args[2];
 
@@ -35,7 +48,7 @@ namespace WhiteBinTools
 
                 // Check argument 1 and 2
                 string[] ActionList = { "-u", "-r", "-f", "-uf", "-rf", "-rfm" };
-                int[] GameCodesList = { 1, 2 };
+                string[] GameCodesList = { "-ff131", "-ff132" };
 
                 if (!ActionList.Contains(ToolAction))
                 {

@@ -7,7 +7,7 @@ namespace WhiteBinTools
 {
     internal class BinUnpkFilePaths
     {
-        public static void UnpkFilelist(int GameCode, string FilelistFile)
+        public static void UnpkFilelist(string GameCode, string FilelistFile)
         {
             // Check if the filelist file exists
             if (!File.Exists(FilelistFile))
@@ -51,7 +51,7 @@ namespace WhiteBinTools
 
             // Check for encryption header in the filelist file, if the
             // game code is set to 1
-            if (GameCode.Equals(1))
+            if (GameCode.Equals("-ff131"))
             {
                 using (FileStream CheckEncHeader = new FileStream(FilelistFile, FileMode.Open, FileAccess.Read))
                 {
@@ -74,7 +74,7 @@ namespace WhiteBinTools
             // Check if the ffxiiicrypt tool is present in the filelist directory
             // and if it doesn't exist copy it to the directory from the app
             // directory if it doesn't exist
-            if (GameCode.Equals(2))
+            if (GameCode.Equals("-ff132"))
             {
                 if (!File.Exists(InFilelistFileDir + "\\ffxiiicrypt.exe"))
                 {
@@ -101,11 +101,11 @@ namespace WhiteBinTools
                 // to decrypt and trim the filelist file for extraction
                 switch (GameCode)
                 {
-                    case 1:
+                    case "-ff131":
                         CmnMethods.LogMsgs("Game is set to 13-1");
                         break;
 
-                    case 2:
+                    case "-ff132":
                         CmnMethods.LogMsgs("Game is set to 13-2 / 13-LR");
 
                         if (!UnEncryptedFilelists.Contains(FilelistName))
@@ -266,7 +266,7 @@ namespace WhiteBinTools
 
                 // Restore old filefile file if game code is
                 // set to 2 and if the filelist file is not encrypted
-                if (GameCode.Equals(2))
+                if (GameCode.Equals("-ff132"))
                 {
                     if (!UnEncryptedFilelists.Contains(FilelistName))
                     {
