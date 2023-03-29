@@ -16,22 +16,12 @@ This app allows you to unpack and repack the main white_img archive files from t
 <br>``-?`` or ``-h`` Display the help page
 <br>
 
-
-<br>**Examples with 13-1 game code:**
-<br>To unpack: ``WhiteBinTools -ff131 -u "filelist.bin" "white_img.bin"``
-<br>To repack: ``WhiteBinTools -ff131 -r "filelist.bin" "unpacked_folder"``
-<br>
-<br>To unpack file paths: ``WhiteBinTools -ff131 -f "filelist.bin"``
-<br>To unpack a sinlge file: ``WhiteBinTools -ff131 -uf "filelist.bin" "white_img.bin" "chr\pc\c201\bin\c201.win32.trb"``
-<br>To repack a sinlge file: ``WhiteBinTools -ff131 -rf "filelist.bin" "unpacked_folder" "chr\pc\c201\bin\c201.win32.trb"``
-<br>To repack multiple files: ``WhiteBinTools -ff131 -rfm "filelist.bin" "white_img.bin" "unpacked_folder"``
-
 Optionally you can run the app via command prompt for knowing the different commands that you can use with this app.
 
-<br>* Filelist file and the white bin file or the unpacked folder has to be specified after the game code and the action argument switches.
-<br>* If you want to unpack or repack a single file, then provide the virtual file path of that file after the white bin file or the unpacked folder argument.
-<br>* If you want repack multiple files from the unpacked folder, then provide the unpacked folder as the last argument.
-<br>* The single file and the multiple files repacking options will inject the file at the original position in the archive or append the file at the end depending on whether the compressed size or the file size when its in the archive, is equal or less than the size of the file that is being replaced.
+<br>- Filelist file and the white bin file or the unpacked folder has to be specified after the game code and the action argument switches.
+<br>- If you want to unpack or repack a single file, then provide the virtual file path of that file after the white bin file or the unpacked folder argument.
+<br>- If you want repack multiple files from the unpacked folder, then provide the unpacked folder as the last argument.
+<br>- The single file and the multiple files repacking options will inject the file at the original position in the archive or append the file at the end depending on whether the compressed size or the file size when its in the archive, is equal or less than the size of the file that is being replaced.
 <br>
 <br>**Important:** The ffxiiicrypt tool that is bundled with this app is required for unpacking and repacking the archive files from FF13-2 and FF13-LR. 
 <br>The author of this ffxiiicrypt tool is Echelo from Xentax.
