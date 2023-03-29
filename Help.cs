@@ -17,7 +17,6 @@ namespace WhiteBinTools
             Console.WriteLine("-uf = Unpack a single file from the bin file");
             Console.WriteLine("-rf = Repack a single file into the bin file");
             Console.WriteLine("-rfm = Repack multiple files into the bin file");
-            Console.WriteLine("");
             Console.WriteLine("-? or -h = Display this help page");
             Console.WriteLine("");
             Console.WriteLine("");
@@ -33,6 +32,10 @@ namespace WhiteBinTools
                 @" ""unpacked_folder""" + @" ""chr\pc\c201\bin\c201.win32.trb""");
             Console.WriteLine("To repack multiple files: WhiteBinTools -ff131 -rfm " + @"""filelist.bin""" + @" ""whitebin.bin"""
                 + @" ""unpacked_folder""");
+            Console.WriteLine("");
+            Console.WriteLine("To show help window:");
+            Console.WriteLine("WhiteBinTools -?");
+            Console.WriteLine("WhiteBinTools -h");
             Environment.Exit(0);
         }
     }
