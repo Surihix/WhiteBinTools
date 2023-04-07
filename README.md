@@ -16,8 +16,6 @@ This app allows you to unpack and repack the main white_img archive files from t
 <br>``-?`` or ``-h`` Display the help page
 <br>
 
-Optionally you can run the app via command prompt for knowing the different commands that you can use with this app.
-
 <br>* Filelist file and the white bin file or the unpacked folder has to be specified after the game code and the action argument switches.
 <br>* If you want to unpack or repack a single file, then provide the virtual file path of that file after the white bin file or the unpacked folder argument.
 <br>* If you want repack multiple files from the unpacked folder, then provide the unpacked folder as the last argument.
