@@ -11,7 +11,7 @@ namespace WhiteBinTools
             // launched with either of the help switches
             if (args.Length < 1)
             {
-                Console.WriteLine("Warning: Enough arguments not specified");
+                Console.WriteLine("Warning: Enough arguments not specified. Please use -? or -h switches for more information");
                 Console.WriteLine("");
                 Environment.Exit(0);
             }
@@ -74,7 +74,7 @@ namespace WhiteBinTools
                     WhiteFilePathOrDirVar = argument_5;
                 }
 
-                CmnMethods.IfFileExistsDel("log.txt");
+                CmnMethods.IfFileExistsDel("ProcessLog.txt");
                 var TotalArgCount = args.Length;
 
 
@@ -111,14 +111,17 @@ namespace WhiteBinTools
                         break;
 
                     default:
-                        CmnMethods.LogMsgs("Error: Proper tool action is not specified");
+                        Console.WriteLine("Error: Proper tool action is not specified");
                         CmnMethods.ErrorExit("");
                         break;
                 }
             }
             catch (Exception ex)
             {
-                CmnMethods.ErrorExit("Error: " + ex);
+                Console.WriteLine("Error: " + ex);
+                CmnMethods.CrashLog("Error: " + ex);
+                Console.WriteLine("");
+                CmnMethods.ErrorExit("Crash exception recorded in CrashLog.txt file");
             }
         }
     }

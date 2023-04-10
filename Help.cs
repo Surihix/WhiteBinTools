@@ -29,7 +29,7 @@ namespace WhiteBinTools
             Console.WriteLine("To unpack a sinlge file: WhiteBinTools -ff131 -uf " + @"""filelist.bin""" + @" ""whitebin.bin"""
                 + @" ""chr\pc\c201\bin\c201.win32.trb""");
             Console.WriteLine("To repack a sinlge file: WhiteBinTools -ff131 -rf " + @"""filelist.bin """ +
-                @" ""unpacked_folder""" + @" ""chr\pc\c201\bin\c201.win32.trb""");
+                @" ""whitebin.bin""" + @" ""chr\pc\c201\bin\c201.win32.trb""");
             Console.WriteLine("To repack multiple files: WhiteBinTools -ff131 -rfm " + @"""filelist.bin""" + @" ""whitebin.bin"""
                 + @" ""unpacked_folder""");
             Console.WriteLine("");

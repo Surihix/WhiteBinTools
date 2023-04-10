@@ -62,18 +62,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CmnMethods.cs" />
-    <Compile Include="ForUnpacking\BinUnpkFilePaths.cs" />
-    <Compile Include="ForRepacking\BinRepack.cs" />
-    <Compile Include="ForRepacking\BinRpkAFile.cs" />
-    <Compile Include="ForRepacking\BinRpkMoreFiles.cs" />
-    <Compile Include="ForUnpacking\BinUnpack.cs" />
-    <Compile Include="ForUnpacking\BinUnpkAFile.cs" />
+    <Compile Include="CommonClasses\CmnMethods.cs" />
+    <Compile Include="BinUnpackClasses\BinUnpkFilePaths.cs" />
+    <Compile Include="BinRepackClasses\BinRepack.cs" />
+    <Compile Include="BinRepackClasses\BinRpkAFile.cs" />
+    <Compile Include="BinRepackClasses\BinRpkMoreFiles.cs" />
+    <Compile Include="BinUnpackClasses\BinUnpack.cs" />
+    <Compile Include="BinUnpackClasses\BinUnpkAFile.cs" />
     <Compile Include="Core.cs" />
     <Compile Include="Help.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StreamExtension.cs" />
-    <Compile Include="ZlibLibrary.cs" />
+    <Compile Include="CommonClasses\StreamExtension.cs" />
+    <Compile Include="CommonClasses\ZlibLibrary.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

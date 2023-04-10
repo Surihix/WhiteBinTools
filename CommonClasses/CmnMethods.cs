@@ -11,17 +11,20 @@ namespace WhiteBinTools
         {
             if (TotalLength < requiredLength)
             {
-                LogMsgs("Error: Specified action requires one or more arguments");
+                Console.WriteLine("Error: Specified action requires one or more arguments");
                 ErrorExit("");
             }
         }
 
-        public static void LogMsgs(string LogInfo)
+        public static void CrashLog(string CrashMsg)
         {
-            Console.WriteLine(LogInfo);
-            using (StreamWriter LogWriter = new StreamWriter("log.txt", append: true))
+            IfFileExistsDel("CrashLog.txt");
+            using (FileStream CrashLogFile = new FileStream("CrashLog.txt", FileMode.Append, FileAccess.Write))
             {
-                LogWriter.WriteLine(LogInfo);
+                using (StreamWriter CrashLogWriter = new StreamWriter(CrashLogFile))
+                {
+                    CrashLogWriter.WriteLine(CrashMsg);
+                }
             }
         }
 
@@ -68,11 +71,19 @@ namespace WhiteBinTools
         }
 
         public static void AdjustBytesUInt32(BinaryWriter WriterName, uint WriterPos, out byte[] AdjustByteVar,
-            uint NewAdjustVar)
+            uint NewAdjustVar, string EndianType)
         {
             WriterName.BaseStream.Position = WriterPos;
             AdjustByteVar = new byte[4];
-            BinaryPrimitives.WriteUInt32LittleEndian(AdjustByteVar, NewAdjustVar);
+            switch (EndianType)
+            {
+                case "le":
+                    BinaryPrimitives.WriteUInt32LittleEndian(AdjustByteVar, NewAdjustVar);
+                    break;
+                case "be":
+                    BinaryPrimitives.WriteUInt32BigEndian(AdjustByteVar, NewAdjustVar);
+                    break;
+            }
             WriterName.Write(AdjustByteVar);
         }
     }
