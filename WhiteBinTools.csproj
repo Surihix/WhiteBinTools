@@ -62,18 +62,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CommonClasses\CmnMethods.cs" />
-    <Compile Include="BinUnpackClasses\BinUnpkFilePaths.cs" />
-    <Compile Include="BinRepackClasses\BinRepack.cs" />
-    <Compile Include="BinRepackClasses\BinRpkAFile.cs" />
-    <Compile Include="BinRepackClasses\BinRpkMoreFiles.cs" />
-    <Compile Include="BinUnpackClasses\BinUnpack.cs" />
-    <Compile Include="BinUnpackClasses\BinUnpkAFile.cs" />
-    <Compile Include="Core.cs" />
-    <Compile Include="Help.cs" />
+    <Compile Include="src\Common\CmnMethods.cs" />
+    <Compile Include="src\Unpack\BinUnpkFilePaths.cs" />
+    <Compile Include="src\Repack\BinRepack.cs" />
+    <Compile Include="src\Repack\BinRpkAFile.cs" />
+    <Compile Include="src\Repack\BinRpkMoreFiles.cs" />
+    <Compile Include="src\Unpack\BinUnpack.cs" />
+    <Compile Include="src\Unpack\BinUnpkAFile.cs" />
+    <Compile Include="src\Core.cs" />
+    <Compile Include="src\Help.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="CommonClasses\StreamExtension.cs" />
-    <Compile Include="CommonClasses\ZlibLibrary.cs" />
+    <Compile Include="src\Common\StreamExtension.cs" />
+    <Compile Include="src\Common\ZlibLibrary.cs" />
+    <Compile Include="src\Common\CmnEnums.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

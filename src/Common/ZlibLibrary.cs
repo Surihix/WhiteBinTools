@@ -1,7 +1,7 @@
 ﻿using Ionic.Zlib;
 using System.IO;
 
-namespace WhiteBinTools
+namespace WhiteBinTools.src.Common
 {
     internal class ZlibLibrary
     {

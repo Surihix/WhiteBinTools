@@ -3,7 +3,7 @@ using System.Buffers.Binary;
 using System.Diagnostics;
 using System.IO;
 
-namespace WhiteBinTools
+namespace WhiteBinTools.src.Common
 {
     internal class CmnMethods
     {
