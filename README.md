@@ -9,10 +9,10 @@ This app allows you to unpack and repack the main white_img archive files from t
 <br>**Tool actions:**
 <br>``-u`` Unpack a bin file
 <br>``-r`` Repack a bin file
-<br>``-f`` Unpack file paths from filelist
-<br>``-uf`` Unpack a single file from the bin file
-<br>``-rf`` Repack a single file into the bin file
-<br>``-rfm`` Repack multiple files into the bin file
+<br>``-ufp`` Unpack file paths from filelist
+<br>``-uaf`` Unpack a single file from the bin file
+<br>``-raf`` Repack a single file into the bin file
+<br>``-rmf`` Repack multiple files into the bin file
 <br>``-?`` or ``-h`` Display the help page
 <br>
 
