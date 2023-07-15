@@ -84,7 +84,7 @@ namespace WhiteBinTools.src
 
 
                 // Additional argument for handling a specific file
-                // Also used for directory argument for -rfm tool action
+                // Also used for directory argument for -rmf tool action
                 var WhiteFilePathOrDirVar = "";
                 if (args.Length > 4)
                 {
