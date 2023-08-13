@@ -1,7 +1,8 @@
 ﻿using System;
-using WhiteBinTools.src.Common;
-using WhiteBinTools.src.Repack;
-using WhiteBinTools.src.Unpack;
+using System.IO;
+using WhiteBinTools.FilelistClasses;
+using WhiteBinTools.SupportClasses;
+using WhiteBinTools.UnpackClasses;
 
 namespace WhiteBinTools.src
 {
@@ -71,8 +72,8 @@ namespace WhiteBinTools.src
                     Help.ShowCommands();
                 }
 
-                var actionSwitch = CmnEnums.ActionSwitches.none;
-                if (Enum.TryParse(specifiedActionSwitch, false, out CmnEnums.ActionSwitches convertedActionSwitch))
+                var actionSwitch = ActionSwitches.none;
+                if (Enum.TryParse(specifiedActionSwitch, false, out ActionSwitches convertedActionSwitch))
                 {
                     actionSwitch = convertedActionSwitch;
                 }
@@ -92,54 +93,93 @@ namespace WhiteBinTools.src
                     WhiteFilePathOrDirVar = argument_5;
                 }
 
-                CmnMethods.IfFileExistsDel("ProcessLog.txt");
+                IOhelpers.IfFileExistsDel("ProcessLog.txt");
                 var totalArgCount = args.Length;
 
 
                 switch (actionSwitch)
                 {
-                    case CmnEnums.ActionSwitches.u:
-                        CmnMethods.CheckArguments(ref totalArgCount, 3);
-                        BinUnpack.Unpack(gameCode, filelistFile, whiteBinOrDir);
+                    case ActionSwitches.u:
+                        CheckArguments(ref totalArgCount, 3);
+                        UnpackTypeA.UnpackFull(gameCode, filelistFile, whiteBinOrDir);
                         break;
 
-                    case CmnEnums.ActionSwitches.r:
-                        CmnMethods.CheckArguments(ref totalArgCount, 3);
-                        BinRepack.Repack(gameCode, filelistFile, whiteBinOrDir);
+                    //case ActionSwitches.r:
+                    //    CheckArguments(ref totalArgCount, 3);
+                    //    BinRepack.Repack(gameCode, filelistFile, whiteBinOrDir);
+                    //    break;
+
+                    case ActionSwitches.uaf:
+                        CheckArguments(ref totalArgCount, 5);
+                        UnpackTypeB.UnpackSingle(gameCode, filelistFile, whiteBinOrDir, WhiteFilePathOrDirVar);
                         break;
 
-                    case CmnEnums.ActionSwitches.ufp:
-                        CmnMethods.CheckArguments(ref totalArgCount, 2);
-                        BinUnpkFilePaths.UnpkFilelist(gameCode, filelistFile);
+                    case ActionSwitches.ufp:
+                        CheckArguments(ref totalArgCount, 2);
+                        UnpackTypeC.UnpackFilelist(gameCode, filelistFile);
                         break;
 
-                    case CmnEnums.ActionSwitches.uaf:
-                        CmnMethods.CheckArguments(ref totalArgCount, 5);
-                        BinUnpkAFile.UnpackFile(gameCode, filelistFile, whiteBinOrDir, WhiteFilePathOrDirVar);
-                        break;
+                    //case ActionSwitches.raf:
+                    //    CheckArguments(ref totalArgCount, 5);
+                    //    BinRpkAFile.RepackFile(gameCode, filelistFile, whiteBinOrDir, WhiteFilePathOrDirVar);
+                    //    break;
 
-                    case CmnEnums.ActionSwitches.raf:
-                        CmnMethods.CheckArguments(ref totalArgCount, 5);
-                        BinRpkAFile.RepackFile(gameCode, filelistFile, whiteBinOrDir, WhiteFilePathOrDirVar);
-                        break;
-
-                    case CmnEnums.ActionSwitches.rmf:
-                        CmnMethods.CheckArguments(ref totalArgCount, 5);
-                        BinRpkMoreFiles.RepackMoreFiles(gameCode, filelistFile, whiteBinOrDir, WhiteFilePathOrDirVar);
-                        break;
+                    //case ActionSwitches.rmf:
+                    //    CheckArguments(ref totalArgCount, 5);
+                    //    BinRpkMoreFiles.RepackMoreFiles(gameCode, filelistFile, whiteBinOrDir, WhiteFilePathOrDirVar);
+                    //    break;
 
                     default:
                         Console.WriteLine("Error: Proper tool action is not specified");
-                        CmnMethods.ErrorExit("");
+                        IOhelpers.ErrorExit("");
                         break;
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Error: " + ex);
-                CmnMethods.CrashLog("Error: " + ex);
+                IOhelpers.IfFileExistsDel("CrashLog.txt");
+
+                var filelistVariables = new FilelistProcesses();
+                if (Directory.Exists(filelistVariables.DefaultChunksExtDir))
+                {
+                    Directory.Delete(filelistVariables.DefaultChunksExtDir, true);
+                }
+
+                using (FileStream crashLogFile = new FileStream("CrashLog.txt", FileMode.Append, FileAccess.Write))
+                {
+                    using (StreamWriter crashLogWriter = new StreamWriter(crashLogFile))
+                    {
+                        crashLogWriter.WriteLine("Error: " + ex);
+                    }
+                }
+
                 Console.WriteLine("");
-                CmnMethods.ErrorExit("Crash exception recorded in CrashLog.txt file");
+                IOhelpers.ErrorExit("Crash exception recorded in CrashLog.txt file");
+            }
+        }
+
+
+        enum ActionSwitches
+        {
+            u,
+            r,
+            ufp,
+            uaf,
+            raf,
+            rmf,
+            t,
+            t2,
+            t3,
+            none
+        }
+
+
+        static void CheckArguments(ref int TotalLength, int requiredLength)
+        {
+            if (TotalLength < requiredLength)
+            {
+                IOhelpers.ErrorExit("Error: Specified action requires one or more arguments");
             }
         }
     }

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Text;
+using WhiteBinTools.Common;
 using WhiteBinTools.src.Common;
 
 namespace WhiteBinTools.src.Unpack
