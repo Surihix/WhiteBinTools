@@ -6,7 +6,7 @@ namespace WhiteBinTools.FilelistClasses
 {
     internal partial class FilelistProcesses
     {
-        public static void CryptProcess(CmnEnums.GameCodes gameCodeVar, FilelistProcesses filelistVariables, StreamWriter writerName)
+        public static void DecryptProcess(CmnEnums.GameCodes gameCodeVar, FilelistProcesses filelistVariables, StreamWriter writerName)
         {
 
             // Check for encryption header in the filelist file,
@@ -103,7 +103,7 @@ namespace WhiteBinTools.FilelistClasses
         }
 
 
-        public static void Encrypt()
+        public static void EncryptProcess()
         {
 
         }

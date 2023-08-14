@@ -37,7 +37,7 @@ namespace WhiteBinTools.UnpackClasses
                     Directory.CreateDirectory(filelistVariables.DefaultChunksExtDir);
 
 
-                    FilelistProcesses.CryptProcess(gameCodeVar, filelistVariables, logWriter);
+                    FilelistProcesses.DecryptProcess(gameCodeVar, filelistVariables, logWriter);
 
                     using (var filelist = new FileStream(filelistVariables.MainFilelistFile, FileMode.Open, FileAccess.Read))
                     {

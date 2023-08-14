@@ -35,7 +35,7 @@ namespace WhiteBinTools.UnpackClasses
                     outChunkFile.IfFileExistsDel();
 
 
-                    FilelistProcesses.CryptProcess(gameCodeVar, filelistVariables, logWriter);
+                    FilelistProcesses.DecryptProcess(gameCodeVar, filelistVariables, logWriter);
 
                     using (var filelist = new FileStream(filelistVariables.MainFilelistFile, FileMode.Open, FileAccess.Read))
                     {
