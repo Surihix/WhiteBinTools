@@ -3,9 +3,9 @@ using System.IO;
 
 namespace WhiteBinTools.SupportClasses
 {
-    internal class ZlibLibrary
+    internal static class ZlibLibrary
     {
-        public static void ZlibDecompress(Stream CmpStreamName, Stream OutStreamName)
+        public static void ZlibDecompress(this Stream CmpStreamName, Stream OutStreamName)
         {
             using (ZlibStream Decompressor = new ZlibStream(CmpStreamName, CompressionMode.Decompress))
             {
@@ -13,7 +13,7 @@ namespace WhiteBinTools.SupportClasses
             }
         }
 
-        public static void ZlibCompress(string FileToCmp, string NewCmpFile, CompressionLevel lvl)
+        public static void ZlibCompress(this string FileToCmp, string NewCmpFile, CompressionLevel lvl)
         {
             byte[] DataToCompress = File.ReadAllBytes(FileToCmp);
             using (FileStream OutStream = new FileStream(NewCmpFile, FileMode.OpenOrCreate, FileAccess.ReadWrite))

@@ -47,7 +47,7 @@ namespace WhiteBinTools.FilelistClasses
                                 using (var chunksOutStream = new FileStream(chunkFile + filelistVariables.ChunkFNameCount, FileMode.OpenOrCreate, FileAccess.ReadWrite))
                                 {
                                     chunkToDcmp.Seek(0, SeekOrigin.Begin);
-                                    ZlibLibrary.ZlibDecompress(chunkToDcmp, chunksOutStream);
+                                    chunkToDcmp.ZlibDecompress(chunksOutStream);
                                 }
                             }
 

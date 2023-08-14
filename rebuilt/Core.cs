@@ -4,7 +4,7 @@ using WhiteBinTools.FilelistClasses;
 using WhiteBinTools.SupportClasses;
 using WhiteBinTools.UnpackClasses;
 
-namespace WhiteBinTools.src
+namespace WhiteBinTools
 {
     internal class Core
     {

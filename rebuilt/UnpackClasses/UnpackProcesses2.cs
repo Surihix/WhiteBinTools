@@ -48,54 +48,54 @@ namespace WhiteBinTools.UnpackClasses
         }
 
 
-        public static void PrepareExtraction(string convertedString, UnpackProcess unpackVariables, string extractDir)
+        public static void PrepareExtraction(string convertedString, FilelistProcesses filelistVariables, string extractDir)
         {
-            unpackVariables.ConvertedStringData = convertedString.Split(':');
-            unpackVariables.Position = Convert.ToUInt32(unpackVariables.ConvertedStringData[0], 16) * 2048;
-            unpackVariables.UnCmpSize = Convert.ToUInt32(unpackVariables.ConvertedStringData[1], 16);
-            unpackVariables.CmpSize = Convert.ToUInt32(unpackVariables.ConvertedStringData[2], 16);
-            unpackVariables.MainPath = unpackVariables.ConvertedStringData[3].Replace("/", "\\");
+            filelistVariables.ConvertedStringData = convertedString.Split(':');
+            filelistVariables.Position = Convert.ToUInt32(filelistVariables.ConvertedStringData[0], 16) * 2048;
+            filelistVariables.UnCmpSize = Convert.ToUInt32(filelistVariables.ConvertedStringData[1], 16);
+            filelistVariables.CmpSize = Convert.ToUInt32(filelistVariables.ConvertedStringData[2], 16);
+            filelistVariables.MainPath = filelistVariables.ConvertedStringData[3].Replace("/", "\\");
 
-            unpackVariables.DirectoryPath = Path.GetDirectoryName(unpackVariables.MainPath);
-            unpackVariables.FileName = Path.GetFileName(unpackVariables.MainPath);
-            unpackVariables.FullFilePath = extractDir + "\\" + unpackVariables.DirectoryPath + "\\" + unpackVariables.FileName;
-            unpackVariables.CompressedState = false;
+            filelistVariables.DirectoryPath = Path.GetDirectoryName(filelistVariables.MainPath);
+            filelistVariables.FileName = Path.GetFileName(filelistVariables.MainPath);
+            filelistVariables.FullFilePath = extractDir + "\\" + filelistVariables.DirectoryPath + "\\" + filelistVariables.FileName;
+            filelistVariables.IsCompressed = false;
 
-            if (!unpackVariables.UnCmpSize.Equals(unpackVariables.CmpSize))
+            if (!filelistVariables.UnCmpSize.Equals(filelistVariables.CmpSize))
             {
-                unpackVariables.CompressedState = true;
-                unpackVariables.UnpackedState = "Decompressed";
+                filelistVariables.IsCompressed = true;
             }
             else
             {
-                unpackVariables.CompressedState = false;
-                unpackVariables.UnpackedState = "Copied";
+                filelistVariables.IsCompressed = false;
             }
         }
 
 
-        public static void UnpackFile(UnpackProcess unpackVariables, FileStream whiteBin)
+        public static void UnpackFile(FilelistProcesses filelistVariables, FileStream whiteBin, UnpackProcess unpackVariables)
         {
-            switch (unpackVariables.CompressedState)
+            switch (filelistVariables.IsCompressed)
             {
                 case true:
                     using (var cmpData = new MemoryStream())
                     {
-                        whiteBin.ExtendedCopyTo(cmpData, unpackVariables.Position, unpackVariables.CmpSize);
+                        whiteBin.ExtendedCopyTo(cmpData, filelistVariables.Position, filelistVariables.CmpSize);
 
-                        using (var outFile = new FileStream(unpackVariables.FullFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+                        using (var outFile = new FileStream(filelistVariables.FullFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
                         {
                             cmpData.Seek(0, SeekOrigin.Begin);
-                            ZlibLibrary.ZlibDecompress(cmpData, outFile);
+                            cmpData.ZlibDecompress(outFile);
+                            unpackVariables.UnpackedState = "Decompressed";
                         }
                     }
                     break;
 
                 case false:
-                    using (var outFile = new FileStream(unpackVariables.FullFilePath, FileMode.OpenOrCreate, FileAccess.Write))
+                    using (var outFile = new FileStream(filelistVariables.FullFilePath, FileMode.OpenOrCreate, FileAccess.Write))
                     {
                         outFile.Seek(0, SeekOrigin.Begin);
-                        whiteBin.ExtendedCopyTo(outFile, unpackVariables.Position, unpackVariables.UnCmpSize);
+                        whiteBin.ExtendedCopyTo(outFile, filelistVariables.Position, filelistVariables.UnCmpSize);
+                        unpackVariables.UnpackedState = "Copied";
                     }
                     break;
             }

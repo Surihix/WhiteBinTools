@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WhiteBinTools.src
+namespace WhiteBinTools
 {
     internal class Help
     {

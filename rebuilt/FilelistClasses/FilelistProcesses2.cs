@@ -40,8 +40,12 @@ namespace WhiteBinTools.FilelistClasses
 
                 if (filelistVariables.IsEncrypted.Equals(true))
                 {
+                    filelistVariables.CryptToolPresentBefore = true;
+
                     if (!File.Exists(filelistVariables.MainFilelistDirectory + "\\ffxiiicrypt.exe"))
                     {
+                        filelistVariables.CryptToolPresentBefore = false;
+
                         if (File.Exists("ffxiiicrypt.exe"))
                         {
                             File.Copy("ffxiiicrypt.exe", filelistVariables.MainFilelistDirectory + "\\ffxiiicrypt.exe");
@@ -99,7 +103,7 @@ namespace WhiteBinTools.FilelistClasses
         }
 
 
-        static void Encrypt()
+        public static void Encrypt()
         {
 
         }

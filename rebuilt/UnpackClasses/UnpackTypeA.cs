@@ -52,12 +52,17 @@ namespace WhiteBinTools.UnpackClasses
                     {
                         filelistVariables.TmpDcryptFilelistFile.IfFileExistsDel();
                         filelistVariables.MainFilelistFile = filelistFileVar;
+
+                        if (filelistVariables.CryptToolPresentBefore.Equals(false))
+                        {
+                            File.Delete(filelistVariables.MainFilelistDirectory + "\\ffxiiicrypt.exe");
+                        }
                     }
 
 
                     // Extracting files section 
                     filelistVariables.ChunkFNameCount = 0;
-                    unpackVariables.CountDuplicates = 1;
+                    unpackVariables.CountDuplicates = 0;
                     for (int ch = 0; ch < filelistVariables.TotalChunks; ch++)
                     {
                         var filesInChunkCount = UnpackProcess.GetFilesInChunkCount(filelistVariables);
@@ -77,25 +82,25 @@ namespace WhiteBinTools.UnpackClasses
                                         break;
                                     }
 
-                                    UnpackProcess.PrepareExtraction(convertedString, unpackVariables, unpackVariables.ExtractDir);
+                                    UnpackProcess.PrepareExtraction(convertedString, filelistVariables, unpackVariables.ExtractDir);
 
                                     // Extract all files
                                     using (var whiteBin = new FileStream(whiteBinFileVar, FileMode.Open, FileAccess.Read))
                                     {
-                                        if (!Directory.Exists(unpackVariables.ExtractDir + "\\" + unpackVariables.DirectoryPath))
+                                        if (!Directory.Exists(unpackVariables.ExtractDir + "\\" + filelistVariables.DirectoryPath))
                                         {
-                                            Directory.CreateDirectory(unpackVariables.ExtractDir + "\\" + unpackVariables.DirectoryPath);
+                                            Directory.CreateDirectory(unpackVariables.ExtractDir + "\\" + filelistVariables.DirectoryPath);
                                         }
-                                        if (File.Exists(unpackVariables.FullFilePath))
+                                        if (File.Exists(filelistVariables.FullFilePath))
                                         {
-                                            File.Delete(unpackVariables.FullFilePath);
+                                            File.Delete(filelistVariables.FullFilePath);
                                             unpackVariables.CountDuplicates++;
                                         }
 
-                                        UnpackProcess.UnpackFile(unpackVariables, whiteBin);
+                                        UnpackProcess.UnpackFile(filelistVariables, whiteBin, unpackVariables);
                                     }
 
-                                    IOhelpers.LogMessage(unpackVariables.UnpackedState + " _" + unpackVariables.ExtractDirName + "\\" + unpackVariables.MainPath, logWriter);
+                                    IOhelpers.LogMessage(unpackVariables.UnpackedState + " _" + unpackVariables.ExtractDirName + "\\" + filelistVariables.MainPath, logWriter);
 
                                     chunkStringReaderPos = (uint)chunkStringReader.BaseStream.Position;
                                 }
