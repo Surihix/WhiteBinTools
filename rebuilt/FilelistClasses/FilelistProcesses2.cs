@@ -8,7 +8,6 @@ namespace WhiteBinTools.FilelistClasses
     {
         public static void DecryptProcess(CmnEnums.GameCodes gameCodeVar, FilelistProcesses filelistVariables, StreamWriter writerName)
         {
-
             // Check for encryption header in the filelist file,
             // if the game code is set to ff13-1
             if (gameCodeVar.Equals(CmnEnums.GameCodes.ff131))
@@ -17,17 +16,18 @@ namespace WhiteBinTools.FilelistClasses
 
                 if (filelistVariables.IsEncrypted.Equals(true))
                 {
-                    IOhelpers.LogMessage("Error: Detected encrypted filelist file. set the game code to -ff132 for handling this type of filelist", writerName);
-                    
                     if (Directory.Exists(filelistVariables.DefaultChunksExtDir))
                     {
                         Directory.Delete(filelistVariables.DefaultChunksExtDir, true);
                     }
 
+                    IOhelpers.LogMessage("Error: Detected encrypted filelist file. set the game code to '-ff132' for handling this type of filelist", writerName);
+
+                    DisposeIfLogStreamOpen(writerName);                
                     IOhelpers.ErrorExit("");
                 }
             }
-            
+
 
             // Check if the ffxiiicrypt tool is present in the filelist directory
             // and if it doesn't exist copy it to the directory from the app
@@ -59,6 +59,7 @@ namespace WhiteBinTools.FilelistClasses
                                 Directory.Delete(filelistVariables.DefaultChunksExtDir, true);
                             }
 
+                            DisposeIfLogStreamOpen(writerName);
                             IOhelpers.ErrorExit("");
                         }
                     }
@@ -100,6 +101,15 @@ namespace WhiteBinTools.FilelistClasses
             }
 
             return isEncrypted;
+        }
+
+
+        public static void DisposeIfLogStreamOpen(StreamWriter writerName)
+        {
+            if (writerName.BaseStream.CanWrite.Equals(true))
+            {
+                writerName.Dispose();
+            }
         }
 
 

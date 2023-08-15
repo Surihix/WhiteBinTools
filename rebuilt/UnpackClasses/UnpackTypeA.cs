@@ -26,7 +26,6 @@ namespace WhiteBinTools.UnpackClasses
             {
                 IOhelpers.LogMessage("Detected previous unpack. deleting....", logWriter);
                 Directory.Delete(unpackVariables.ExtractDir, true);
-                Console.Clear();
             }
 
             Directory.CreateDirectory(unpackVariables.ExtractDir);
