@@ -27,7 +27,7 @@ namespace WhiteBinTools.FilelistClasses
                     IOhelpers.ErrorExit("");
                 }
             }
-
+            
 
             // Check if the ffxiiicrypt tool is present in the filelist directory
             // and if it doesn't exist copy it to the directory from the app

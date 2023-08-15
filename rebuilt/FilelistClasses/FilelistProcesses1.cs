@@ -27,9 +27,10 @@
         public uint UnCmpSize;
         public uint CmpSize;
         public string MainPath;
-
+        
         public string DirectoryPath;
         public string FileName;
+        public uint NoPathFileCount;
         public string FullFilePath;
         public bool IsCompressed;
     }

@@ -55,11 +55,22 @@ namespace WhiteBinTools.UnpackClasses
             filelistVariables.UnCmpSize = Convert.ToUInt32(filelistVariables.ConvertedStringData[1], 16);
             filelistVariables.CmpSize = Convert.ToUInt32(filelistVariables.ConvertedStringData[2], 16);
             filelistVariables.MainPath = filelistVariables.ConvertedStringData[3].Replace("/", "\\");
-
-            filelistVariables.DirectoryPath = Path.GetDirectoryName(filelistVariables.MainPath);
-            filelistVariables.FileName = Path.GetFileName(filelistVariables.MainPath);
-            filelistVariables.FullFilePath = extractDir + "\\" + filelistVariables.DirectoryPath + "\\" + filelistVariables.FileName;
             filelistVariables.IsCompressed = false;
+
+            if (filelistVariables.MainPath.Equals(" "))
+            {
+                filelistVariables.NoPathFileCount++;
+                filelistVariables.DirectoryPath = "noPath";
+                filelistVariables.FileName = "FILE_" + filelistVariables.NoPathFileCount;
+                filelistVariables.FullFilePath = extractDir + "\\" + filelistVariables.DirectoryPath + "\\" + filelistVariables.FileName;
+                filelistVariables.MainPath = filelistVariables.DirectoryPath + "\\" + filelistVariables.FileName;
+            }
+            else
+            {
+                filelistVariables.DirectoryPath = Path.GetDirectoryName(filelistVariables.MainPath);
+                filelistVariables.FileName = Path.GetFileName(filelistVariables.MainPath);
+                filelistVariables.FullFilePath = extractDir + "\\" + filelistVariables.DirectoryPath + "\\" + filelistVariables.FileName;
+            }
 
             if (!filelistVariables.UnCmpSize.Equals(filelistVariables.CmpSize))
             {
