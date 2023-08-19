@@ -83,9 +83,15 @@
     <Compile Include="rebuilt\FilelistClasses\FilelistProcesses2.cs" />
     <Compile Include="rebuilt\FilelistClasses\FilelistProcesses3.cs" />
     <Compile Include="rebuilt\FilelistClasses\FilelistProcesses4.cs" />
-    <Compile Include="rebuilt\SupportClasses\ByteReaders.cs" />
+    <Compile Include="rebuilt\RepackClasses\RepackProcesses3.cs" />
+    <Compile Include="rebuilt\SupportClasses\BinaryHelpers.cs" />
     <Compile Include="rebuilt\SupportClasses\CmnEnums.cs" />
     <Compile Include="rebuilt\SupportClasses\IOhelpers.cs" />
+    <Compile Include="rebuilt\RepackClasses\RepackTypeA.cs" />
+    <Compile Include="rebuilt\RepackClasses\RepackTypeB.cs" />
+    <Compile Include="rebuilt\RepackClasses\RepackTypeC.cs" />
+    <Compile Include="rebuilt\RepackClasses\RepackProcesses1.cs" />
+    <Compile Include="rebuilt\RepackClasses\RepackProcesses2.cs" />
     <Compile Include="src\Common\StreamExtension.cs" />
     <Compile Include="rebuilt\SupportClasses\ZlibLibrary.cs" />
     <Compile Include="rebuilt\UnpackClasses\UnpackProcesses1.cs" />
@@ -109,9 +115,7 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="rebuilt\RepackClasses\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.8">
       <Visible>False</Visible>

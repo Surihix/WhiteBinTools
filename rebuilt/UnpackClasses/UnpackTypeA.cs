@@ -15,18 +15,14 @@ namespace WhiteBinTools.UnpackClasses
             var filelistVariables = new FilelistProcesses();
             var unpackVariables = new UnpackProcess();
 
-            UnpackProcess.PrepareFilelistVars(filelistVariables, filelistFileVar);
+            FilelistProcesses.PrepareFilelistVars(filelistVariables, filelistFileVar);
             UnpackProcess.PrepareBinVars(whiteBinFileVar, unpackVariables);
 
             filelistVariables.DefaultChunksExtDir = unpackVariables.ExtractDir + "\\_chunks";
             filelistVariables.ChunkFile = filelistVariables.DefaultChunksExtDir + "\\chunk_";
 
-
-            if (Directory.Exists(unpackVariables.ExtractDir))
-            {
-                IOhelpers.LogMessage("Detected previous unpack. deleting....", logWriter);
-                Directory.Delete(unpackVariables.ExtractDir, true);
-            }
+            IOhelpers.LogMessage("Detected previous unpack. deleting....", logWriter);
+            unpackVariables.ExtractDir.IfDirExistsDel();
 
             Directory.CreateDirectory(unpackVariables.ExtractDir);
             Directory.CreateDirectory(filelistVariables.DefaultChunksExtDir);
@@ -60,7 +56,7 @@ namespace WhiteBinTools.UnpackClasses
             unpackVariables.CountDuplicates = 0;
             for (int ch = 0; ch < filelistVariables.TotalChunks; ch++)
             {
-                var filesInChunkCount = UnpackProcess.GetFilesInChunkCount(filelistVariables);
+                var filesInChunkCount = FilelistProcesses.GetFilesInChunkCount(filelistVariables.ChunkFile + filelistVariables.ChunkFNameCount);
 
                 // Open a chunk file for reading
                 using (var currentChunk = new FileStream(filelistVariables.ChunkFile + filelistVariables.ChunkFNameCount, FileMode.Open, FileAccess.Read))

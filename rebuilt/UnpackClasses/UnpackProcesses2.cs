@@ -7,16 +7,6 @@ namespace WhiteBinTools.UnpackClasses
 {
     internal partial class UnpackProcess
     {
-        public static void PrepareFilelistVars(FilelistProcesses filelistVariables, string filelistFileVar)
-        {
-            filelistVariables.MainFilelistFile = filelistFileVar;
-
-            var inFilelistFilePath = Path.GetFullPath(filelistVariables.MainFilelistFile);
-            filelistVariables.MainFilelistDirectory = Path.GetDirectoryName(inFilelistFilePath);
-            filelistVariables.TmpDcryptFilelistFile = filelistVariables.MainFilelistDirectory + "\\filelist_tmp.bin";
-        }
-
-
         public static void PrepareBinVars(string whiteBinFileVar, UnpackProcess unpackVariables)
         {
             unpackVariables.WhiteBinName = Path.GetFileName(whiteBinFileVar);
@@ -26,25 +16,6 @@ namespace WhiteBinTools.UnpackClasses
 
             unpackVariables.ExtractDirName = Path.GetFileName(whiteBinFileVar);
             unpackVariables.ExtractDir = unpackVariables.InBinFileDir + "\\_" + unpackVariables.ExtractDirName;
-        }
-
-
-        public static uint GetFilesInChunkCount(FilelistProcesses filelistVariables)
-        {
-            var filesInChunkCount = (uint)0;
-            using (var fileCountReader = new StreamReader(filelistVariables.DefaultChunksExtDir + "/chunk_" + filelistVariables.ChunkFNameCount))
-            {
-                while (!fileCountReader.EndOfStream)
-                {
-                    var currentNullChar = fileCountReader.Read();
-                    if (currentNullChar == 0)
-                    {
-                        filesInChunkCount++;
-                    }
-                }
-            }
-
-            return filesInChunkCount;
         }
 
 

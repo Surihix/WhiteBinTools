@@ -8,5 +8,12 @@
             ff132,
             none
         }
+
+
+        public enum Endianness
+        {
+            LittleEndian,
+            BigEndian
+        }
     }
 }

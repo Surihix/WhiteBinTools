@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using WhiteBinTools.FilelistClasses;
+using WhiteBinTools.RepackClasses;
 using WhiteBinTools.SupportClasses;
 using WhiteBinTools.UnpackClasses;
 
@@ -40,27 +41,24 @@ namespace WhiteBinTools
             {
                 // Basic arguments
                 // Assign the arguments to the proper variables
-                var arg_1 = args[0];
-                var arg_2 = args[1];
-                var arg_3 = args[2];
+                var specifiedGameCode = args[0].Replace("-", "");
+                var specifiedActionSwitch = args[1].Replace("-", "");
+                var filelistFile = args[2];
 
-                // White bin file or unpacked dir is 
-                // used only when the length of the args
-                // is more than 3.
-                // Its this way cause of the filepaths 
+                // whiteBinOrDir value is assigned from
+                // the arg only when the length of
+                // the args is more than 3.
+                // This is to accomodate for the filepaths
                 // feature.
-                var arg_4 = "";
+                var whiteBinOrDir = "";
                 if (args.Length > 3)
                 {
-                    arg_4 = args[3];
+                    whiteBinOrDir = args[3];
                 }
 
-                var specifiedGameCode = arg_1.Replace("-", "");
-                var specifiedActionSwitch = arg_2.Replace("-", "");
-                var filelistFile = arg_3;
-                var whiteBinOrDir = arg_4;
 
-                // Check argument 1 and 2
+                // Check argument 1 and 2 and assign
+                // the appropriate enum values to it
                 var gameCode = CmnEnums.GameCodes.none;
                 if (Enum.TryParse(specifiedGameCode, false, out CmnEnums.GameCodes convertedGameCode))
                 {
@@ -68,7 +66,7 @@ namespace WhiteBinTools
                 }
                 else
                 {
-                    Console.WriteLine("Warning: Specified game code is incorrect");
+                    Console.WriteLine("Warning: Specified game code was incorrect");
                     Help.ShowCommands();
                 }
 
@@ -79,18 +77,19 @@ namespace WhiteBinTools
                 }
                 else
                 {
-                    Console.WriteLine("Warning: Specified tool action is invalid");
+                    Console.WriteLine("Warning: Specified tool action was invalid");
                     Help.ShowCommands();
                 }
 
 
-                // Additional argument for handling a specific file
-                // Also used for directory argument for -rmf tool action
-                var WhiteFilePathOrDirVar = "";
+                // args for handling a specific file
+                // and directory of unpacked files.
+                // whiteFilePathOrDirVar value is assigned from
+                // the arg only when the args length is more than 4.
+                var whiteFilePathOrDirVar = "";
                 if (args.Length > 4)
                 {
-                    var argument_5 = args[4];
-                    WhiteFilePathOrDirVar = argument_5;
+                    whiteFilePathOrDirVar = args[4];
                 }
 
                 IOhelpers.IfFileExistsDel("ProcessLog.txt");
@@ -121,14 +120,14 @@ namespace WhiteBinTools
                                 UnpackTypeA.UnpackFull(gameCode, filelistFile, whiteBinOrDir, logWriter);
                                 break;
 
-                            //case ActionSwitches.r:
-                            //    CheckArguments(ref totalArgCount, 3);
-                            //    BinRepack.Repack(gameCode, filelistFile, whiteBinOrDir);
-                            //    break;
+                            case ActionSwitches.r:
+                                CheckArguments(totalArgCount, 3);
+                                RepackTypeA.RepackAll(gameCode, filelistFile, whiteBinOrDir, logWriter);
+                                break;
 
                             case ActionSwitches.uaf:
                                 CheckArguments(totalArgCount, 5);
-                                UnpackTypeB.UnpackSingle(gameCode, filelistFile, whiteBinOrDir, WhiteFilePathOrDirVar, logWriter);
+                                UnpackTypeB.UnpackSingle(gameCode, filelistFile, whiteBinOrDir, whiteFilePathOrDirVar, logWriter);
                                 break;
 
                             case ActionSwitches.ufp:

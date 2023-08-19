@@ -15,7 +15,7 @@ namespace WhiteBinTools.UnpackClasses
             var filelistVariables = new FilelistProcesses();
             var unpackVariables = new UnpackProcess();
 
-            UnpackProcess.PrepareFilelistVars(filelistVariables, filelistFileVar);
+            FilelistProcesses.PrepareFilelistVars(filelistVariables, filelistFileVar);
             UnpackProcess.PrepareBinVars(whiteBinFileVar, unpackVariables);
 
             filelistVariables.DefaultChunksExtDir = unpackVariables.ExtractDir + "\\_chunks";
@@ -26,10 +26,8 @@ namespace WhiteBinTools.UnpackClasses
             {
                 Directory.CreateDirectory(unpackVariables.ExtractDir);
             }
-            if (Directory.Exists(filelistVariables.DefaultChunksExtDir))
-            {
-                Directory.Delete(filelistVariables.DefaultChunksExtDir, true);
-            }
+
+            filelistVariables.DefaultChunksExtDir.IfDirExistsDel();
             Directory.CreateDirectory(filelistVariables.DefaultChunksExtDir);
 
 
@@ -62,7 +60,7 @@ namespace WhiteBinTools.UnpackClasses
             var hasExtracted = false;
             for (int ch = 0; ch < filelistVariables.TotalChunks; ch++)
             {
-                var filesInChunkCount = UnpackProcess.GetFilesInChunkCount(filelistVariables);
+                var filesInChunkCount = FilelistProcesses.GetFilesInChunkCount(filelistVariables.ChunkFile + filelistVariables.ChunkFNameCount);
 
                 // Open a chunk file for reading
                 using (var currentChunk = new FileStream(filelistVariables.ChunkFile + filelistVariables.ChunkFNameCount, FileMode.Open, FileAccess.Read))

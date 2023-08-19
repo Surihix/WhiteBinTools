@@ -13,10 +13,10 @@ namespace WhiteBinTools.SupportClasses
         }
 
 
-        public static void LogMessage(string message, StreamWriter writerName)
+        public static void LogMessage(string message, StreamWriter logWriter)
         {
             Console.WriteLine(message);
-            writerName.WriteLine(message);
+            logWriter.WriteLine(message);
         }
 
 
@@ -25,7 +25,28 @@ namespace WhiteBinTools.SupportClasses
             if (!File.Exists(fileVar))
             {
                 LogMessage(missingErrorMsg, logWriter);
+                logWriter.DisposeIfLogStreamOpen();
                 ErrorExit("");
+            }
+        }
+
+
+        public static void CheckDirExists(this string directoryPath, StreamWriter logWriter, string missingErrorMsg)
+        {
+            if (!Directory.Exists(directoryPath))
+            {
+                LogMessage(missingErrorMsg, logWriter);
+                logWriter.DisposeIfLogStreamOpen();
+                ErrorExit("");
+            }
+        }
+
+
+        public static void DisposeIfLogStreamOpen(this StreamWriter logWriter)
+        {
+            if (logWriter.BaseStream.CanWrite.Equals(true))
+            {
+                logWriter.Dispose();
             }
         }
 
@@ -35,6 +56,15 @@ namespace WhiteBinTools.SupportClasses
             if (File.Exists(filePath))
             {
                 File.Delete(filePath);
+            }
+        }
+
+
+        public static void IfDirExistsDel(this string directoryPath)
+        {
+            if (Directory.Exists(directoryPath))
+            {
+                Directory.Delete(directoryPath, true);
             }
         }
 
