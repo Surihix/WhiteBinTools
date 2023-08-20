@@ -82,7 +82,6 @@
     <Compile Include="rebuilt\FilelistClasses\FilelistProcesses1.cs" />
     <Compile Include="rebuilt\FilelistClasses\FilelistProcesses2.cs" />
     <Compile Include="rebuilt\FilelistClasses\FilelistProcesses3.cs" />
-    <Compile Include="rebuilt\FilelistClasses\FilelistProcesses4.cs" />
     <Compile Include="rebuilt\RepackClasses\RepackProcesses3.cs" />
     <Compile Include="rebuilt\SupportClasses\BinaryHelpers.cs" />
     <Compile Include="rebuilt\SupportClasses\CmnEnums.cs" />

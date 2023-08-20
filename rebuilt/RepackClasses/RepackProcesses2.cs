@@ -33,6 +33,7 @@ namespace WhiteBinTools
         public static void GetPackedState(string convertedString, RepackProcesses repackVariables, string extractedDir)
         {
             repackVariables.ConvertedOgStringData = convertedString.Split(':');
+            repackVariables.OgFilePos = Convert.ToUInt32(repackVariables.ConvertedOgStringData[0], 16) * 2048;
             repackVariables.OgUnCmpSize = Convert.ToUInt32(repackVariables.ConvertedOgStringData[1], 16);
             repackVariables.OgCmpSize = Convert.ToUInt32(repackVariables.ConvertedOgStringData[2], 16);
             repackVariables.OgMainPath = repackVariables.ConvertedOgStringData[3];
@@ -68,7 +69,7 @@ namespace WhiteBinTools
         }
 
 
-        public static void RepackTypeAppend(RepackProcesses repackVariables, FileStream newWhiteBin, string fileToPack, string extractedDirVar)
+        public static void RepackTypeAppend(RepackProcesses repackVariables, FileStream newWhiteBin, string fileToAppend, string extractedDirVar)
         {
             var filePositionInDecimal = (uint)newWhiteBin.Length;
 
@@ -93,12 +94,29 @@ namespace WhiteBinTools
             var filePositionForChunk = filePositionInDecimal / 2048;
             repackVariables.AsciiFilePos = filePositionForChunk.DecimalToAscii();
 
-            var fileSizeInDecimal = (uint)new FileInfo(fileToPack).Length;
+            var fileSizeInDecimal = (uint)new FileInfo(fileToAppend).Length;
             repackVariables.AsciiUnCmpSize = fileSizeInDecimal.DecimalToAscii();
 
-
             newWhiteBin.Seek(filePositionInDecimal, SeekOrigin.Begin);
+            RepackFiles(repackVariables, newWhiteBin, fileToAppend, extractedDirVar);
+        }
 
+
+        public static void RepackTypeInject(RepackProcesses repackVariables, FileStream whiteBin, string fileToInject, string extractedDirVar)
+        {
+            var filePositionForChunk = repackVariables.OgFilePos / 2048;
+            repackVariables.AsciiFilePos = filePositionForChunk.DecimalToAscii();
+
+            var fileSizeInDecimal = (uint)new FileInfo(fileToInject).Length;
+            repackVariables.AsciiUnCmpSize = fileSizeInDecimal.DecimalToAscii();
+
+            whiteBin.Seek(repackVariables.OgFilePos, SeekOrigin.Begin);
+            RepackFiles(repackVariables, whiteBin, fileToInject, extractedDirVar);
+        }
+
+
+        static void RepackFiles(RepackProcesses repackVariables, FileStream whiteBinStream, string fileToPack, string extractedDirVar)
+        {
             switch (repackVariables.WasCompressed)
             {
                 case true:
@@ -111,7 +129,7 @@ namespace WhiteBinTools
                     using (var cmpData = new FileStream(repackVariables.TmpCmpDataFile, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
                     {
                         cmpData.Seek(0, SeekOrigin.Begin);
-                        cmpData.CopyTo(newWhiteBin);
+                        cmpData.CopyTo(whiteBinStream);
 
                         var cmpFileSizeInDecimal = (uint)new FileInfo(repackVariables.TmpCmpDataFile).Length;
                         repackVariables.AsciiCmpSize = cmpFileSizeInDecimal.DecimalToAscii();
@@ -126,16 +144,43 @@ namespace WhiteBinTools
                     using (var unCmpFile = new FileStream(fileToPack, FileMode.Open, FileAccess.Read))
                     {
                         unCmpFile.Seek(0, SeekOrigin.Begin);
-                        unCmpFile.CopyTo(newWhiteBin);
+                        unCmpFile.CopyTo(whiteBinStream);
                     }
                     break;
             }
         }
 
 
-        public static void RepackTypeInject(RepackProcesses repackVariables, FileStream whiteBin, string fileToInject, string extractedDirVar)
+        public static void CleanOldFile(string whiteBinFileVar, uint filePos, uint sizeVar)
         {
+            using (var fs = new FileStream(whiteBinFileVar, FileMode.Open, FileAccess.Write))
+            {
+                fs.Seek(filePos, SeekOrigin.Begin);
+                for (int pad = 0; pad < sizeVar; pad++)
+                {
+                    fs.WriteByte(0);
+                }
+            }
+        }
 
+
+        public static void AppendProcess(RepackProcesses repackVariables, string extractedDirVar, ref string packedAs)
+        {
+            using (var appendBin = new FileStream(repackVariables.NewWhiteBinFile, FileMode.Append, FileAccess.Write))
+            {
+                packedAs = "(Appended)";
+                RepackTypeAppend(repackVariables, appendBin, repackVariables.OgFullFilePath, extractedDirVar);
+            }
+        }
+
+
+        public static void InjectProcess(RepackProcesses repackVariables, string extractedDirVar, ref string packedAs)
+        {
+            using (var injectBin = new FileStream(repackVariables.NewWhiteBinFile, FileMode.Open, FileAccess.ReadWrite))
+            {
+                packedAs = "(Injected)";
+                RepackTypeInject(repackVariables, injectBin, repackVariables.OgFullFilePath, extractedDirVar);
+            }
         }
     }
 }

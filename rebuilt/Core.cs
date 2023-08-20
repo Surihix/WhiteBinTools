@@ -135,6 +135,11 @@ namespace WhiteBinTools
                                 UnpackTypeC.UnpackFilelist(gameCode, filelistFile, logWriter);
                                 break;
 
+                            case ActionSwitches.t:
+                                CheckArguments(totalArgCount, 5);
+                                RepackTypeB.RepackSingle(gameCode, filelistFile, whiteBinOrDir, whiteFilePathOrDirVar, logWriter);
+                                break;
+
                             //case ActionSwitches.raf:
                             //    CheckArguments(ref totalArgCount, 5);
                             //    BinRpkAFile.RepackFile(gameCode, filelistFile, whiteBinOrDir, WhiteFilePathOrDirVar);

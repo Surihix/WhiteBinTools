@@ -17,6 +17,7 @@
         public string TmpCmpDataFile { get; set; }
 
         public string[] ConvertedOgStringData { get; set; }
+        public uint OgFilePos { get; set; }
         public uint OgCmpSize { get; set; }
         public uint OgUnCmpSize { get; set; }
         public string OgMainPath { get; set; }
