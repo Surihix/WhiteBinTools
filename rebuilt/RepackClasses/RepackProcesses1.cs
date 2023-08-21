@@ -1,4 +1,4 @@
-﻿namespace WhiteBinTools
+﻿namespace WhiteBinTools.RepackClasses
 {
     internal partial class RepackProcesses
     {

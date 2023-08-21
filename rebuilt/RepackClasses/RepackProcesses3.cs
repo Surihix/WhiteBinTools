@@ -3,7 +3,7 @@ using System.IO;
 using WhiteBinTools.FilelistClasses;
 using WhiteBinTools.SupportClasses;
 
-namespace WhiteBinTools
+namespace WhiteBinTools.RepackClasses
 {
     internal partial class RepackProcesses
     {
