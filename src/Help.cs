@@ -33,9 +33,6 @@ namespace WhiteBinTools
             Console.WriteLine("To repack multiple files: WhiteBinTools -ff131 -rmf " + @"""filelist.bin""" + @" ""whitebin.bin"""
                 + @" ""unpacked_folder""");
             Console.WriteLine("");
-            Console.WriteLine("To show help window:");
-            Console.WriteLine("WhiteBinTools -?");
-            Console.WriteLine("WhiteBinTools -h");
             Environment.Exit(0);
         }
     }
