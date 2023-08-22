@@ -21,8 +21,11 @@ namespace WhiteBinTools.UnpackClasses
             filelistVariables.DefaultChunksExtDir = unpackVariables.ExtractDir + "\\_chunks";
             filelistVariables.ChunkFile = filelistVariables.DefaultChunksExtDir + "\\chunk_";
 
-            IOhelpers.LogMessage("Detected previous unpack. deleting....", logWriter);
-            unpackVariables.ExtractDir.IfDirExistsDel();
+            if (Directory.Exists(unpackVariables.ExtractDir))
+            {
+                IOhelpers.LogMessage("Detected previous unpack. deleting....", logWriter);
+                unpackVariables.ExtractDir.IfDirExistsDel();
+            }
 
             Directory.CreateDirectory(unpackVariables.ExtractDir);
             Directory.CreateDirectory(filelistVariables.DefaultChunksExtDir);
