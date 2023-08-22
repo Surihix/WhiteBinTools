@@ -135,20 +135,15 @@ namespace WhiteBinTools
                                 UnpackTypeC.UnpackFilelist(gameCode, filelistFile, logWriter);
                                 break;
 
-                            case ActionSwitches.t:
+                            case ActionSwitches.raf:
                                 CheckArguments(totalArgCount, 5);
                                 RepackTypeB.RepackSingle(gameCode, filelistFile, whiteBinOrDir, whiteFilePathOrDirVar, logWriter);
                                 break;
 
-                            //case ActionSwitches.raf:
-                            //    CheckArguments(ref totalArgCount, 5);
-                            //    BinRpkAFile.RepackFile(gameCode, filelistFile, whiteBinOrDir, WhiteFilePathOrDirVar);
-                            //    break;
-
-                            //case ActionSwitches.rmf:
-                            //    CheckArguments(ref totalArgCount, 5);
-                            //    BinRpkMoreFiles.RepackMoreFiles(gameCode, filelistFile, whiteBinOrDir, WhiteFilePathOrDirVar);
-                            //    break;
+                            case ActionSwitches.rmf:
+                                CheckArguments(totalArgCount, 5);
+                                RepackTypeC.RepackMultiple(gameCode, filelistFile, whiteBinOrDir, whiteFilePathOrDirVar, logWriter);
+                                break;
 
                             default:
                                 Console.WriteLine("Error: Proper tool action is not specified");
@@ -191,9 +186,6 @@ namespace WhiteBinTools
             uaf,
             raf,
             rmf,
-            t,
-            t2,
-            t3,
             none
         }
 

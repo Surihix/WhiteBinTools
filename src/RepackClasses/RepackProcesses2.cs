@@ -121,8 +121,11 @@ namespace WhiteBinTools.RepackClasses
             {
                 case true:
                     repackVariables.TmpCmpDataFile = extractedDirVar + "\\zlib_data";
-                    var zlibTmpDataStream = File.Create(repackVariables.TmpCmpDataFile);
-                    zlibTmpDataStream.Close();
+                    if (!File.Exists(repackVariables.TmpCmpDataFile))
+                    {
+                        var zlibTmpDataStream = File.Create(repackVariables.TmpCmpDataFile);
+                        zlibTmpDataStream.Close();
+                    }
 
                     fileToPack.ZlibCompress(repackVariables.TmpCmpDataFile, Ionic.Zlib.CompressionLevel.Level9);
 

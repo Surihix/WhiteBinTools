@@ -78,37 +78,27 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="rebuilt\Core.cs" />
-    <Compile Include="rebuilt\FilelistClasses\FilelistProcesses1.cs" />
-    <Compile Include="rebuilt\FilelistClasses\FilelistProcesses2.cs" />
-    <Compile Include="rebuilt\FilelistClasses\FilelistProcesses3.cs" />
-    <Compile Include="rebuilt\RepackClasses\RepackProcesses3.cs" />
-    <Compile Include="rebuilt\SupportClasses\BinaryHelpers.cs" />
-    <Compile Include="rebuilt\SupportClasses\CmnEnums.cs" />
-    <Compile Include="rebuilt\SupportClasses\IOhelpers.cs" />
-    <Compile Include="rebuilt\RepackClasses\RepackTypeA.cs" />
-    <Compile Include="rebuilt\RepackClasses\RepackTypeB.cs" />
-    <Compile Include="rebuilt\RepackClasses\RepackTypeC.cs" />
-    <Compile Include="rebuilt\RepackClasses\RepackProcesses1.cs" />
-    <Compile Include="rebuilt\RepackClasses\RepackProcesses2.cs" />
-    <Compile Include="src\Common\StreamExtension.cs" />
-    <Compile Include="rebuilt\SupportClasses\ZlibLibrary.cs" />
-    <Compile Include="rebuilt\UnpackClasses\UnpackProcesses1.cs" />
-    <Compile Include="rebuilt\UnpackClasses\UnpackProcesses2.cs" />
-    <Compile Include="rebuilt\UnpackClasses\UnpackTypeA.cs" />
-    <Compile Include="rebuilt\UnpackClasses\UnpackTypeB.cs" />
-    <Compile Include="rebuilt\UnpackClasses\UnpackTypeC.cs" />
-    <Compile Include="src\Common\CmnMethods.cs" />
-    <Compile Include="src\Common\ZlibLibrary.cs" />
-    <Compile Include="src\Unpack\BinUnpkFilePaths.cs" />
-    <Compile Include="src\Repack\BinRepack.cs" />
-    <Compile Include="src\Repack\BinRpkAFile.cs" />
-    <Compile Include="src\Repack\BinRpkMoreFiles.cs" />
-    <Compile Include="src\Unpack\BinUnpack.cs" />
-    <Compile Include="src\Unpack\BinUnpkAFile.cs" />
-    <Compile Include="rebuilt\Help.cs" />
+    <Compile Include="src\Core.cs" />
+    <Compile Include="src\FilelistClasses\FilelistProcesses1.cs" />
+    <Compile Include="src\FilelistClasses\FilelistProcesses2.cs" />
+    <Compile Include="src\FilelistClasses\FilelistProcesses3.cs" />
+    <Compile Include="src\RepackClasses\RepackProcesses3.cs" />
+    <Compile Include="src\SupportClasses\BinaryHelpers.cs" />
+    <Compile Include="src\SupportClasses\CmnEnums.cs" />
+    <Compile Include="src\SupportClasses\IOhelpers.cs" />
+    <Compile Include="src\RepackClasses\RepackTypeA.cs" />
+    <Compile Include="src\RepackClasses\RepackTypeB.cs" />
+    <Compile Include="src\RepackClasses\RepackTypeC.cs" />
+    <Compile Include="src\RepackClasses\RepackProcesses1.cs" />
+    <Compile Include="src\RepackClasses\RepackProcesses2.cs" />
+    <Compile Include="src\SupportClasses\ZlibLibrary.cs" />
+    <Compile Include="src\UnpackClasses\UnpackProcesses1.cs" />
+    <Compile Include="src\UnpackClasses\UnpackProcesses2.cs" />
+    <Compile Include="src\UnpackClasses\UnpackTypeA.cs" />
+    <Compile Include="src\UnpackClasses\UnpackTypeB.cs" />
+    <Compile Include="src\UnpackClasses\UnpackTypeC.cs" />
+    <Compile Include="src\Help.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="src\Common\CmnEnums.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

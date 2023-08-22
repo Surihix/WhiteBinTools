@@ -93,14 +93,13 @@ namespace WhiteBinTools.RepackClasses
                                                 RepackProcesses.CleanOldFile(repackVariables.NewWhiteBinFile, repackVariables.OgFilePos, repackVariables.OgCmpSize);
 
                                                 repackVariables.TmpCmpDataFile = extractedDirVar + "\\zlib_data";
-                                                var zlibTmpDummyDataStream = File.Create(repackVariables.TmpCmpDataFile);
-                                                zlibTmpDummyDataStream.Close();
+                                                var zlibTmpCmpDataStream = File.Create(repackVariables.TmpCmpDataFile);
+                                                zlibTmpCmpDataStream.Close();
 
                                                 repackVariables.OgFullFilePath.ZlibCompress(repackVariables.TmpCmpDataFile, Ionic.Zlib.CompressionLevel.Level9);
-                                                var dummyCmpFileSize = (uint)new FileInfo(repackVariables.TmpCmpDataFile).Length;
-                                                File.Delete(repackVariables.TmpCmpDataFile);
+                                                var zlibCmpFileSize = (uint)new FileInfo(repackVariables.TmpCmpDataFile).Length;
 
-                                                if (dummyCmpFileSize < repackVariables.OgCmpSize || dummyCmpFileSize == repackVariables.OgCmpSize)
+                                                if (zlibCmpFileSize < repackVariables.OgCmpSize || zlibCmpFileSize == repackVariables.OgCmpSize)
                                                 {
                                                     RepackProcesses.InjectProcess(repackVariables, extractedDirVar, ref packedAs);
                                                 }
