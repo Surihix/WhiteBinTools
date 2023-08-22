@@ -7,7 +7,7 @@ namespace WhiteBinTools
         public static void ShowCommands()
         {
             Console.WriteLine("Game Codes:");
-            Console.WriteLine("-ff131 = 13-1");
+            Console.WriteLine("-ff131 = 13-1 and Dirge Of Cerberus");
             Console.WriteLine("-ff132 = 13-2 and 13-LR");
             Console.WriteLine("");
             Console.WriteLine("Tool actions:");
