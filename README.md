@@ -30,9 +30,12 @@ The following additional packages were used for Big Endian reading and writing b
 <br>
 The following additional package is used for Zlib compression and decompression:
 <br>**DotNetZip** - https://www.nuget.org/packages/DotNetZip
+<br>
+<br>
+Refer to this [page](https://github.com/LR-Research-Team/Datalog/wiki/White-Image-BIN-files) for information on the file structure of the archive.
 
-# Credits
+## Credits
 **ffxiiicrypt** - Echelo (from Xentax)
 
-# Special Thanks
+## Special Thanks
 [**Kizari**](https://github.com/Kizari)
