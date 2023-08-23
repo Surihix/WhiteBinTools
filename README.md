@@ -1,9 +1,9 @@
 # WhiteBinTools
-This app allows you to unpack and repack the main white_img archive files from the FF13 game trilogy. the app has to be run from a command prompt with a valid argument switch. the list of valid switches that you can use with this app are given below. 
+This app allows you to unpack and repack the main white_img archive files from the FF13 game trilogy as well as the KEL.DAT archive from Dirge of Cerberus. the app should be launched from command prompt with a few argument switches to perform a function. the list of valid argument switches are given below:
 
 **Game Codes:**
-<br>``-ff131`` For 13-1's files
-<br>``-ff132`` For 13-2 and 13-LR's files
+<br>``-ff131`` For FF13-1 and Dirge Of Cerberus files
+<br>``-ff132`` For FF13-2 and FF13-LR 's files
 
 
 <br>**Tool actions:**
@@ -16,13 +16,11 @@ This app allows you to unpack and repack the main white_img archive files from t
 <br>``-?`` or ``-h`` Display the help page
 <br>
 
-<br>* Filelist file and the white bin file or the unpacked folder has to be specified after the game code and the action argument switches.
-<br>* If you want to unpack or repack a single file, then provide the virtual file path of that file after the white bin file or the unpacked folder argument.
-<br>* If you want repack multiple files from the unpacked folder, then provide the unpacked folder as the last argument.
-<br>* The single file and the multiple files repacking options will inject the file at the original position in the archive or append the file at the end depending on whether the compressed size or the file size when its in the archive, is equal or less than the size of the file that is being replaced.
-<br>
-<br>**Important:** The ffxiiicrypt tool that is bundled with this app is required for unpacking and repacking the archive files from FF13-2 and FF13-LR. 
-<br>The author of this ffxiiicrypt tool is Echelo from Xentax.
+## Important notes
+- Filelist file and the white bin file or the unpacked folder, has to be specified after the game code and the tool action argument switches.
+- The ffxiiicrypt tool that is bundled with this app is required for unpacking and repacking the archive files from FF13-2 and FF13-LR.
+- If you want to unpack or repack a single file, then provide the virtual file path of that file after the white bin file or the unpacked folder argument. refer to the app's help page that can be accessed with the `-?` or `-h` switches. 
+- The single file and the multiple files repacking options will either inject the file at the original position in the archive or append the file at the end of the archive. the file will be injected into the archive if the compressed data size (i.e if its stored compressed) or the file size (i.e if not stored compressed), is lesser than or equal to the size of the file that is being replaced. if its greater than the original size, then its appended at the end of the archive.
 
 ## For developers
 The following additional packages were used for Big Endian reading and writing byte values:
@@ -32,3 +30,9 @@ The following additional packages were used for Big Endian reading and writing b
 <br>
 The following additional package is used for Zlib compression and decompression:
 <br>**DotNetZip** - https://www.nuget.org/packages/DotNetZip
+
+# Credits
+**ffxiiicrypt** - Echelo (from Xentax)
+
+# Special Thanks
+[**Kizari**](https://github.com/Kizari)
