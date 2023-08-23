@@ -32,7 +32,7 @@ The following additional package is used for Zlib compression and decompression:
 <br>**DotNetZip** - https://www.nuget.org/packages/DotNetZip
 <br>
 <br>
-Refer to this [page](https://github.com/LR-Research-Team/Datalog/wiki/White-Image-BIN-files) for information on the file structure of the archive.
+Refer to this [page](https://github.com/LR-Research-Team/Datalog/wiki/White-Image-BIN-files) for information about the file structures of the filelist and the archive.
 
 ## Credits
 **ffxiiicrypt** - Echelo (from Xentax)
