@@ -194,9 +194,9 @@ namespace WhiteBinTools.FilelistClasses
 
             // Write checksum to the filelist file
             filelistDataSize += 32;
-            var asciiSize = filelistDataSize.DecimalToAscii();
+            var asciiSize = filelistDataSize.ToString("x8");
             var cryptCheckSumCode = " write";
-            var checkSumActionArg = " 000" + asciiSize + cryptCheckSumCode;
+            var checkSumActionArg = asciiSize + cryptCheckSumCode;
             FFXiiiCryptTool(filelistVariables.MainFilelistDirectory, " -c ", "\"" + repackVariables.NewFilelistFile + "\"", ref checkSumActionArg);
 
 
