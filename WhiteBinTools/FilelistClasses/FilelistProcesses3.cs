@@ -5,7 +5,7 @@ namespace WhiteBinTools.FilelistClasses
 {
     internal partial class FilelistProcesses
     {
-        public static void GetFilelistOffsets(BinaryReader filelistReader, StreamWriter logWriter, FilelistProcesses filelistVariables, CmnEnums.GameCodes gameCodeVar)
+        public static void GetFilelistOffsets(BinaryReader filelistReader, StreamWriter logWriter, FilelistProcesses filelistVariables)
         {
             var readStartPositionVar = new uint();
             var adjustOffset = new uint();

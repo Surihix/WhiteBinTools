@@ -120,7 +120,7 @@ namespace WhiteBinTools.FilelistClasses
         }
 
 
-        public static void EncryptProcess(RepackProcesses repackVariables, FilelistProcesses filelistVariables, StreamWriter writerName)
+        public static void EncryptProcess(RepackProcesses repackVariables, StreamWriter writerName)
         {
             var filelistDataSize = (uint)0;
 

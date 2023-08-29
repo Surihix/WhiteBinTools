@@ -33,7 +33,7 @@ namespace WhiteBinTools.UnpackClasses
             {
                 using (var filelistReader = new BinaryReader(filelist))
                 {
-                    FilelistProcesses.GetFilelistOffsets(filelistReader, logWriter, filelistVariables, gameCodeVar);
+                    FilelistProcesses.GetFilelistOffsets(filelistReader, logWriter, filelistVariables);
                     FilelistProcesses.UnpackChunks(filelist, filelistVariables.ChunkFile, filelistVariables);
                 }
             }

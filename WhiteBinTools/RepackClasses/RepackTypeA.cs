@@ -40,7 +40,7 @@ namespace WhiteBinTools.RepackClasses
             {
                 using (var filelistReader = new BinaryReader(filelist))
                 {
-                    FilelistProcesses.GetFilelistOffsets(filelistReader, logWriter, filelistVariables, gameCodeVar);
+                    FilelistProcesses.GetFilelistOffsets(filelistReader, logWriter, filelistVariables);
                     FilelistProcesses.UnpackChunks(filelist, filelistVariables.ChunkFile, filelistVariables);
                 }
             }
@@ -114,7 +114,7 @@ namespace WhiteBinTools.RepackClasses
 
             if (filelistVariables.IsEncrypted.Equals(true))
             {
-                FilelistProcesses.EncryptProcess(repackVariables, filelistVariables, logWriter);
+                FilelistProcesses.EncryptProcess(repackVariables, logWriter);
                 filelistVariables.TmpDcryptFilelistFile.IfFileExistsDel();
             }
 
