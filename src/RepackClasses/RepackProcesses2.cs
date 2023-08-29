@@ -12,7 +12,7 @@ namespace WhiteBinTools.RepackClasses
             repackVariables.FilelistFileName = Path.GetFileName(filelistFileVar);
             repackVariables.NewFilelistFile = filelistVariables.MainFilelistDirectory + "\\" + repackVariables.FilelistFileName;
             repackVariables.NewWhiteBinFileName = Path.GetFileName(extractedDirVar).Remove(0, 1);
-            repackVariables.NewWhiteBinFile = filelistVariables.MainFilelistDirectory + "\\" + repackVariables.NewWhiteBinFileName;
+            repackVariables.NewWhiteBinFile = Path.GetDirectoryName(extractedDirVar) + "\\" + repackVariables.NewWhiteBinFileName;
 
             filelistVariables.DefaultChunksExtDir = extractedDirVar + "\\_chunks";
             filelistVariables.ChunkFile = filelistVariables.DefaultChunksExtDir + "\\chunk_";

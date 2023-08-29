@@ -17,7 +17,7 @@ namespace WhiteBinTools.RepackClasses
 
             FilelistProcesses.PrepareFilelistVars(filelistVariables, filelistFileVar);
 
-            var extractedDirVar = filelistVariables.MainFilelistDirectory + "\\_" + Path.GetFileName(whiteBinFileVar);
+            var extractedDirVar = Path.GetDirectoryName(whiteBinFileVar) + "\\_" + Path.GetFileName(whiteBinFileVar);
             RepackProcesses.PrepareRepackVars(repackVariables, filelistFileVar, filelistVariables, extractedDirVar);
 
             (extractedDirVar + "\\" + whiteFilePathVar).CheckFileExists(logWriter, "Error: Specified file to repack in the argument is missing");
