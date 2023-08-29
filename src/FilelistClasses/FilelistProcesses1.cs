@@ -9,8 +9,6 @@
         public string ChunkFile { get; set; }
         public bool IsEncrypted { get; set; }
 
-        public bool CryptToolPresentBefore { get; set; }
-
         public uint ChunkInfoSectionOffset { get; set; }
         public uint ChunkDataSectionOffset { get; set; }
         public uint TotalFiles { get; set; }

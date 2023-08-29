@@ -42,11 +42,6 @@ namespace WhiteBinTools.UnpackClasses
             {
                 filelistVariables.TmpDcryptFilelistFile.IfFileExistsDel();
                 filelistVariables.MainFilelistFile = filelistFileVar;
-
-                if (filelistVariables.CryptToolPresentBefore.Equals(false))
-                {
-                    File.Delete(filelistVariables.MainFilelistDirectory + "\\ffxiiicrypt.exe");
-                }
             }
 
 

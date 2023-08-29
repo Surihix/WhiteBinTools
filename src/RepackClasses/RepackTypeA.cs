@@ -116,11 +116,6 @@ namespace WhiteBinTools.RepackClasses
             {
                 FilelistProcesses.EncryptProcess(repackVariables, filelistVariables, logWriter);
                 filelistVariables.TmpDcryptFilelistFile.IfFileExistsDel();
-
-                if (filelistVariables.CryptToolPresentBefore.Equals(false))
-                {
-                    File.Delete(filelistVariables.MainFilelistDirectory + "\\ffxiiicrypt.exe");
-                }
             }
 
             IOhelpers.LogMessage("\nFinished repacking files into " + repackVariables.NewWhiteBinFileName, logWriter);

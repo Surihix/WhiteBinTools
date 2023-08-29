@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
 using WhiteBinTools.RepackClasses;
 using WhiteBinTools.SupportClasses;
@@ -40,9 +41,6 @@ namespace WhiteBinTools.FilelistClasses
             }
 
 
-            // Check if the ffxiiicrypt tool is present in the filelist directory
-            // and if it doesn't exist copy it to the directory from the app
-            // directory.
             // If the ffxiiicrypt tool does not exist in app directory, then
             // throw a error and exit
             if (gameCodeVar.Equals(CmnEnums.GameCodes.ff132))
@@ -51,28 +49,17 @@ namespace WhiteBinTools.FilelistClasses
 
                 if (filelistVariables.IsEncrypted.Equals(true))
                 {
-                    filelistVariables.CryptToolPresentBefore = true;
-
-                    if (!File.Exists(filelistVariables.MainFilelistDirectory + "\\ffxiiicrypt.exe"))
+                    if (!File.Exists("ffxiiicrypt.exe"))
                     {
-                        filelistVariables.CryptToolPresentBefore = false;
+                        IOhelpers.LogMessage("Error: Unable to locate ffxiiicrypt tool in the main app folder to decrypt the filelist file", writerName);
 
-                        if (File.Exists("ffxiiicrypt.exe"))
+                        if (Directory.Exists(filelistVariables.DefaultChunksExtDir))
                         {
-                            File.Copy("ffxiiicrypt.exe", filelistVariables.MainFilelistDirectory + "\\ffxiiicrypt.exe");
+                            Directory.Delete(filelistVariables.DefaultChunksExtDir, true);
                         }
-                        else
-                        {
-                            IOhelpers.LogMessage("Error: Unable to locate ffxiiicrypt tool in the main app folder to decrypt the filelist file", writerName);
 
-                            if (Directory.Exists(filelistVariables.DefaultChunksExtDir))
-                            {
-                                Directory.Delete(filelistVariables.DefaultChunksExtDir, true);
-                            }
-
-                            writerName.DisposeIfLogStreamOpen();
-                            IOhelpers.ErrorExit("");
-                        }
+                        writerName.DisposeIfLogStreamOpen();
+                        IOhelpers.ErrorExit("");
                     }
                 }
             }
@@ -86,8 +73,7 @@ namespace WhiteBinTools.FilelistClasses
                 File.Copy(filelistVariables.MainFilelistFile, filelistVariables.TmpDcryptFilelistFile);
 
                 var cryptFilelistCode = " filelist";
-
-                FFXiiiCryptTool(filelistVariables.MainFilelistDirectory, " -d ", "\"" + filelistVariables.TmpDcryptFilelistFile + "\"", ref cryptFilelistCode);
+                FFXiiiCryptTool(" -d ", "\"" + filelistVariables.TmpDcryptFilelistFile + "\"", ref cryptFilelistCode);
 
                 filelistVariables.MainFilelistFile = filelistVariables.TmpDcryptFilelistFile;
             }
@@ -197,23 +183,23 @@ namespace WhiteBinTools.FilelistClasses
             var asciiSize = filelistDataSize.ToString("x8");
             var cryptCheckSumCode = " write";
             var checkSumActionArg = " " + asciiSize + cryptCheckSumCode;
-            FFXiiiCryptTool(filelistVariables.MainFilelistDirectory, " -c ", "\"" + repackVariables.NewFilelistFile + "\"", ref checkSumActionArg);
+            FFXiiiCryptTool(" -c ", "\"" + repackVariables.NewFilelistFile + "\"", ref checkSumActionArg);
 
 
             // Encrypt the filelist file
             var cryptFilelistCode = " filelist";
-            FFXiiiCryptTool(filelistVariables.MainFilelistDirectory, " -e ", "\"" + repackVariables.NewFilelistFile + "\"", ref cryptFilelistCode);
+            FFXiiiCryptTool(" -e ", "\"" + repackVariables.NewFilelistFile + "\"", ref cryptFilelistCode);
 
 
             IOhelpers.LogMessage("\nFinished encrypting new filelist", writerName);
         }
 
 
-        static void FFXiiiCryptTool(string cryptDir, string actionSwitch, string filelistName, ref string actionType)
+        static void FFXiiiCryptTool(string actionSwitch, string filelistName, ref string actionType)
         {
             using (Process xiiiCrypt = new Process())
             {
-                xiiiCrypt.StartInfo.WorkingDirectory = cryptDir;
+                xiiiCrypt.StartInfo.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
                 xiiiCrypt.StartInfo.FileName = "ffxiiicrypt.exe";
                 xiiiCrypt.StartInfo.Arguments = actionSwitch + filelistName + actionType;
                 xiiiCrypt.StartInfo.UseShellExecute = true;
