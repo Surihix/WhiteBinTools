@@ -14,7 +14,7 @@ namespace WhiteBinTools.FilelistClasses
 
             var inFilelistFilePath = Path.GetFullPath(filelistVariables.MainFilelistFile);
             filelistVariables.MainFilelistDirectory = Path.GetDirectoryName(inFilelistFilePath);
-            filelistVariables.TmpDcryptFilelistFile = filelistVariables.MainFilelistDirectory + "\\filelist_tmp.bin";
+            filelistVariables.TmpDcryptFilelistFile = Path.Combine(filelistVariables.MainFilelistDirectory, "filelist_tmp.bin");
         }
 
 
@@ -124,27 +124,27 @@ namespace WhiteBinTools.FilelistClasses
         {
             var filelistDataSize = (uint)0;
 
-            // Check filelist size if divisibile by 4
+            // Check filelist size if divisibile by 8
             // and pad in null bytes if not divisible.
-            // Also write some null bytes for the size 
+            // Then write some null bytes for the size 
             // and hash offsets
             using (var preEncryptedfilelist = new FileStream(repackVariables.NewFilelistFile, FileMode.Append, FileAccess.Write))
             {
                 filelistDataSize = (uint)preEncryptedfilelist.Length - 32;
 
-                if (filelistDataSize % 4 != 0)
+                if (filelistDataSize % 8 != 0)
                 {
                     // Get remainder from the division and
-                    // reduce the remainder with 4. set that
+                    // reduce the remainder with 8. set that
                     // reduced value to a variable
-                    var remainder = filelistDataSize % 4;
-                    var increaseByteAmount = 4 - remainder;
+                    var remainder = filelistDataSize % 8;
+                    var increaseByteAmount = 8 - remainder;
 
                     // Increase the filelist size with the
                     // increase byte variable from the previous step and
                     // set this as a variable
                     // Then get the amount of null bytes to pad by subtracting 
-                    // the new size  with the filelist size
+                    // the new size with the filelist size
                     var newSize = filelistDataSize + increaseByteAmount;
                     var padNulls = newSize - filelistDataSize;
 
@@ -184,13 +184,12 @@ namespace WhiteBinTools.FilelistClasses
             var cryptCheckSumCode = " write";
             var checkSumActionArg = " " + asciiSize + cryptCheckSumCode;
             FFXiiiCryptTool(" -c ", "\"" + repackVariables.NewFilelistFile + "\"", ref checkSumActionArg);
+            IOhelpers.LogMessage("\nFinished writing checksum for new filelist", writerName);
 
 
             // Encrypt the filelist file
             var cryptFilelistCode = " filelist";
             FFXiiiCryptTool(" -e ", "\"" + repackVariables.NewFilelistFile + "\"", ref cryptFilelistCode);
-
-
             IOhelpers.LogMessage("\nFinished encrypting new filelist", writerName);
         }
 

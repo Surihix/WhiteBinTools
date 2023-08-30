@@ -10,9 +10,9 @@ namespace WhiteBinTools.RepackClasses
         public static void PrepareRepackVars(RepackProcesses repackVariables, string filelistFileVar, FilelistProcesses filelistVariables, string extractedDirVar)
         {
             repackVariables.FilelistFileName = Path.GetFileName(filelistFileVar);
-            repackVariables.NewFilelistFile = filelistVariables.MainFilelistDirectory + "\\" + repackVariables.FilelistFileName;
+            repackVariables.NewFilelistFile = Path.Combine(filelistVariables.MainFilelistDirectory, repackVariables.FilelistFileName);
             repackVariables.NewWhiteBinFileName = Path.GetFileName(extractedDirVar).Remove(0, 1);
-            repackVariables.NewWhiteBinFile = Path.GetDirectoryName(extractedDirVar) + "\\" + repackVariables.NewWhiteBinFileName;
+            repackVariables.NewWhiteBinFile = Path.Combine(Path.GetDirectoryName(extractedDirVar), repackVariables.NewWhiteBinFileName);
 
             filelistVariables.DefaultChunksExtDir = extractedDirVar + "\\_chunks";
             filelistVariables.ChunkFile = filelistVariables.DefaultChunksExtDir + "\\chunk_";

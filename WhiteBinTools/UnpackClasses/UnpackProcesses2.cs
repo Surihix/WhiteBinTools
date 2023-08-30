@@ -15,7 +15,7 @@ namespace WhiteBinTools.UnpackClasses
             unpackVariables.InBinFileDir = Path.GetDirectoryName(inBinFilePath);
 
             unpackVariables.ExtractDirName = Path.GetFileName(whiteBinFileVar);
-            unpackVariables.ExtractDir = unpackVariables.InBinFileDir + "\\_" + unpackVariables.ExtractDirName;
+            unpackVariables.ExtractDir = Path.Combine(unpackVariables.InBinFileDir, "_" + unpackVariables.ExtractDirName);
         }
 
 
