@@ -121,8 +121,6 @@ namespace WhiteBinTools.UnpackClasses
                     IOhelpers.LogMessage(unpackVariables.CountDuplicates + " duplicate file(s)", logWriter);
                 }
             }
-
-            Console.ReadLine();
         }
     }
 }

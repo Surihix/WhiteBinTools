@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using WhiteBinTools.FilelistClasses;
 using WhiteBinTools.SupportClasses;
 
@@ -119,7 +118,6 @@ namespace WhiteBinTools.RepackClasses
             }
 
             IOhelpers.LogMessage("\nFinished repacking files into " + repackVariables.NewWhiteBinFileName, logWriter);
-            Console.ReadLine();
         }
     }
 }

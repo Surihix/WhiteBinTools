@@ -105,21 +105,9 @@ namespace WhiteBinTools.RepackClasses
                                     newFilelist.Seek(appendAt, SeekOrigin.Begin);
 
                                     chunkUncmpSize = (uint)new FileInfo(repackVariables.NewChunkFile + filelistVariables.ChunkFNameCount).Length;
-
-                                    repackVariables.TmpCmpChunkDataFile = repackVariables.NewChunksExtDir + "zlib_chunk";
-                                    var createChunkFile = File.Create(repackVariables.TmpCmpChunkDataFile);
-                                    createChunkFile.Close();
-
-                                    (repackVariables.NewChunkFile + filelistVariables.ChunkFNameCount).ZlibCompress(repackVariables.TmpCmpChunkDataFile, Ionic.Zlib.CompressionLevel.Level9);
-
-                                    using (var cmpChunkStream = new FileStream(repackVariables.TmpCmpChunkDataFile, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
-                                    {
-                                        cmpChunkStream.Seek(0, SeekOrigin.Begin);
-                                        cmpChunkStream.CopyTo(newFilelist);
-
-                                        chunkCmpSize = (uint)new FileInfo(repackVariables.TmpCmpChunkDataFile).Length;
-                                    }
-                                    File.Delete(repackVariables.TmpCmpChunkDataFile);
+                                    var chunkCmpData = (repackVariables.NewChunkFile + filelistVariables.ChunkFNameCount).ZlibCompress();
+                                    newFilelist.Write(chunkCmpData, 0, chunkCmpData.Length);
+                                    chunkCmpSize = (uint)chunkCmpData.Length;
 
                                     newFilelistWriter.AdjustBytesUInt32(chunkInfoWriterPos, chunkUncmpSize, CmnEnums.Endianness.LittleEndian);
                                     newFilelistWriter.AdjustBytesUInt32(chunkInfoWriterPos + 4, chunkCmpSize, CmnEnums.Endianness.LittleEndian);

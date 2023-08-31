@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using WhiteBinTools.FilelistClasses;
 using WhiteBinTools.SupportClasses;
 
@@ -84,7 +83,7 @@ namespace WhiteBinTools.RepackClasses
                                     repackVariables.AsciiCmpSize = repackVariables.ConvertedOgStringData[2];
 
                                     // Repack a specific file
-                                    var currentFilePath = repackVariables.OgDirectoryPath + "\\" + repackVariables.OgFileName;                                   
+                                    var currentFilePath = repackVariables.OgDirectoryPath + "\\" + repackVariables.OgFileName;
                                     if (currentFilePath.Equals(whiteFilePathVar))
                                     {
                                         switch (repackVariables.WasCompressed)
@@ -92,12 +91,8 @@ namespace WhiteBinTools.RepackClasses
                                             case true:
                                                 RepackProcesses.CleanOldFile(repackVariables.NewWhiteBinFile, repackVariables.OgFilePos, repackVariables.OgCmpSize);
 
-                                                repackVariables.TmpCmpDataFile = extractedDirVar + "\\zlib_data";
-                                                var zlibTmpCmpDataStream = File.Create(repackVariables.TmpCmpDataFile);
-                                                zlibTmpCmpDataStream.Close();
-
-                                                repackVariables.OgFullFilePath.ZlibCompress(repackVariables.TmpCmpDataFile, Ionic.Zlib.CompressionLevel.Level9);
-                                                var zlibCmpFileSize = (uint)new FileInfo(repackVariables.TmpCmpDataFile).Length;
+                                                var zlibTmpCmpData = repackVariables.OgFullFilePath.ZlibCompress();
+                                                var zlibCmpFileSize = (uint)zlibTmpCmpData.Length;
 
                                                 if (zlibCmpFileSize < repackVariables.OgCmpSize || zlibCmpFileSize == repackVariables.OgCmpSize)
                                                 {
@@ -160,7 +155,6 @@ namespace WhiteBinTools.RepackClasses
             }
 
             IOhelpers.LogMessage("\nFinished repacking file into " + repackVariables.NewWhiteBinFileName, logWriter);
-            Console.ReadLine();
         }
     }
 }

@@ -120,25 +120,31 @@ namespace WhiteBinTools.RepackClasses
             switch (repackVariables.WasCompressed)
             {
                 case true:
-                    repackVariables.TmpCmpDataFile = extractedDirVar + "\\zlib_data";
-                    if (!File.Exists(repackVariables.TmpCmpDataFile))
-                    {
-                        var zlibTmpDataStream = File.Create(repackVariables.TmpCmpDataFile);
-                        zlibTmpDataStream.Close();
-                    }
+                    var cmpData = fileToPack.ZlibCompress();                    
+                    whiteBinStream.Write(cmpData, 0, cmpData.Length);
 
-                    fileToPack.ZlibCompress(repackVariables.TmpCmpDataFile, Ionic.Zlib.CompressionLevel.Level9);
+                    var cmpFileSizeInDecimal = (uint)cmpData.Length;
+                    repackVariables.AsciiCmpSize = cmpFileSizeInDecimal.DecimalToAscii();
 
-                    using (var cmpData = new FileStream(repackVariables.TmpCmpDataFile, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
-                    {
-                        cmpData.Seek(0, SeekOrigin.Begin);
-                        cmpData.CopyTo(whiteBinStream);
+                    //repackVariables.TmpCmpDataFile = extractedDirVar + "\\zlib_data";
+                    //if (!File.Exists(repackVariables.TmpCmpDataFile))
+                    //{
+                    //    var zlibTmpDataStream = File.Create(repackVariables.TmpCmpDataFile);
+                    //    zlibTmpDataStream.Close();
+                    //}
 
-                        var cmpFileSizeInDecimal = (uint)new FileInfo(repackVariables.TmpCmpDataFile).Length;
-                        repackVariables.AsciiCmpSize = cmpFileSizeInDecimal.DecimalToAscii();
-                    }
+                    //fileToPack.ZlibCompress(repackVariables.TmpCmpDataFile, Ionic.Zlib.CompressionLevel.Level9);
 
-                    File.Delete(repackVariables.TmpCmpDataFile);
+                    //using (var cmpData = new FileStream(repackVariables.TmpCmpDataFile, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
+                    //{
+                    //    cmpData.Seek(0, SeekOrigin.Begin);
+                    //    cmpData.CopyTo(whiteBinStream);
+
+                    //    var cmpFileSizeInDecimal = (uint)new FileInfo(repackVariables.TmpCmpDataFile).Length;
+                    //    repackVariables.AsciiCmpSize = cmpFileSizeInDecimal.DecimalToAscii();
+                    //}
+
+                    //File.Delete(repackVariables.TmpCmpDataFile);
                     break;
 
                 case false:
