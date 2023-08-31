@@ -92,10 +92,10 @@ namespace WhiteBinTools.RepackClasses
             }
 
             var filePositionForChunk = filePositionInDecimal / 2048;
-            repackVariables.AsciiFilePos = filePositionForChunk.DecimalToAscii();
+            repackVariables.AsciiFilePos = filePositionForChunk.ToString("x");
 
             var fileSizeInDecimal = (uint)new FileInfo(fileToAppend).Length;
-            repackVariables.AsciiUnCmpSize = fileSizeInDecimal.DecimalToAscii();
+            repackVariables.AsciiUnCmpSize = fileSizeInDecimal.ToString("x");
 
             newWhiteBin.Seek(filePositionInDecimal, SeekOrigin.Begin);
             RepackFiles(repackVariables, newWhiteBin, fileToAppend, extractedDirVar);
@@ -105,10 +105,10 @@ namespace WhiteBinTools.RepackClasses
         public static void RepackTypeInject(RepackProcesses repackVariables, FileStream whiteBin, string fileToInject, string extractedDirVar)
         {
             var filePositionForChunk = repackVariables.OgFilePos / 2048;
-            repackVariables.AsciiFilePos = filePositionForChunk.DecimalToAscii();
+            repackVariables.AsciiFilePos = filePositionForChunk.ToString("x");
 
             var fileSizeInDecimal = (uint)new FileInfo(fileToInject).Length;
-            repackVariables.AsciiUnCmpSize = fileSizeInDecimal.DecimalToAscii();
+            repackVariables.AsciiUnCmpSize = fileSizeInDecimal.ToString("x");
 
             whiteBin.Seek(repackVariables.OgFilePos, SeekOrigin.Begin);
             RepackFiles(repackVariables, whiteBin, fileToInject, extractedDirVar);
@@ -124,27 +124,7 @@ namespace WhiteBinTools.RepackClasses
                     whiteBinStream.Write(cmpData, 0, cmpData.Length);
 
                     var cmpFileSizeInDecimal = (uint)cmpData.Length;
-                    repackVariables.AsciiCmpSize = cmpFileSizeInDecimal.DecimalToAscii();
-
-                    //repackVariables.TmpCmpDataFile = extractedDirVar + "\\zlib_data";
-                    //if (!File.Exists(repackVariables.TmpCmpDataFile))
-                    //{
-                    //    var zlibTmpDataStream = File.Create(repackVariables.TmpCmpDataFile);
-                    //    zlibTmpDataStream.Close();
-                    //}
-
-                    //fileToPack.ZlibCompress(repackVariables.TmpCmpDataFile, Ionic.Zlib.CompressionLevel.Level9);
-
-                    //using (var cmpData = new FileStream(repackVariables.TmpCmpDataFile, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
-                    //{
-                    //    cmpData.Seek(0, SeekOrigin.Begin);
-                    //    cmpData.CopyTo(whiteBinStream);
-
-                    //    var cmpFileSizeInDecimal = (uint)new FileInfo(repackVariables.TmpCmpDataFile).Length;
-                    //    repackVariables.AsciiCmpSize = cmpFileSizeInDecimal.DecimalToAscii();
-                    //}
-
-                    //File.Delete(repackVariables.TmpCmpDataFile);
+                    repackVariables.AsciiCmpSize = cmpFileSizeInDecimal.ToString("x");
                     break;
 
                 case false:

@@ -78,7 +78,8 @@ namespace WhiteBinTools.RepackClasses
                                     {
                                         if (!File.Exists(repackVariables.OgFullFilePath))
                                         {
-                                            File.Create(repackVariables.OgFullFilePath);
+                                            var createDummyFile = File.Create(repackVariables.OgFullFilePath);
+                                            createDummyFile.Close();
                                         }
 
                                         RepackProcesses.RepackTypeAppend(repackVariables, newWhiteBin, repackVariables.OgFullFilePath, extractedDirVar);
