@@ -73,7 +73,6 @@
     <Compile Include="WhiteBinTools\FilelistClasses\FilelistProcesses2.cs" />
     <Compile Include="WhiteBinTools\FilelistClasses\FilelistProcesses3.cs" />
     <Compile Include="WhiteBinTools\RepackClasses\RepackProcesses3.cs" />
-    <Compile Include="WhiteBinTools\RepackClasses\RepackProcessesOld.cs" />
     <Compile Include="WhiteBinTools\SupportClasses\BinaryHelpers.cs" />
     <Compile Include="WhiteBinTools\SupportClasses\CmnEnums.cs" />
     <Compile Include="WhiteBinTools\SupportClasses\IOhelpers.cs" />

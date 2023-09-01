@@ -7,9 +7,9 @@ namespace WhiteBinTools.SupportClasses
     {
         public static void ZlibDecompress(this Stream cmpStreamName, Stream outStreamName)
         {
-            using (ZlibStream Decompressor = new ZlibStream(cmpStreamName, CompressionMode.Decompress))
+            using (ZlibStream decompressor = new ZlibStream(cmpStreamName, CompressionMode.Decompress))
             {
-                Decompressor.CopyTo(outStreamName);
+                decompressor.CopyTo(outStreamName);
             }
         }
 
