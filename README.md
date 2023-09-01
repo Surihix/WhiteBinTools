@@ -18,16 +18,12 @@ This app allows you to unpack and repack the main white_img archive files from t
 
 ## Important notes
 - Filelist file and the white bin file or the unpacked folder, has to be specified after the game code and the tool action argument switches.
+- The game code switch determines how this app handles the filelist and white bin file during unpacking and repacking. this is very important during repacking and if an incorrect game code switch is specified, then the filelist and white bin file will not be repacked correctly.
 - The ffxiiicrypt tool that is bundled with this app is required for unpacking and repacking the archive files from FF13-2 and FF13-LR.
 - If you want to unpack or repack a single file, then provide the virtual file path of that file after the white bin file or the unpacked folder argument. refer to the app's help page that can be accessed with the `-?` or `-h` switches. 
-- The single file and the multiple files repacking options will either inject the file at the original position in the archive or append the file at the end of the archive. the file will be injected into the archive if the compressed data size (i.e if its stored compressed) or the file size (i.e if not stored compressed), is lesser than or equal to the size of the file that is being replaced. if its greater than the original size, then its appended at the end of the archive.
+- The single file and the multiple files repacking options will either inject the file at the original position in the archive or append the file at the end of the archive. the file will be injected at the original position if the compressed data size (i.e if its stored compressed) or the file size (i.e if not stored compressed), is lesser than or equal to the size of the file that is being replaced. if its greater than the original size, then the file is appended at the end of the archive.
 
 ## For developers
-The following additional packages were used for Big Endian reading and writing byte values:
-<br>**System.Memory** - https://www.nuget.org/packages/System.Memory/
-<br>**System.Buffers** - https://www.nuget.org/packages/System.Buffers/
-<br>
-<br>
 The following additional package is used for Zlib compression and decompression:
 <br>**DotNetZip** - https://www.nuget.org/packages/DotNetZip
 <br>
