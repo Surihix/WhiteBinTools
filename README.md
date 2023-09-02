@@ -1,5 +1,5 @@
 # WhiteBinTools
-This app allows you to unpack and repack the main white_img archive files from the FF13 game trilogy as well as the KEL.DAT archive from Dirge of Cerberus. the app should be launched from command prompt with a few argument switches to perform a function. the list of valid argument switches are given below:
+This program allows you to unpack and repack the main white_img archive files from the FF13 game trilogy as well as the KEL.DAT archive from Dirge of Cerberus. the program should be launched from command prompt with a few argument switches to perform a function. the list of valid argument switches are given below:
 
 **Game Codes:**
 <br>``-ff131`` For FF13-1 and Dirge Of Cerberus files
