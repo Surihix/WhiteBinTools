@@ -69,7 +69,7 @@ namespace WhiteBinTools.RepackClasses
         }
 
 
-        public static void RepackTypeAppend(RepackProcesses repackVariables, FileStream newWhiteBin, string fileToAppend, string extractedDirVar)
+        public static void RepackTypeAppend(RepackProcesses repackVariables, FileStream newWhiteBin, string fileToAppend)
         {
             var filePositionInDecimal = (uint)newWhiteBin.Length;
 
@@ -98,11 +98,11 @@ namespace WhiteBinTools.RepackClasses
             repackVariables.AsciiUnCmpSize = fileSizeInDecimal.ToString("x");
 
             newWhiteBin.Seek(filePositionInDecimal, SeekOrigin.Begin);
-            RepackFiles(repackVariables, newWhiteBin, fileToAppend, extractedDirVar);
+            RepackFiles(repackVariables, newWhiteBin, fileToAppend);
         }
 
 
-        public static void RepackTypeInject(RepackProcesses repackVariables, FileStream whiteBin, string fileToInject, string extractedDirVar)
+        public static void RepackTypeInject(RepackProcesses repackVariables, FileStream whiteBin, string fileToInject)
         {
             var filePositionForChunk = repackVariables.OgFilePos / 2048;
             repackVariables.AsciiFilePos = filePositionForChunk.ToString("x");
@@ -111,11 +111,11 @@ namespace WhiteBinTools.RepackClasses
             repackVariables.AsciiUnCmpSize = fileSizeInDecimal.ToString("x");
 
             whiteBin.Seek(repackVariables.OgFilePos, SeekOrigin.Begin);
-            RepackFiles(repackVariables, whiteBin, fileToInject, extractedDirVar);
+            RepackFiles(repackVariables, whiteBin, fileToInject);
         }
 
 
-        static void RepackFiles(RepackProcesses repackVariables, FileStream whiteBinStream, string fileToPack, string extractedDirVar)
+        static void RepackFiles(RepackProcesses repackVariables, FileStream whiteBinStream, string fileToPack)
         {
             switch (repackVariables.WasCompressed)
             {
@@ -153,22 +153,22 @@ namespace WhiteBinTools.RepackClasses
         }
 
 
-        public static void AppendProcess(RepackProcesses repackVariables, string extractedDirVar, ref string packedAs)
+        public static void AppendProcess(RepackProcesses repackVariables, ref string packedAs)
         {
             using (var appendBin = new FileStream(repackVariables.NewWhiteBinFile, FileMode.Append, FileAccess.Write))
             {
                 packedAs = "(Appended)";
-                RepackTypeAppend(repackVariables, appendBin, repackVariables.OgFullFilePath, extractedDirVar);
+                RepackTypeAppend(repackVariables, appendBin, repackVariables.OgFullFilePath);
             }
         }
 
 
-        public static void InjectProcess(RepackProcesses repackVariables, string extractedDirVar, ref string packedAs)
+        public static void InjectProcess(RepackProcesses repackVariables, ref string packedAs)
         {
             using (var injectBin = new FileStream(repackVariables.NewWhiteBinFile, FileMode.Open, FileAccess.ReadWrite))
             {
                 packedAs = "(Injected)";
-                RepackTypeInject(repackVariables, injectBin, repackVariables.OgFullFilePath, extractedDirVar);
+                RepackTypeInject(repackVariables, injectBin, repackVariables.OgFullFilePath);
             }
         }
     }

@@ -82,7 +82,7 @@ namespace WhiteBinTools.RepackClasses
                                             createDummyFile.Close();
                                         }
 
-                                        RepackProcesses.RepackTypeAppend(repackVariables, newWhiteBin, repackVariables.OgFullFilePath, extractedDirVar);
+                                        RepackProcesses.RepackTypeAppend(repackVariables, newWhiteBin, repackVariables.OgFullFilePath);
                                     }
 
                                     updChunkStringsWriter.Write(repackVariables.AsciiFilePos + ":");

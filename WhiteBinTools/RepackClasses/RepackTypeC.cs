@@ -93,11 +93,11 @@ namespace WhiteBinTools.RepackClasses
 
                                                 if (zlibCmpFileSize < repackVariables.OgCmpSize || zlibCmpFileSize == repackVariables.OgCmpSize)
                                                 {
-                                                    RepackProcesses.InjectProcess(repackVariables, whiteExtractedDirVar, ref packedAs);
+                                                    RepackProcesses.InjectProcess(repackVariables, ref packedAs);
                                                 }
                                                 else
                                                 {
-                                                    RepackProcesses.AppendProcess(repackVariables, whiteExtractedDirVar, ref packedAs);
+                                                    RepackProcesses.AppendProcess(repackVariables, ref packedAs);
                                                 }
                                                 break;
 
@@ -108,11 +108,11 @@ namespace WhiteBinTools.RepackClasses
 
                                                 if (dummyFileSize < repackVariables.OgUnCmpSize || dummyFileSize == repackVariables.OgUnCmpSize)
                                                 {
-                                                    RepackProcesses.InjectProcess(repackVariables, whiteExtractedDirVar, ref packedAs);
+                                                    RepackProcesses.InjectProcess(repackVariables, ref packedAs);
                                                 }
                                                 else
                                                 {
-                                                    RepackProcesses.AppendProcess(repackVariables, whiteExtractedDirVar, ref packedAs);
+                                                    RepackProcesses.AppendProcess(repackVariables, ref packedAs);
                                                 }
                                                 break;
                                         }

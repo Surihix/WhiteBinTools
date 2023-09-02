@@ -96,11 +96,11 @@ namespace WhiteBinTools.RepackClasses
 
                                                 if (zlibCmpFileSize < repackVariables.OgCmpSize || zlibCmpFileSize == repackVariables.OgCmpSize)
                                                 {
-                                                    RepackProcesses.InjectProcess(repackVariables, extractedDirVar, ref packedAs);
+                                                    RepackProcesses.InjectProcess(repackVariables, ref packedAs);
                                                 }
                                                 else
                                                 {
-                                                    RepackProcesses.AppendProcess(repackVariables, extractedDirVar, ref packedAs);
+                                                    RepackProcesses.AppendProcess(repackVariables, ref packedAs);
                                                 }
                                                 break;
 
@@ -111,11 +111,11 @@ namespace WhiteBinTools.RepackClasses
 
                                                 if (dummyFileSize < repackVariables.OgUnCmpSize || dummyFileSize == repackVariables.OgUnCmpSize)
                                                 {
-                                                    RepackProcesses.InjectProcess(repackVariables, extractedDirVar, ref packedAs);
+                                                    RepackProcesses.InjectProcess(repackVariables, ref packedAs);
                                                 }
                                                 else
                                                 {
-                                                    RepackProcesses.AppendProcess(repackVariables, extractedDirVar, ref packedAs);
+                                                    RepackProcesses.AppendProcess(repackVariables, ref packedAs);
                                                 }
                                                 break;
                                         }

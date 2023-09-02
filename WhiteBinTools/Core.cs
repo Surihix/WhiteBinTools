@@ -152,7 +152,7 @@ namespace WhiteBinTools
 
                             case ActionSwitches.rfl:
                                 CheckArguments(totalArgCount, 3);
-                                RepackTypeD.RepackFilelist(gameCode, filelistFile, whiteBinOrDir, logWriter);
+                                RepackTypeD.RepackFilelist(filelistFile, whiteBinOrDir, logWriter);
                                 break;
 
                             default:

@@ -80,7 +80,7 @@ namespace WhiteBinTools.FilelistClasses
         }
 
 
-        static bool CheckIfEncrypted(string filelistFileVar)
+        public static bool CheckIfEncrypted(string filelistFileVar)
         {
             var isEncrypted = false;
             using (var encStream = new FileStream(filelistFileVar, FileMode.Open, FileAccess.Read))
