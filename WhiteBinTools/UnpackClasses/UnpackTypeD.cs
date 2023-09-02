@@ -8,6 +8,8 @@ namespace WhiteBinTools
     {
         public static void UnpackFilelist(CmnEnums.GameCodes gameCodeVar, string filelistFileVar, StreamWriter logWriter)
         {
+            filelistFileVar.CheckFileExists(logWriter, "Error: Filelist file specified in the argument is missing");
+
             var filelistVariables = new FilelistProcesses();
 
             FilelistProcesses.PrepareFilelistVars(filelistVariables, filelistFileVar);
