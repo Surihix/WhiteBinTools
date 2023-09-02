@@ -19,7 +19,7 @@ namespace WhiteBinTools
             Console.WriteLine("-uaf = Unpack a single file from the bin file");
             Console.WriteLine("-raf = Repack a single file into the bin file");
             Console.WriteLine("-rmf = Repack multiple files into the bin file");
-            Console.WriteLine("-rfl = Unpack filelist file");
+            Console.WriteLine("-rfl = Repack filelist file");
             Console.WriteLine("-? or -h = Display this help page");
 
             Console.WriteLine("");
