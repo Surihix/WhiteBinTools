@@ -11,8 +11,10 @@ This program allows you to unpack and repack the main white_img archive files fr
 <br>``-r`` Repack a bin file
 <br>``-ufp`` Unpack file paths from filelist
 <br>``-uaf`` Unpack a single file from the bin file
+<br>``-ufl`` Unpack filelist file
 <br>``-raf`` Repack a single file into the bin file
 <br>``-rmf`` Repack multiple files into the bin file
+<br>``-rfl`` Repack filelist file
 <br>``-?`` or ``-h`` Display the help page
 <br>
 
