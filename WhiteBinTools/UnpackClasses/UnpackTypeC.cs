@@ -6,7 +6,7 @@ namespace WhiteBinTools.UnpackClasses
 {
     internal class UnpackTypeC
     {
-        public static void UnpackFilelist(CmnEnums.GameCodes gameCodeVar, string filelistFileVar, StreamWriter logWriter)
+        public static void UnpackFilelistPaths(CmnEnums.GameCodes gameCodeVar, string filelistFileVar, StreamWriter logWriter)
         {
             filelistFileVar.CheckFileExists(logWriter, "Error: Filelist file specified in the argument is missing");
 

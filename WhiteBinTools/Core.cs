@@ -132,7 +132,12 @@ namespace WhiteBinTools
 
                             case ActionSwitches.ufp:
                                 CheckArguments(totalArgCount, 2);
-                                UnpackTypeC.UnpackFilelist(gameCode, filelistFile, logWriter);
+                                UnpackTypeC.UnpackFilelistPaths(gameCode, filelistFile, logWriter);
+                                break;
+
+                            case ActionSwitches.ufl:
+                                CheckArguments(totalArgCount, 2);
+                                UnpackTypeD.UnpackFilelist(gameCode, filelistFile, logWriter);
                                 break;
 
                             case ActionSwitches.raf:
@@ -143,6 +148,11 @@ namespace WhiteBinTools
                             case ActionSwitches.rmf:
                                 CheckArguments(totalArgCount, 5);
                                 RepackTypeC.RepackMultiple(gameCode, filelistFile, whiteBinOrDir, whiteFilePathOrDirVar, logWriter);
+                                break;
+
+                            case ActionSwitches.rfl:
+                                CheckArguments(totalArgCount, 3);
+                                RepackTypeD.RepackFilelist(gameCode, filelistFile, whiteBinOrDir, logWriter);
                                 break;
 
                             default:
@@ -184,8 +194,10 @@ namespace WhiteBinTools
             r,
             ufp,
             uaf,
+            ufl,
             raf,
             rmf,
+            rfl,
             none
         }
 

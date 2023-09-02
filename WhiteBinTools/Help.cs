@@ -14,6 +14,7 @@ namespace WhiteBinTools
             Console.WriteLine("-u = Unpack a bin file");
             Console.WriteLine("-r = Repack a bin file");
             Console.WriteLine("-ufp = Unpack file paths from filelist");
+            Console.WriteLine("-ufl = Unpack filelist file");
             Console.WriteLine("-uaf = Unpack a single file from the bin file");
             Console.WriteLine("-raf = Repack a single file into the bin file");
             Console.WriteLine("-rmf = Repack multiple files into the bin file");
@@ -25,6 +26,7 @@ namespace WhiteBinTools
             Console.WriteLine("To repack: WhiteBinTools -ff131 -r " + @"""filelist.bin""" + @" ""unpacked_folder""");
             Console.WriteLine("");
             Console.WriteLine("To unpack file paths: WhiteBinTools -ff131 -ufp " + @"""filelist.bin""");
+            Console.WriteLine("To unpack file paths: WhiteBinTools -ff131 -ufl " + @"""filelist.bin""");
             Console.WriteLine("");
             Console.WriteLine("To unpack a sinlge file: WhiteBinTools -ff131 -uaf " + @"""filelist.bin""" + @" ""whitebin.bin"""
                 + @" ""chr\pc\c201\bin\c201.win32.trb""");
