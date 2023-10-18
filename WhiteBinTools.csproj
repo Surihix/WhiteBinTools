@@ -68,9 +68,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="WhiteBinTools\RepackClasses\RepackTypeTest.cs" />
-    <Compile Include="WhiteBinTools\UnpackClasses\UnpackTypeD.cs" />
     <Compile Include="WhiteBinTools\RepackClasses\RepackTypeD.cs" />
+    <Compile Include="WhiteBinTools\UnpackClasses\UnpackTypeD.cs" />
     <Compile Include="WhiteBinTools\Core.cs" />
     <Compile Include="WhiteBinTools\FilelistClasses\FilelistProcesses1.cs" />
     <Compile Include="WhiteBinTools\FilelistClasses\FilelistProcesses2.cs" />
