@@ -155,6 +155,11 @@ namespace WhiteBinTools
                                 RepackTypeD.RepackFilelist(gameCode, filelistFile, whiteBinOrDir, logWriter);
                                 break;
 
+                            case ActionSwitches.tfl:
+                                CheckArguments(totalArgCount, 2);
+                                UnpackTypeTest.UnpackFilelistTest(gameCode, filelistFile, logWriter);
+                                break;
+
                             default:
                                 Console.WriteLine("Error: Proper tool action is not specified");
                                 IOhelpers.ErrorExit("");
@@ -198,6 +203,7 @@ namespace WhiteBinTools
             raf,
             rmf,
             rfl,
+            tfl,
             none
         }
 
