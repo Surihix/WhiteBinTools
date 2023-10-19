@@ -32,7 +32,7 @@ namespace WhiteBinTools
 
                     if (filelistVariables.IsEncrypted)
                     {
-                        using (var encHeader = new FileStream(extractedFilelistDir + "\\EncryptionHeader_(DON'T EDIT)", FileMode.OpenOrCreate, FileAccess.Write))
+                        using (var encHeader = new FileStream(extractedFilelistDir + "\\EncryptionHeader_(DON'T DELETE)", FileMode.OpenOrCreate, FileAccess.Write))
                         {
                             filelistStream.ExtendedCopyTo(encHeader, 0, 32);
                         }

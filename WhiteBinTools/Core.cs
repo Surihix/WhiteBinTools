@@ -43,7 +43,7 @@ namespace WhiteBinTools
                 // Assign the arguments to the proper variables
                 var specifiedGameCode = args[0].Replace("-", "");
                 var specifiedActionSwitch = args[1].Replace("-", "");
-                var filelistFile = args[2];
+                var filelistFileOrDir = args[2];
 
                 // whiteBinOrDir value is assigned from
                 // the arg only when the length of
@@ -117,42 +117,42 @@ namespace WhiteBinTools
                         {
                             case ActionSwitches.u:
                                 CheckArguments(totalArgCount, 3);
-                                UnpackTypeA.UnpackFull(gameCode, filelistFile, whiteBinOrDir, logWriter);
+                                UnpackTypeA.UnpackFull(gameCode, filelistFileOrDir, whiteBinOrDir, logWriter);
                                 break;
 
                             case ActionSwitches.r:
                                 CheckArguments(totalArgCount, 3);
-                                RepackTypeA.RepackAll(gameCode, filelistFile, whiteBinOrDir, logWriter);
+                                RepackTypeA.RepackAll(gameCode, filelistFileOrDir, whiteBinOrDir, logWriter);
                                 break;
 
                             case ActionSwitches.uaf:
                                 CheckArguments(totalArgCount, 5);
-                                UnpackTypeB.UnpackSingle(gameCode, filelistFile, whiteBinOrDir, whiteFilePathOrDirVar, logWriter);
+                                UnpackTypeB.UnpackSingle(gameCode, filelistFileOrDir, whiteBinOrDir, whiteFilePathOrDirVar, logWriter);
                                 break;
 
                             case ActionSwitches.ufp:
                                 CheckArguments(totalArgCount, 2);
-                                UnpackTypeC.UnpackFilelistPaths(gameCode, filelistFile, logWriter);
+                                UnpackTypeC.UnpackFilelistPaths(gameCode, filelistFileOrDir, logWriter);
                                 break;
 
                             case ActionSwitches.ufl:
                                 CheckArguments(totalArgCount, 2);
-                                UnpackTypeD.UnpackFilelist(gameCode, filelistFile, logWriter);
+                                UnpackTypeD.UnpackFilelist(gameCode, filelistFileOrDir, logWriter);
                                 break;
 
                             case ActionSwitches.raf:
                                 CheckArguments(totalArgCount, 5);
-                                RepackTypeB.RepackSingle(gameCode, filelistFile, whiteBinOrDir, whiteFilePathOrDirVar, logWriter);
+                                RepackTypeB.RepackSingle(gameCode, filelistFileOrDir, whiteBinOrDir, whiteFilePathOrDirVar, logWriter);
                                 break;
 
                             case ActionSwitches.rmf:
                                 CheckArguments(totalArgCount, 5);
-                                RepackTypeC.RepackMultiple(gameCode, filelistFile, whiteBinOrDir, whiteFilePathOrDirVar, logWriter);
+                                RepackTypeC.RepackMultiple(gameCode, filelistFileOrDir, whiteBinOrDir, whiteFilePathOrDirVar, logWriter);
                                 break;
 
                             case ActionSwitches.rfl:
-                                CheckArguments(totalArgCount, 3);
-                                RepackTypeD.RepackFilelist(gameCode, filelistFile, whiteBinOrDir, logWriter);
+                                CheckArguments(totalArgCount, 2);
+                                RepackTypeD.RepackFilelist(gameCode, filelistFileOrDir, logWriter);
                                 break;
 
                             default:

@@ -8,42 +8,48 @@ namespace WhiteBinTools.RepackClasses
 {
     internal class RepackTypeD
     {
-        public static void RepackFilelist(CmnEnums.GameCodes gameCodeVar, string filelistFileVar, string extractedFilelistDir, StreamWriter logWriter)
+        public static void RepackFilelist(CmnEnums.GameCodes gameCodeVar, string extractedFilelistDir, StreamWriter logWriter)
         {
-            filelistFileVar.CheckFileExists(logWriter, "Error: Filelist file specified in the argument is missing");
             extractedFilelistDir.CheckDirExists(logWriter, "Error: Unpacked filelist directory specified in the argument is missing");
 
-            var filelistFileDir = Path.GetDirectoryName(filelistFileVar);
-            var filelistFileName = Path.GetFileName(filelistFileVar);
-
             var countsFile = extractedFilelistDir + "\\~Counts.txt";
-            var encHeaderFile = extractedFilelistDir + "\\EncryptionHeader_(DON'T EDIT)";
+            var encHeaderFile = extractedFilelistDir + "\\EncryptionHeader_(DON'T DELETE)";
             var outChunksDir = extractedFilelistDir + "\\_chunks";
 
             countsFile.CheckFileExists(logWriter, "Error: Unable to locate the '~Counts.txt' file");
 
-
             var filelistVariables = new FilelistProcesses();
-            filelistVariables.IsEncrypted = FilelistProcesses.CheckIfEncrypted(filelistFileVar);
+            if (File.Exists(encHeaderFile))
+            {
+                filelistVariables.IsEncrypted = true;
+            }
 
             uint encHeaderAdjustedOffset = 0;
             if (filelistVariables.IsEncrypted)
             {
                 encHeaderAdjustedOffset += 32;
-                encHeaderFile.CheckFileExists(logWriter, "Error: Unable to locate the 'EncryptionHeader_(DON'T EDIT)' file");
                 "ffxiiicrypt.exe".CheckFileExists(logWriter, "Error: Unable to locate ffxiiicrypt tool in the main app folder to encrypt the filelist file");
             }
 
-            var backupFilelistFile = Path.Combine(filelistFileDir, filelistFileName + ".bak");
-            backupFilelistFile.IfFileExistsDel();
-            File.Copy(filelistFileVar, backupFilelistFile);
-            File.Delete(filelistFileVar);
+
+            var newFilelistFile = Path.Combine(Path.GetDirectoryName(extractedFilelistDir), Path.GetFileName(extractedFilelistDir).Substring(1));
+
+            if (File.Exists(newFilelistFile))
+            {
+                (newFilelistFile + ".bak").IfFileExistsDel();
+
+                File.Copy(newFilelistFile, newFilelistFile + ".bak");
+                File.Delete(newFilelistFile);
+            }
 
 
             using (var countsReader = new StreamReader(countsFile))
             {
                 filelistVariables.TotalFiles = uint.Parse(countsReader.ReadLine());
                 filelistVariables.TotalChunks = uint.Parse(countsReader.ReadLine());
+
+                IOhelpers.LogMessage("TotalChunks: " + filelistVariables.TotalChunks, logWriter);
+                IOhelpers.LogMessage("No of files: " + filelistVariables.TotalFiles + "\n", logWriter);
             }
 
 
@@ -62,7 +68,7 @@ namespace WhiteBinTools.RepackClasses
             }
 
 
-            using (var emptyFilelistStream = new FileStream(filelistFileVar, FileMode.Append, FileAccess.Write))
+            using (var emptyFilelistStream = new FileStream(newFilelistFile, FileMode.Append, FileAccess.Write))
             {
                 if (filelistVariables.IsEncrypted)
                 {
@@ -81,7 +87,7 @@ namespace WhiteBinTools.RepackClasses
 
 
             filelistVariables.ChunkFNameCount = 0;
-            using (var entriesStream = new FileStream(filelistFileVar, FileMode.Open, FileAccess.Write))
+            using (var entriesStream = new FileStream(newFilelistFile, FileMode.Open, FileAccess.Write))
             {
                 using (var entriesWriter = new BinaryWriter(entriesStream))
                 {
@@ -172,9 +178,9 @@ namespace WhiteBinTools.RepackClasses
             var chunksInfoWriterPos = encHeaderAdjustedOffset + 12 + (filelistVariables.TotalFiles * 8);
             var chunksDataStartPos = encHeaderAdjustedOffset + 12 + (filelistVariables.TotalFiles * 8) + (filelistVariables.TotalChunks * 12);
 
-            using (var chunkDataStream = new FileStream(filelistFileVar, FileMode.Append, FileAccess.Write, FileShare.Write))
+            using (var chunkDataStream = new FileStream(newFilelistFile, FileMode.Append, FileAccess.Write, FileShare.Write))
             {
-                using (var chunkInfoStream = new FileStream(filelistFileVar, FileMode.Open, FileAccess.Write, FileShare.Write))
+                using (var chunkInfoStream = new FileStream(newFilelistFile, FileMode.Open, FileAccess.Write, FileShare.Write))
                 {
                     using (var chunkInfoWriter = new BinaryWriter(chunkInfoStream))
                     {
@@ -209,14 +215,14 @@ namespace WhiteBinTools.RepackClasses
             outChunksDir.IfDirExistsDel();
 
             var repackVariables = new RepackProcesses();
-            repackVariables.NewFilelistFile = filelistFileVar;
+            repackVariables.NewFilelistFile = newFilelistFile;
 
             if (filelistVariables.IsEncrypted.Equals(true))
             {
                 FilelistProcesses.EncryptProcess(repackVariables, logWriter);
             }
 
-            IOhelpers.LogMessage("\n\nFinished repacking " + Path.GetFileName(filelistFileVar), logWriter);
+            IOhelpers.LogMessage("\n\nFinished repacking filelist data into " + Path.GetFileName(newFilelistFile), logWriter);
         }
     }
 }
