@@ -40,8 +40,6 @@ namespace WhiteBinTools.RepackClasses
             File.Delete(filelistFileVar);
 
 
-            // Get file count and chunk
-            // count
             using (var countsReader = new StreamReader(countsFile))
             {
                 filelistVariables.TotalFiles = uint.Parse(countsReader.ReadLine());
@@ -49,8 +47,6 @@ namespace WhiteBinTools.RepackClasses
             }
 
 
-            // Get a list of chunks that begin
-            // with 32768 position value
             var int16RangeValues = new List<uint>();
             if (gameCodeVar.Equals(CmnEnums.GameCodes.ff132) && filelistVariables.TotalChunks > 1)
             {
@@ -66,10 +62,8 @@ namespace WhiteBinTools.RepackClasses
             }
 
 
-            // Prepare an empty filelist
             using (var emptyFilelistStream = new FileStream(filelistFileVar, FileMode.Append, FileAccess.Write))
             {
-                // Copy in encrypted header
                 if (filelistVariables.IsEncrypted)
                 {
                     using (var encHeader = new FileStream(encHeaderFile, FileMode.Open, FileAccess.Read))
@@ -78,8 +72,6 @@ namespace WhiteBinTools.RepackClasses
                     }
                 }
 
-                // Pad null bytes for entry and
-                // chunk info sections
                 var amountToPad = 12 + (filelistVariables.TotalFiles * 8) + (filelistVariables.TotalChunks * 12);
                 for (int b = 0; b < amountToPad; b++)
                 {
@@ -88,7 +80,6 @@ namespace WhiteBinTools.RepackClasses
             }
 
 
-            // Update the entries for each file
             filelistVariables.ChunkFNameCount = 0;
             using (var entriesStream = new FileStream(filelistFileVar, FileMode.Open, FileAccess.Write))
             {
@@ -176,7 +167,6 @@ namespace WhiteBinTools.RepackClasses
             }
 
 
-            // Update the chunk info offsets
             filelistVariables.ChunkFNameCount = 0;
             uint chunkStart = 0;
             var chunksInfoWriterPos = encHeaderAdjustedOffset + 12 + (filelistVariables.TotalFiles * 8);
