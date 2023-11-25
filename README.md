@@ -30,7 +30,8 @@ The following additional package is used for Zlib compression and decompression:
 <br>**DotNetZip** - https://www.nuget.org/packages/DotNetZip
 <br>
 <br>
-Refer to this [page](https://github.com/LR-Research-Team/Datalog/wiki/White-Image-BIN-files) for information about the file structures of the filelist and the archive.
+- Refer to this [page](https://github.com/LR-Research-Team/Datalog/wiki/White-Image-BIN-files) for information about the file structures of the filelist and the archive.
+- The functions of this tool are ported to this [reference project](https://github.com/Surihix/WhiteBinTools_dll) which you can compile as a dll file and use in your C# projects.
 
 ## Credits
 **ffxiiicrypt** - Echelo (from Xentax)
