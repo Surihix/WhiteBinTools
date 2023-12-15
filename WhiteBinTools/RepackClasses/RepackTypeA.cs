@@ -45,37 +45,39 @@ namespace WhiteBinTools.RepackClasses
             }
 
 
-            filelistVariables.ChunkFNameCount = 0;
-            repackVariables.LastChunkFileNumber = 0;
-            for (int ch = 0; ch < filelistVariables.TotalChunks; ch++)
+            using (var newWhiteBin = new FileStream(repackVariables.NewWhiteBinFile, FileMode.Append, FileAccess.Write))
             {
-                var filesInChunkCount = FilelistProcesses.GetFilesInChunkCount(filelistVariables.ChunkFile + filelistVariables.ChunkFNameCount);
 
-                using (var currentChunk = new FileStream(filelistVariables.ChunkFile + filelistVariables.ChunkFNameCount, FileMode.Open, FileAccess.Read))
+                filelistVariables.ChunkFNameCount = 0;
+                repackVariables.LastChunkFileNumber = 0;
+
+                for (int ch = 0; ch < filelistVariables.TotalChunks; ch++)
                 {
-                    using (var chunkStringReader = new BinaryReader(currentChunk))
+                    var filesInChunkCount = FilelistProcesses.GetFilesInChunkCount(filelistVariables.ChunkFile + filelistVariables.ChunkFNameCount);
+
+                    using (var currentChunk = new FileStream(filelistVariables.ChunkFile + filelistVariables.ChunkFNameCount, FileMode.Open, FileAccess.Read))
                     {
-
-                        using (var updChunkStrings = new FileStream(repackVariables.NewChunkFile + filelistVariables.ChunkFNameCount, FileMode.Append, FileAccess.Write))
+                        using (var chunkStringReader = new BinaryReader(currentChunk))
                         {
-                            using (var updChunkStringsWriter = new StreamWriter(updChunkStrings))
+
+                            using (var updChunkStrings = new FileStream(repackVariables.NewChunkFile + filelistVariables.ChunkFNameCount, FileMode.Append, FileAccess.Write))
                             {
-
-                                var chunkStringReaderPos = (uint)0;
-                                for (int f = 0; f < filesInChunkCount; f++)
+                                using (var updChunkStringsWriter = new StreamWriter(updChunkStrings))
                                 {
-                                    var convertedString = chunkStringReader.BinaryToString(chunkStringReaderPos);
-                                    if (convertedString.Equals("end"))
-                                    {
-                                        updChunkStringsWriter.Write("end\0");
-                                        repackVariables.LastChunkFileNumber = filelistVariables.ChunkFNameCount;
-                                        break;
-                                    }
 
-                                    RepackProcesses.GetPackedState(convertedString, repackVariables, extractedDirVar);
-
-                                    using (var newWhiteBin = new FileStream(repackVariables.NewWhiteBinFile, FileMode.Append, FileAccess.Write))
+                                    var chunkStringReaderPos = (uint)0;
+                                    for (int f = 0; f < filesInChunkCount; f++)
                                     {
+                                        var convertedString = chunkStringReader.BinaryToString(chunkStringReaderPos);
+                                        if (convertedString.Equals("end"))
+                                        {
+                                            updChunkStringsWriter.Write("end\0");
+                                            repackVariables.LastChunkFileNumber = filelistVariables.ChunkFNameCount;
+                                            break;
+                                        }
+
+                                        RepackProcesses.GetPackedState(convertedString, repackVariables, extractedDirVar);
+
                                         if (!File.Exists(repackVariables.OgFullFilePath))
                                         {
                                             var createDummyFile = File.Create(repackVariables.OgFullFilePath);
@@ -83,23 +85,23 @@ namespace WhiteBinTools.RepackClasses
                                         }
 
                                         RepackProcesses.RepackTypeAppend(repackVariables, newWhiteBin, repackVariables.OgFullFilePath);
+
+                                        updChunkStringsWriter.Write(repackVariables.AsciiFilePos + ":");
+                                        updChunkStringsWriter.Write(repackVariables.AsciiUnCmpSize + ":");
+                                        updChunkStringsWriter.Write(repackVariables.AsciiCmpSize + ":");
+                                        updChunkStringsWriter.Write(repackVariables.RepackPathInChunk + "\0");
+
+                                        IOhelpers.LogMessage(repackVariables.RepackState + " " + repackVariables.NewWhiteBinFileName + "\\" + repackVariables.RepackLogMsg, logWriter);
+
+                                        chunkStringReaderPos = (uint)chunkStringReader.BaseStream.Position;
                                     }
-
-                                    updChunkStringsWriter.Write(repackVariables.AsciiFilePos + ":");
-                                    updChunkStringsWriter.Write(repackVariables.AsciiUnCmpSize + ":");
-                                    updChunkStringsWriter.Write(repackVariables.AsciiCmpSize + ":");
-                                    updChunkStringsWriter.Write(repackVariables.RepackPathInChunk + "\0");
-
-                                    IOhelpers.LogMessage(repackVariables.RepackState + " " + repackVariables.NewWhiteBinFileName + "\\" + repackVariables.RepackLogMsg, logWriter);
-
-                                    chunkStringReaderPos = (uint)chunkStringReader.BaseStream.Position;
                                 }
                             }
                         }
                     }
-                }
 
-                filelistVariables.ChunkFNameCount++;
+                    filelistVariables.ChunkFNameCount++;
+                }
             }
 
             filelistVariables.DefaultChunksExtDir.IfDirExistsDel();

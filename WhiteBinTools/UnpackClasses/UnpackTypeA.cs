@@ -48,54 +48,58 @@ namespace WhiteBinTools.UnpackClasses
             }
 
 
-            // Extracting files section 
-            filelistVariables.ChunkFNameCount = 0;
-            unpackVariables.CountDuplicates = 0;
-            for (int ch = 0; ch < filelistVariables.TotalChunks; ch++)
+            using (var whiteBin = new FileStream(whiteBinFileVar, FileMode.Open, FileAccess.Read))
             {
-                var filesInChunkCount = FilelistProcesses.GetFilesInChunkCount(filelistVariables.ChunkFile + filelistVariables.ChunkFNameCount);
+                // Extracting files section 
+                filelistVariables.ChunkFNameCount = 0;
+                unpackVariables.CountDuplicates = 0;
 
-                // Open a chunk file for reading
-                using (var currentChunk = new FileStream(filelistVariables.ChunkFile + filelistVariables.ChunkFNameCount, FileMode.Open, FileAccess.Read))
+                for (int ch = 0; ch < filelistVariables.TotalChunks; ch++)
                 {
-                    using (var chunkStringReader = new BinaryReader(currentChunk))
+                    var filesInChunkCount = FilelistProcesses.GetFilesInChunkCount(filelistVariables.ChunkFile + filelistVariables.ChunkFNameCount);
+
+                    // Open a chunk file for reading
+                    using (var currentChunk = new FileStream(filelistVariables.ChunkFile + filelistVariables.ChunkFNameCount, FileMode.Open, FileAccess.Read))
                     {
-                        var chunkStringReaderPos = (uint)0;
-                        for (int f = 0; f < filesInChunkCount; f++)
+                        using (var chunkStringReader = new BinaryReader(currentChunk))
                         {
-                            var convertedString = chunkStringReader.BinaryToString(chunkStringReaderPos);
 
-                            if (convertedString.Equals("end") || convertedString.Equals(" ") || convertedString.Equals(null))
+                            var chunkStringReaderPos = (uint)0;
+                            for (int f = 0; f < filesInChunkCount; f++)
                             {
-                                break;
-                            }
+                                var convertedString = chunkStringReader.BinaryToString(chunkStringReaderPos);
 
-                            UnpackProcess.PrepareExtraction(convertedString, filelistVariables, unpackVariables.ExtractDir);
-
-                            // Extract all files
-                            using (var whiteBin = new FileStream(whiteBinFileVar, FileMode.Open, FileAccess.Read))
-                            {
-                                if (!Directory.Exists(unpackVariables.ExtractDir + "\\" + filelistVariables.DirectoryPath))
+                                if (convertedString.Equals("end") || convertedString.Equals(" ") || convertedString.Equals(null))
                                 {
-                                    Directory.CreateDirectory(unpackVariables.ExtractDir + "\\" + filelistVariables.DirectoryPath);
-                                }
-                                if (File.Exists(filelistVariables.FullFilePath))
-                                {
-                                    File.Delete(filelistVariables.FullFilePath);
-                                    unpackVariables.CountDuplicates++;
+                                    break;
                                 }
 
-                                UnpackProcess.UnpackFile(filelistVariables, whiteBin, unpackVariables);
+                                UnpackProcess.PrepareExtraction(convertedString, filelistVariables, unpackVariables.ExtractDir);
+
+                                // Extract all files
+                                {
+                                    if (!Directory.Exists(unpackVariables.ExtractDir + "\\" + filelistVariables.DirectoryPath))
+                                    {
+                                        Directory.CreateDirectory(unpackVariables.ExtractDir + "\\" + filelistVariables.DirectoryPath);
+                                    }
+                                    if (File.Exists(filelistVariables.FullFilePath))
+                                    {
+                                        File.Delete(filelistVariables.FullFilePath);
+                                        unpackVariables.CountDuplicates++;
+                                    }
+
+                                    UnpackProcess.UnpackFile(filelistVariables, whiteBin, unpackVariables);
+                                }
+
+                                IOhelpers.LogMessage(unpackVariables.UnpackedState + " _" + unpackVariables.ExtractDirName + "\\" + filelistVariables.MainPath, logWriter);
+
+                                chunkStringReaderPos = (uint)chunkStringReader.BaseStream.Position;
                             }
-
-                            IOhelpers.LogMessage(unpackVariables.UnpackedState + " _" + unpackVariables.ExtractDirName + "\\" + filelistVariables.MainPath, logWriter);
-
-                            chunkStringReaderPos = (uint)chunkStringReader.BaseStream.Position;
                         }
                     }
-                }
 
-                filelistVariables.ChunkFNameCount++;
+                    filelistVariables.ChunkFNameCount++;
+                }
             }
 
             Directory.Delete(filelistVariables.DefaultChunksExtDir, true);

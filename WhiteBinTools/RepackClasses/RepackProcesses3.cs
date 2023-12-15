@@ -22,7 +22,7 @@ namespace WhiteBinTools.RepackClasses
             {
                 using (var newFilelistBase = new FileStream(repackVariables.NewFilelistFile, FileMode.Append, FileAccess.Write))
                 {
-                    oldFilelistBase.ExtendedCopyTo(newFilelistBase, 0, filelistVariables.ChunkDataSectionOffset);
+                    oldFilelistBase.ExCopyTo(newFilelistBase, 0, filelistVariables.ChunkDataSectionOffset);
                 }
             }
 
@@ -52,9 +52,9 @@ namespace WhiteBinTools.RepackClasses
                             newFilelistChunks.Write(chunkCmpData, 0, chunkCmpData.Length);
                             chunkCmpSize = (uint)chunkCmpData.Length;
 
-                            newChunksInfoWriter.AdjustBytesUInt32(chunkInfoWriterPos, chunkUncmpSize, CmnEnums.Endianness.LittleEndian);
-                            newChunksInfoWriter.AdjustBytesUInt32(chunkInfoWriterPos + 4, chunkCmpSize, CmnEnums.Endianness.LittleEndian);
-                            newChunksInfoWriter.AdjustBytesUInt32(chunkInfoWriterPos + 8, chunkStartVal, CmnEnums.Endianness.LittleEndian);
+                            newChunksInfoWriter.ExWriteBytesUInt32(chunkInfoWriterPos, chunkUncmpSize, CmnEnums.Endianness.LittleEndian);
+                            newChunksInfoWriter.ExWriteBytesUInt32(chunkInfoWriterPos + 4, chunkCmpSize, CmnEnums.Endianness.LittleEndian);
+                            newChunksInfoWriter.ExWriteBytesUInt32(chunkInfoWriterPos + 8, chunkStartVal, CmnEnums.Endianness.LittleEndian);
 
                             var newChunkStartVal = chunkStartVal + chunkCmpSize;
                             chunkStartVal = newChunkStartVal;
@@ -126,7 +126,7 @@ namespace WhiteBinTools.RepackClasses
                                                 }
                                             }
 
-                                            newFileInfoWriter.AdjustBytesUInt16(fileInfoWriterPos, filePosInChunkToWrite);
+                                            newFileInfoWriter.ExWriteBytesUInt16(fileInfoWriterPos, filePosInChunkToWrite);
 
                                             var readString = newChunkReader.BinaryToString(filePosInChunk);
 

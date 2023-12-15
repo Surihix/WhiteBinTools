@@ -34,7 +34,7 @@ namespace WhiteBinTools
                     {
                         using (var encHeader = new FileStream(extractedFilelistDir + "\\EncryptionHeader_(DON'T DELETE)", FileMode.OpenOrCreate, FileAccess.Write))
                         {
-                            filelistStream.ExtendedCopyTo(encHeader, 0, 32);
+                            filelistStream.ExCopyTo(encHeader, 0, 32);
                         }
                     }
 
@@ -70,7 +70,7 @@ namespace WhiteBinTools
                                 {
                                     using (var dcmpChunkReader = new BinaryReader(dcmpChunkStream))
                                     {
-                                        filelistStream.ExtendedCopyTo(cmpChunkStream, chunkStart, compressedSize);
+                                        filelistStream.ExCopyTo(cmpChunkStream, chunkStart, compressedSize);
 
                                         cmpChunkStream.Seek(0, SeekOrigin.Begin);
                                         cmpChunkStream.ZlibDecompress(dcmpChunkStream);

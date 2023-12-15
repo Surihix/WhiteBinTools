@@ -172,8 +172,8 @@ namespace WhiteBinTools.FilelistClasses
                 {
                     filelistToEncrypt.Seek(0, SeekOrigin.Begin);
 
-                    filelistToEncryptWriter.AdjustBytesUInt32(16, filelistDataSize, CmnEnums.Endianness.BigEndian);
-                    filelistToEncryptWriter.AdjustBytesUInt32((uint)filelistToEncrypt.Length - 16, filelistDataSize, CmnEnums.Endianness.LittleEndian);
+                    filelistToEncryptWriter.ExWriteBytesUInt32(16, filelistDataSize, CmnEnums.Endianness.BigEndian);
+                    filelistToEncryptWriter.ExWriteBytesUInt32((uint)filelistToEncrypt.Length - 16, filelistDataSize, CmnEnums.Endianness.LittleEndian);
                 }
             }
 

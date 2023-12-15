@@ -61,7 +61,7 @@ namespace WhiteBinTools.UnpackClasses
                 case true:
                     using (var cmpData = new MemoryStream())
                     {
-                        whiteBin.ExtendedCopyTo(cmpData, filelistVariables.Position, filelistVariables.CmpSize);
+                        whiteBin.ExCopyTo(cmpData, filelistVariables.Position, filelistVariables.CmpSize);
 
                         using (var outFile = new FileStream(filelistVariables.FullFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
                         {
@@ -76,7 +76,7 @@ namespace WhiteBinTools.UnpackClasses
                     using (var outFile = new FileStream(filelistVariables.FullFilePath, FileMode.OpenOrCreate, FileAccess.Write))
                     {
                         outFile.Seek(0, SeekOrigin.Begin);
-                        whiteBin.ExtendedCopyTo(outFile, filelistVariables.Position, filelistVariables.UnCmpSize);
+                        whiteBin.ExCopyTo(outFile, filelistVariables.Position, filelistVariables.UnCmpSize);
                         unpackVariables.UnpackedState = "Copied";
                     }
                     break;

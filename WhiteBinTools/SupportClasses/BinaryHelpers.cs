@@ -20,7 +20,7 @@ namespace WhiteBinTools.SupportClasses
         }
 
 
-        public static void AdjustBytesUInt16(this BinaryWriter writerName, uint writerPos, ushort adjustVal)
+        public static void ExWriteBytesUInt16(this BinaryWriter writerName, uint writerPos, ushort adjustVal)
         {
             writerName.BaseStream.Position = writerPos;
             var adjustValBytes = BitConverter.GetBytes(adjustVal);
@@ -28,7 +28,7 @@ namespace WhiteBinTools.SupportClasses
         }
 
 
-        public static void AdjustBytesUInt32(this BinaryWriter writerName, uint writerPos, uint adjustVal, CmnEnums.Endianness endiannessVar)
+        public static void ExWriteBytesUInt32(this BinaryWriter writerName, uint writerPos, uint adjustVal, CmnEnums.Endianness endiannessVar)
         {
             writerName.BaseStream.Position = writerPos;
             var adjustValBytes = new byte[4];
