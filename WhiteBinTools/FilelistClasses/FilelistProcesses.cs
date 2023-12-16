@@ -3,12 +3,13 @@ using System.Diagnostics;
 using System.IO;
 using WhiteBinTools.RepackClasses;
 using WhiteBinTools.SupportClasses;
+using static WhiteBinTools.SupportClasses.ProgramEnums;
 
 namespace WhiteBinTools.FilelistClasses
 {
-    internal partial class FilelistProcesses
+    internal class FilelistProcesses
     {
-        public static void PrepareFilelistVars(FilelistProcesses filelistVariables, string filelistFileVar)
+        public static void PrepareFilelistVars(FilelistVariables filelistVariables, string filelistFileVar)
         {
             filelistVariables.MainFilelistFile = filelistFileVar;
 
@@ -18,11 +19,11 @@ namespace WhiteBinTools.FilelistClasses
         }
 
 
-        public static void DecryptProcess(CmnEnums.GameCodes gameCodeVar, FilelistProcesses filelistVariables, StreamWriter writerName)
+        public static void DecryptProcess(GameCodes gameCodeVar, FilelistVariables filelistVariables, StreamWriter writerName)
         {
             // Check for encryption header in the filelist file,
             // if the game code is set to ff13-1
-            if (gameCodeVar.Equals(CmnEnums.GameCodes.ff131))
+            if (gameCodeVar.Equals(ProgramEnums.GameCodes.ff131))
             {
                 filelistVariables.IsEncrypted = CheckIfEncrypted(filelistVariables.MainFilelistFile);
 
@@ -43,7 +44,7 @@ namespace WhiteBinTools.FilelistClasses
 
             // If the ffxiiicrypt tool does not exist in app directory, then
             // throw a error and exit
-            if (gameCodeVar.Equals(CmnEnums.GameCodes.ff132))
+            if (gameCodeVar.Equals(GameCodes.ff132))
             {
                 filelistVariables.IsEncrypted = CheckIfEncrypted(filelistVariables.MainFilelistFile);
 
@@ -120,7 +121,7 @@ namespace WhiteBinTools.FilelistClasses
         }
 
 
-        public static void EncryptProcess(RepackProcesses repackVariables, StreamWriter writerName)
+        public static void EncryptProcess(RepackVariables repackVariables, StreamWriter writerName)
         {
             var filelistDataSize = (uint)0;
 
@@ -172,8 +173,8 @@ namespace WhiteBinTools.FilelistClasses
                 {
                     filelistToEncrypt.Seek(0, SeekOrigin.Begin);
 
-                    filelistToEncryptWriter.ExWriteBytesUInt32(16, filelistDataSize, CmnEnums.Endianness.BigEndian);
-                    filelistToEncryptWriter.ExWriteBytesUInt32((uint)filelistToEncrypt.Length - 16, filelistDataSize, CmnEnums.Endianness.LittleEndian);
+                    filelistToEncryptWriter.ExWriteBytesUInt32(16, filelistDataSize, Endianness.BigEndian);
+                    filelistToEncryptWriter.ExWriteBytesUInt32((uint)filelistToEncrypt.Length - 16, filelistDataSize, Endianness.LittleEndian);
                 }
             }
 

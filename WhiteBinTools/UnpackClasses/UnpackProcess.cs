@@ -5,9 +5,9 @@ using WhiteBinTools.FilelistClasses;
 
 namespace WhiteBinTools.UnpackClasses
 {
-    internal partial class UnpackProcess
+    internal class UnpackProcess
     {
-        public static void PrepareBinVars(string whiteBinFileVar, UnpackProcess unpackVariables)
+        public static void PrepareBinVars(string whiteBinFileVar, UnpackVariables unpackVariables)
         {
             unpackVariables.WhiteBinName = Path.GetFileName(whiteBinFileVar);
 
@@ -19,7 +19,7 @@ namespace WhiteBinTools.UnpackClasses
         }
 
 
-        public static void PrepareExtraction(string convertedString, FilelistProcesses filelistVariables, string extractDir)
+        public static void PrepareExtraction(string convertedString, FilelistVariables filelistVariables, string extractDir)
         {
             filelistVariables.ConvertedStringData = convertedString.Split(':');
             filelistVariables.Position = Convert.ToUInt32(filelistVariables.ConvertedStringData[0], 16) * 2048;
@@ -54,7 +54,7 @@ namespace WhiteBinTools.UnpackClasses
         }
 
 
-        public static void UnpackFile(FilelistProcesses filelistVariables, FileStream whiteBin, UnpackProcess unpackVariables)
+        public static void UnpackFile(FilelistVariables filelistVariables, FileStream whiteBin, UnpackVariables unpackVariables)
         {
             switch (filelistVariables.IsCompressed)
             {

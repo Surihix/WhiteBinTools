@@ -1,6 +1,6 @@
 ﻿namespace WhiteBinTools.SupportClasses
 {
-    internal class CmnEnums
+    internal class ProgramEnums
     {
         public enum GameCodes
         {

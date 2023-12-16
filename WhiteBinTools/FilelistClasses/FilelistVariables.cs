@@ -1,6 +1,6 @@
 ﻿namespace WhiteBinTools.FilelistClasses
 {
-    internal partial class FilelistProcesses
+    internal class FilelistVariables
     {
         public string MainFilelistFile { get; set; }
         public string MainFilelistDirectory { get; set; }

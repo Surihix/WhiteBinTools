@@ -1,12 +1,13 @@
 ﻿using System.IO;
 using WhiteBinTools.FilelistClasses;
 using WhiteBinTools.SupportClasses;
+using static WhiteBinTools.SupportClasses.ProgramEnums;
 
 namespace WhiteBinTools.RepackClasses
 {
-    internal partial class RepackProcesses
+    internal class RepackFilelist
     {
-        public static void CreateFilelist(FilelistProcesses filelistVariables, RepackProcesses repackVariables, CmnEnums.GameCodes gameCodeVar)
+        public static void CreateFilelist(FilelistVariables filelistVariables, RepackVariables repackVariables, GameCodes gameCodeVar)
         {
             // Create a copy of the filelist that is being used.
             // The copying and renaming is done for unencrypted
@@ -52,9 +53,9 @@ namespace WhiteBinTools.RepackClasses
                             newFilelistChunks.Write(chunkCmpData, 0, chunkCmpData.Length);
                             chunkCmpSize = (uint)chunkCmpData.Length;
 
-                            newChunksInfoWriter.ExWriteBytesUInt32(chunkInfoWriterPos, chunkUncmpSize, CmnEnums.Endianness.LittleEndian);
-                            newChunksInfoWriter.ExWriteBytesUInt32(chunkInfoWriterPos + 4, chunkCmpSize, CmnEnums.Endianness.LittleEndian);
-                            newChunksInfoWriter.ExWriteBytesUInt32(chunkInfoWriterPos + 8, chunkStartVal, CmnEnums.Endianness.LittleEndian);
+                            newChunksInfoWriter.ExWriteBytesUInt32(chunkInfoWriterPos, chunkUncmpSize, Endianness.LittleEndian);
+                            newChunksInfoWriter.ExWriteBytesUInt32(chunkInfoWriterPos + 4, chunkCmpSize, Endianness.LittleEndian);
+                            newChunksInfoWriter.ExWriteBytesUInt32(chunkInfoWriterPos + 8, chunkStartVal, Endianness.LittleEndian);
 
                             var newChunkStartVal = chunkStartVal + chunkCmpSize;
                             chunkStartVal = newChunkStartVal;
@@ -81,7 +82,7 @@ namespace WhiteBinTools.RepackClasses
 
                             filelistVariables.ChunkFNameCount = 0;
                             var fileInfoWriterPos = (uint)18;
-                            if (gameCodeVar.Equals(CmnEnums.GameCodes.ff132))
+                            if (gameCodeVar.Equals(GameCodes.ff132))
                             {
                                 // Change fileInfo writer position
                                 // according to the game code.
@@ -115,7 +116,7 @@ namespace WhiteBinTools.RepackClasses
                                             // According to the game code, check how to
                                             // write the value and then set the appropriate
                                             // converted value to write.
-                                            if (gameCodeVar.Equals(CmnEnums.GameCodes.ff132))
+                                            if (gameCodeVar.Equals(GameCodes.ff132))
                                             {
                                                 oldFileInfoReader.BaseStream.Position = fileInfoWriterPos;
                                                 var checkVal = oldFileInfoReader.ReadUInt16();

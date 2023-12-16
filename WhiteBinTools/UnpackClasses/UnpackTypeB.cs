@@ -1,21 +1,22 @@
 ﻿using System.IO;
 using WhiteBinTools.FilelistClasses;
 using WhiteBinTools.SupportClasses;
+using static WhiteBinTools.SupportClasses.ProgramEnums;
 
 namespace WhiteBinTools.UnpackClasses
 {
     internal class UnpackTypeB
     {
-        public static void UnpackSingle(CmnEnums.GameCodes gameCodeVar, string filelistFileVar, string whiteBinFileVar, string whiteFilePathVar, StreamWriter logWriter)
+        public static void UnpackSingle(GameCodes gameCode, string filelistFile, string whiteBinFile, string whiteFilePath, StreamWriter logWriter)
         {
-            filelistFileVar.CheckFileExists(logWriter, "Error: Filelist file specified in the argument is missing");
-            whiteBinFileVar.CheckFileExists(logWriter, "Error: Image bin file specified in the argument is missing");
+            filelistFile.CheckFileExists(logWriter, "Error: Filelist file specified in the argument is missing");
+            whiteBinFile.CheckFileExists(logWriter, "Error: Image bin file specified in the argument is missing");
 
-            var filelistVariables = new FilelistProcesses();
-            var unpackVariables = new UnpackProcess();
+            var filelistVariables = new FilelistVariables();
+            var unpackVariables = new UnpackVariables();
 
-            FilelistProcesses.PrepareFilelistVars(filelistVariables, filelistFileVar);
-            UnpackProcess.PrepareBinVars(whiteBinFileVar, unpackVariables);
+            FilelistProcesses.PrepareFilelistVars(filelistVariables, filelistFile);
+            UnpackProcess.PrepareBinVars(whiteBinFile, unpackVariables);
 
             filelistVariables.DefaultChunksExtDir = unpackVariables.ExtractDir + "\\_chunks";
             filelistVariables.ChunkFile = filelistVariables.DefaultChunksExtDir + "\\chunk_";
@@ -30,21 +31,21 @@ namespace WhiteBinTools.UnpackClasses
             Directory.CreateDirectory(filelistVariables.DefaultChunksExtDir);
 
 
-            FilelistProcesses.DecryptProcess(gameCodeVar, filelistVariables, logWriter);
+            FilelistProcesses.DecryptProcess(gameCode, filelistVariables, logWriter);
 
-            using (var filelist = new FileStream(filelistVariables.MainFilelistFile, FileMode.Open, FileAccess.Read))
+            using (var filelistStream = new FileStream(filelistVariables.MainFilelistFile, FileMode.Open, FileAccess.Read))
             {
-                using (var filelistReader = new BinaryReader(filelist))
+                using (var filelistReader = new BinaryReader(filelistStream))
                 {
-                    FilelistProcesses.GetFilelistOffsets(filelistReader, logWriter, filelistVariables);
-                    FilelistProcesses.UnpackChunks(filelist, filelistVariables.ChunkFile, filelistVariables);
+                    FilelistChunksPrep.GetFilelistOffsets(filelistReader, logWriter, filelistVariables);
+                    FilelistChunksPrep.UnpackChunks(filelistStream, filelistVariables.ChunkFile, filelistVariables);
                 }
             }
 
-            if (filelistVariables.IsEncrypted.Equals(true))
+            if (filelistVariables.IsEncrypted)
             {
                 filelistVariables.TmpDcryptFilelistFile.IfFileExistsDel();
-                filelistVariables.MainFilelistFile = filelistFileVar;
+                filelistVariables.MainFilelistFile = filelistFile;
             }
 
 
@@ -57,9 +58,9 @@ namespace WhiteBinTools.UnpackClasses
                 var filesInChunkCount = FilelistProcesses.GetFilesInChunkCount(filelistVariables.ChunkFile + filelistVariables.ChunkFNameCount);
 
                 // Open a chunk file for reading
-                using (var currentChunk = new FileStream(filelistVariables.ChunkFile + filelistVariables.ChunkFNameCount, FileMode.Open, FileAccess.Read))
+                using (var currentChunkStream = new FileStream(filelistVariables.ChunkFile + filelistVariables.ChunkFNameCount, FileMode.Open, FileAccess.Read))
                 {
-                    using (var chunkStringReader = new BinaryReader(currentChunk))
+                    using (var chunkStringReader = new BinaryReader(currentChunkStream))
                     {
                         var chunkStringReaderPos = (uint)0;
                         for (int f = 0; f < filesInChunkCount; f++)
@@ -74,9 +75,9 @@ namespace WhiteBinTools.UnpackClasses
                             UnpackProcess.PrepareExtraction(convertedString, filelistVariables, unpackVariables.ExtractDir);
 
                             // Extract a specific file
-                            if (filelistVariables.MainPath.Equals(whiteFilePathVar))
+                            if (filelistVariables.MainPath.Equals(whiteFilePath))
                             {
-                                using (var whiteBin = new FileStream(whiteBinFileVar, FileMode.Open, FileAccess.Read))
+                                using (var whiteBinStream = new FileStream(whiteBinFile, FileMode.Open, FileAccess.Read))
                                 {
                                     if (!Directory.Exists(unpackVariables.ExtractDir + "\\" + filelistVariables.DirectoryPath))
                                     {
@@ -88,7 +89,7 @@ namespace WhiteBinTools.UnpackClasses
                                         unpackVariables.CountDuplicates++;
                                     }
 
-                                    UnpackProcess.UnpackFile(filelistVariables, whiteBin, unpackVariables);
+                                    UnpackProcess.UnpackFile(filelistVariables, whiteBinStream, unpackVariables);
                                 }
 
                                 hasExtracted = true;
@@ -106,7 +107,7 @@ namespace WhiteBinTools.UnpackClasses
 
             Directory.Delete(filelistVariables.DefaultChunksExtDir, true);
 
-            if (hasExtracted.Equals(false))
+            if (hasExtracted)
             {
                 IOhelpers.LogMessage("Specified file does not exist. please specify the correct file path", logWriter);
                 IOhelpers.LogMessage("\nFinished extracting file " + unpackVariables.WhiteBinName, logWriter);

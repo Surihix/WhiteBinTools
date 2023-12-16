@@ -59,8 +59,8 @@ namespace WhiteBinTools
 
                 // Check argument 1 and 2 and assign
                 // the appropriate enum values to it
-                var gameCode = CmnEnums.GameCodes.none;
-                if (Enum.TryParse(specifiedGameCode, false, out CmnEnums.GameCodes convertedGameCode))
+                var gameCode = ProgramEnums.GameCodes.none;
+                if (Enum.TryParse(specifiedGameCode, false, out ProgramEnums.GameCodes convertedGameCode))
                 {
                     gameCode = convertedGameCode;
                 }
@@ -103,11 +103,11 @@ namespace WhiteBinTools
 
                         switch (gameCode)
                         {
-                            case CmnEnums.GameCodes.ff131:
+                            case ProgramEnums.GameCodes.ff131:
                                 IOhelpers.LogMessage("GameCode is set to ff13-1", logWriter);
                                 break;
 
-                            case CmnEnums.GameCodes.ff132:
+                            case ProgramEnums.GameCodes.ff132:
                                 IOhelpers.LogMessage("GameCode is set to ff13-2", logWriter);
                                 break;
                         }
@@ -168,7 +168,7 @@ namespace WhiteBinTools
                 Console.WriteLine("Error: " + ex);
                 IOhelpers.IfFileExistsDel("CrashLog.txt");
 
-                var filelistVariables = new FilelistProcesses();
+                var filelistVariables = new FilelistVariables();
                 if (Directory.Exists(filelistVariables.DefaultChunksExtDir))
                 {
                     Directory.Delete(filelistVariables.DefaultChunksExtDir, true);

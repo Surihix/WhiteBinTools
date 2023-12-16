@@ -3,12 +3,13 @@ using System.IO;
 using System.Linq;
 using WhiteBinTools.FilelistClasses;
 using WhiteBinTools.SupportClasses;
+using static WhiteBinTools.SupportClasses.ProgramEnums;
 
 namespace WhiteBinTools.RepackClasses
 {
     internal class RepackTypeD
     {
-        public static void RepackFilelist(CmnEnums.GameCodes gameCodeVar, string extractedFilelistDir, StreamWriter logWriter)
+        public static void RepackFilelist(GameCodes gameCode, string extractedFilelistDir, StreamWriter logWriter)
         {
             extractedFilelistDir.CheckDirExists(logWriter, "Error: Unpacked filelist directory specified in the argument is missing");
 
@@ -18,7 +19,7 @@ namespace WhiteBinTools.RepackClasses
 
             countsFile.CheckFileExists(logWriter, "Error: Unable to locate the '~Counts.txt' file");
 
-            var filelistVariables = new FilelistProcesses();
+            var filelistVariables = new FilelistVariables();
             if (File.Exists(encHeaderFile))
             {
                 filelistVariables.IsEncrypted = true;
@@ -54,7 +55,7 @@ namespace WhiteBinTools.RepackClasses
 
 
             var int16RangeValues = new List<uint>();
-            if (gameCodeVar.Equals(CmnEnums.GameCodes.ff132) && filelistVariables.TotalChunks > 1)
+            if (gameCode.Equals(GameCodes.ff132) && filelistVariables.TotalChunks > 1)
             {
                 var nextChunkNo = 1;
                 for (int i = 0; i < filelistVariables.TotalChunks; i++)
@@ -118,11 +119,11 @@ namespace WhiteBinTools.RepackClasses
                                         var chunkData = currentChunkReader.ReadLine().Split('|');
                                         var fileCode = uint.Parse(chunkData[0]);
 
-                                        entriesWriter.ExWriteBytesUInt32(entriesWritePos, fileCode, CmnEnums.Endianness.LittleEndian);
+                                        entriesWriter.ExWriteBytesUInt32(entriesWritePos, fileCode, ProgramEnums.Endianness.LittleEndian);
 
-                                        switch (gameCodeVar)
+                                        switch (gameCode)
                                         {
-                                            case CmnEnums.GameCodes.ff131:
+                                            case GameCodes.ff131:
                                                 var chunkNumber = ushort.Parse(chunkData[1]);
 
                                                 entriesWriter.ExWriteBytesUInt16(entriesWritePos + 4, chunkNumber);
@@ -132,7 +133,7 @@ namespace WhiteBinTools.RepackClasses
                                                 pathPos += (ushort)(chunkData[2] + "\0").Length;
                                                 break;
 
-                                            case CmnEnums.GameCodes.ff132:
+                                            case GameCodes.ff132:
                                                 if (int16RangeValues.Contains(filelistVariables.ChunkFNameCount))
                                                 {
                                                     entriesWriter.ExWriteBytesUInt16(entriesWritePos + 4, (ushort)(32768 + pathPos));
@@ -185,9 +186,9 @@ namespace WhiteBinTools.RepackClasses
                     using (var chunkInfoWriter = new BinaryWriter(chunkInfoStream))
                     {
 
-                        chunkInfoWriter.ExWriteBytesUInt32(encHeaderAdjustedOffset, chunksInfoWriterPos - encHeaderAdjustedOffset, CmnEnums.Endianness.LittleEndian);
-                        chunkInfoWriter.ExWriteBytesUInt32(encHeaderAdjustedOffset + 4, chunksDataStartPos - encHeaderAdjustedOffset, CmnEnums.Endianness.LittleEndian);
-                        chunkInfoWriter.ExWriteBytesUInt32(encHeaderAdjustedOffset + 8, filelistVariables.TotalFiles, CmnEnums.Endianness.LittleEndian);
+                        chunkInfoWriter.ExWriteBytesUInt32(encHeaderAdjustedOffset, chunksInfoWriterPos - encHeaderAdjustedOffset, ProgramEnums.Endianness.LittleEndian);
+                        chunkInfoWriter.ExWriteBytesUInt32(encHeaderAdjustedOffset + 4, chunksDataStartPos - encHeaderAdjustedOffset, ProgramEnums.Endianness.LittleEndian);
+                        chunkInfoWriter.ExWriteBytesUInt32(encHeaderAdjustedOffset + 8, filelistVariables.TotalFiles, ProgramEnums.Endianness.LittleEndian);
 
 
                         for (int fc = 0; fc < filelistVariables.TotalChunks; fc++)
@@ -199,9 +200,9 @@ namespace WhiteBinTools.RepackClasses
                             var cmpSize = (uint)cmpChunkArray.Length;
                             chunkDataStream.Write(cmpChunkArray, 0, cmpChunkArray.Length);
 
-                            chunkInfoWriter.ExWriteBytesUInt32(chunksInfoWriterPos, uncmpSize, CmnEnums.Endianness.LittleEndian);
-                            chunkInfoWriter.ExWriteBytesUInt32(chunksInfoWriterPos + 4, cmpSize, CmnEnums.Endianness.LittleEndian);
-                            chunkInfoWriter.ExWriteBytesUInt32(chunksInfoWriterPos + 8, chunkStart, CmnEnums.Endianness.LittleEndian);
+                            chunkInfoWriter.ExWriteBytesUInt32(chunksInfoWriterPos, uncmpSize, ProgramEnums.Endianness.LittleEndian);
+                            chunkInfoWriter.ExWriteBytesUInt32(chunksInfoWriterPos + 4, cmpSize, ProgramEnums.Endianness.LittleEndian);
+                            chunkInfoWriter.ExWriteBytesUInt32(chunksInfoWriterPos + 8, chunkStart, ProgramEnums.Endianness.LittleEndian);
 
                             chunkStart += cmpSize;
                             chunksInfoWriterPos += 12;
@@ -214,10 +215,10 @@ namespace WhiteBinTools.RepackClasses
 
             outChunksDir.IfDirExistsDel();
 
-            var repackVariables = new RepackProcesses();
+            var repackVariables = new RepackVariables();
             repackVariables.NewFilelistFile = newFilelistFile;
 
-            if (filelistVariables.IsEncrypted.Equals(true))
+            if (filelistVariables.IsEncrypted)
             {
                 FilelistProcesses.EncryptProcess(repackVariables, logWriter);
             }

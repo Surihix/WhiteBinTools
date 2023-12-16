@@ -3,9 +3,9 @@ using WhiteBinTools.SupportClasses;
 
 namespace WhiteBinTools.FilelistClasses
 {
-    internal partial class FilelistProcesses
+    internal class FilelistChunksPrep
     {
-        public static void GetFilelistOffsets(BinaryReader filelistReader, StreamWriter logWriter, FilelistProcesses filelistVariables)
+        public static void GetFilelistOffsets(BinaryReader filelistReader, StreamWriter logWriter, FilelistVariables filelistVariables)
         {
             var readStartPositionVar = new uint();
             var adjustOffset = new uint();
@@ -36,21 +36,21 @@ namespace WhiteBinTools.FilelistClasses
         }
 
 
-        public static void UnpackChunks(FileStream filelist, string chunkFile, FilelistProcesses filelistVariables)
+        public static void UnpackChunks(FileStream filelistStream, string chunkFile, FilelistVariables filelistVariables)
         {
             // Make a memorystream for holding all Chunks info
             using (var chunkInfoStream = new MemoryStream())
             {
-                filelist.Seek(filelistVariables.ChunkInfoSectionOffset, SeekOrigin.Begin);
+                filelistStream.Seek(filelistVariables.ChunkInfoSectionOffset, SeekOrigin.Begin);
                 var chunkInfoBuffer = new byte[filelistVariables.ChunkInfoSize];
-                filelist.Read(chunkInfoBuffer, 0, chunkInfoBuffer.Length);
+                filelistStream.Read(chunkInfoBuffer, 0, chunkInfoBuffer.Length);
                 chunkInfoStream.Write(chunkInfoBuffer, 0, chunkInfoBuffer.Length);
 
                 // Make memorystream for all Chunks compressed data
                 using (var chunkStream = new MemoryStream())
                 {
-                    filelist.Seek(filelistVariables.ChunkDataSectionOffset, SeekOrigin.Begin);
-                    filelist.CopyTo(chunkStream);
+                    filelistStream.Seek(filelistVariables.ChunkDataSectionOffset, SeekOrigin.Begin);
+                    filelistStream.CopyTo(chunkStream);
 
                     // Open a binary reader and read each chunk's info and
                     // dump them as separate files
