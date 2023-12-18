@@ -21,7 +21,6 @@ This program allows you to unpack and repack the main white_img archive files fr
 ## Important notes
 - Filelist file and the white bin file or the unpacked folder, has to be specified after the game code and the tool action argument switches.
 - The game code switch determines how this app handles the filelist and white bin file during unpacking and repacking. this is very important during repacking and if an incorrect game code switch is specified, then the filelist and white bin file will not be repacked correctly.
-- The ffxiiicrypt tool that is bundled with this app is required for unpacking and repacking the archive files from FF13-2 and FF13-LR.
 - If you want to unpack or repack a single file, then provide the virtual file path of that file after the white bin file or the unpacked folder argument. refer to the app's help page that can be accessed with the `-?` or `-h` switches. 
 - The single file and the multiple files repacking options will either inject the file at the original position in the archive or append the file at the end of the archive. the file will be injected at the original position if the compressed data size (i.e if its stored compressed) or the file size (i.e if not stored compressed), is lesser than or equal to the size of the file that is being replaced. if its greater than the original size, then the file is appended at the end of the archive.
 
@@ -31,9 +30,6 @@ This program allows you to unpack and repack the main white_img archive files fr
 
 - Refer to this [page](https://github.com/LR-Research-Team/Datalog/wiki/White-Image-BIN-files) for information about the file structures of the filelist and the archive.
 - The functions of this tool are ported to this [reference project](https://github.com/Surihix/WhiteBinTools_dll) which you can compile as a dll file and use in your C# projects.
-
-## Credits
-**ffxiiicrypt** - Echelo (from Xentax)
 
 ## Special Thanks
 [**Kizari**](https://github.com/Kizari)
