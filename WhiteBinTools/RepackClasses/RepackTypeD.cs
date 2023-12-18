@@ -118,7 +118,7 @@ namespace WhiteBinTools.RepackClasses
                                         var chunkData = currentChunkReader.ReadLine().Split('|');
                                         var fileCode = uint.Parse(chunkData[0]);
 
-                                        entriesWriter.ExWriteBytesUInt32(entriesWritePos, fileCode, ProgramEnums.Endianness.LittleEndian);
+                                        entriesWriter.ExWriteBytesUInt32(entriesWritePos, fileCode, Endianness.LittleEndian);
 
                                         switch (gameCode)
                                         {
@@ -185,9 +185,9 @@ namespace WhiteBinTools.RepackClasses
                     using (var chunkInfoWriter = new BinaryWriter(chunkInfoStream))
                     {
 
-                        chunkInfoWriter.ExWriteBytesUInt32(encHeaderAdjustedOffset, chunksInfoWriterPos - encHeaderAdjustedOffset, ProgramEnums.Endianness.LittleEndian);
-                        chunkInfoWriter.ExWriteBytesUInt32(encHeaderAdjustedOffset + 4, chunksDataStartPos - encHeaderAdjustedOffset, ProgramEnums.Endianness.LittleEndian);
-                        chunkInfoWriter.ExWriteBytesUInt32(encHeaderAdjustedOffset + 8, filelistVariables.TotalFiles, ProgramEnums.Endianness.LittleEndian);
+                        chunkInfoWriter.ExWriteBytesUInt32(encHeaderAdjustedOffset, chunksInfoWriterPos - encHeaderAdjustedOffset, Endianness.LittleEndian);
+                        chunkInfoWriter.ExWriteBytesUInt32(encHeaderAdjustedOffset + 4, chunksDataStartPos - encHeaderAdjustedOffset, Endianness.LittleEndian);
+                        chunkInfoWriter.ExWriteBytesUInt32(encHeaderAdjustedOffset + 8, filelistVariables.TotalFiles, Endianness.LittleEndian);
 
 
                         for (int fc = 0; fc < filelistVariables.TotalChunks; fc++)
@@ -199,9 +199,9 @@ namespace WhiteBinTools.RepackClasses
                             var cmpSize = (uint)cmpChunkArray.Length;
                             chunkDataStream.Write(cmpChunkArray, 0, cmpChunkArray.Length);
 
-                            chunkInfoWriter.ExWriteBytesUInt32(chunksInfoWriterPos, uncmpSize, ProgramEnums.Endianness.LittleEndian);
-                            chunkInfoWriter.ExWriteBytesUInt32(chunksInfoWriterPos + 4, cmpSize, ProgramEnums.Endianness.LittleEndian);
-                            chunkInfoWriter.ExWriteBytesUInt32(chunksInfoWriterPos + 8, chunkStart, ProgramEnums.Endianness.LittleEndian);
+                            chunkInfoWriter.ExWriteBytesUInt32(chunksInfoWriterPos, uncmpSize, Endianness.LittleEndian);
+                            chunkInfoWriter.ExWriteBytesUInt32(chunksInfoWriterPos + 4, cmpSize, Endianness.LittleEndian);
+                            chunkInfoWriter.ExWriteBytesUInt32(chunksInfoWriterPos + 8, chunkStart, Endianness.LittleEndian);
 
                             chunkStart += cmpSize;
                             chunksInfoWriterPos += 12;

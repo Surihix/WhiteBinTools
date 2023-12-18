@@ -38,7 +38,7 @@ namespace WhiteBinTools.RepackClasses
             repackVariables.OgCmpSize = Convert.ToUInt32(repackVariables.ConvertedOgStringData[2], 16);
             repackVariables.OgMainPath = repackVariables.ConvertedOgStringData[3];
 
-            if (repackVariables.OgMainPath.Equals(" "))
+            if (repackVariables.OgMainPath == " ")
             {
                 repackVariables.OgNoPathFileCount++;
                 repackVariables.OgDirectoryPath = "noPath";
@@ -54,7 +54,7 @@ namespace WhiteBinTools.RepackClasses
                 repackVariables.RepackPathInChunk = repackVariables.OgMainPath;
             }
 
-            if (!repackVariables.OgUnCmpSize.Equals(repackVariables.OgCmpSize))
+            if (repackVariables.OgUnCmpSize != repackVariables.OgCmpSize)
             {
                 repackVariables.WasCompressed = true;
                 repackVariables.RepackState = "Compressed";
@@ -120,7 +120,7 @@ namespace WhiteBinTools.RepackClasses
             switch (repackVariables.WasCompressed)
             {
                 case true:
-                    var cmpData = fileToPack.ZlibCompress();                    
+                    var cmpData = fileToPack.ZlibCompress();
                     whiteBinStream.Write(cmpData, 0, cmpData.Length);
 
                     var cmpFileSizeInDecimal = (uint)cmpData.Length;

@@ -87,7 +87,7 @@
     <Compile Include="WhiteBinTools\RepackClasses\RepackTypeC.cs" />
     <Compile Include="WhiteBinTools\RepackClasses\RepackVariables.cs" />
     <Compile Include="WhiteBinTools\RepackClasses\RepackProcesses.cs" />
-    <Compile Include="WhiteBinTools\SupportClasses\ZlibFunctions.cs" />
+    <Compile Include="WhiteBinTools\SupportClasses\ZlibHelpers.cs" />
     <Compile Include="WhiteBinTools\UnpackClasses\UnpackVariables.cs" />
     <Compile Include="WhiteBinTools\UnpackClasses\UnpackProcess.cs" />
     <Compile Include="WhiteBinTools\UnpackClasses\UnpackTypeA.cs" />

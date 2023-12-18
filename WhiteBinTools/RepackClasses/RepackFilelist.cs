@@ -91,7 +91,7 @@ namespace WhiteBinTools.RepackClasses
                                 // If encrypted, increase the 
                                 // position to factor in the
                                 // encryption header.
-                                if (filelistVariables.IsEncrypted.Equals(true))
+                                if (filelistVariables.IsEncrypted)
                                 {
                                     fileInfoWriterPos += 32;
                                 }
@@ -99,7 +99,7 @@ namespace WhiteBinTools.RepackClasses
                             for (int ncf = 0; ncf < filelistVariables.TotalChunks; ncf++)
                             {
                                 var filesInNewChunkCount = FilelistProcesses.GetFilesInChunkCount(repackVariables.NewChunkFile + filelistVariables.ChunkFNameCount);
-                                if (repackVariables.LastChunkFileNumber.Equals(filelistVariables.ChunkFNameCount))
+                                if (repackVariables.LastChunkFileNumber == filelistVariables.ChunkFNameCount)
                                 {
                                     filesInNewChunkCount--;
                                 }

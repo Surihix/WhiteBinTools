@@ -70,7 +70,7 @@ namespace WhiteBinTools.RepackClasses
                                     for (int f = 0; f < filesInChunkCount; f++)
                                     {
                                         var convertedString = chunkStringReader.BinaryToString(chunkStringReaderPos);
-                                        if (convertedString.Equals("end"))
+                                        if (convertedString == "end")
                                         {
                                             updChunkStringsWriter.Write("end\0");
                                             repackVariables.LastChunkFileNumber = filelistVariables.ChunkFNameCount;

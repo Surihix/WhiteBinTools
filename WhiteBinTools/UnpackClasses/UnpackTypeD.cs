@@ -83,7 +83,7 @@ namespace WhiteBinTools
                                         {
                                             var filePath = dcmpChunkReader.BinaryToString(currentPathReadPos);
 
-                                            if (filePath.Equals("end"))
+                                            if (filePath == "end")
                                             {
                                                 break;
                                             }

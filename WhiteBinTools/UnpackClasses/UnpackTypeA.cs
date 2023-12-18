@@ -70,7 +70,7 @@ namespace WhiteBinTools.UnpackClasses
                             {
                                 var convertedString = chunkStringReader.BinaryToString(chunkStringReaderPos);
 
-                                if (convertedString.Equals("end") || convertedString.Equals(" ") || convertedString.Equals(null))
+                                if (convertedString == "end" || convertedString == " " || convertedString == null)
                                 {
                                     break;
                                 }

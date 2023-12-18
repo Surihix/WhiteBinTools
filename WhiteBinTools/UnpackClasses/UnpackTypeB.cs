@@ -75,7 +75,7 @@ namespace WhiteBinTools.UnpackClasses
                             UnpackProcess.PrepareExtraction(convertedString, filelistVariables, unpackVariables.ExtractDir);
 
                             // Extract a specific file
-                            if (filelistVariables.MainPath.Equals(whiteFilePath))
+                            if (filelistVariables.MainPath == whiteFilePath)
                             {
                                 using (var whiteBinStream = new FileStream(whiteBinFile, FileMode.Open, FileAccess.Read))
                                 {

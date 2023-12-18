@@ -28,7 +28,7 @@ namespace WhiteBinTools.UnpackClasses
             filelistVariables.MainPath = filelistVariables.ConvertedStringData[3].Replace("/", "\\");
             filelistVariables.IsCompressed = false;
 
-            if (filelistVariables.MainPath.Equals(" "))
+            if (filelistVariables.MainPath == " ")
             {
                 filelistVariables.NoPathFileCount++;
                 filelistVariables.DirectoryPath = "noPath";
@@ -43,7 +43,7 @@ namespace WhiteBinTools.UnpackClasses
                 filelistVariables.FullFilePath = extractDir + "\\" + filelistVariables.DirectoryPath + "\\" + filelistVariables.FileName;
             }
 
-            if (!filelistVariables.UnCmpSize.Equals(filelistVariables.CmpSize))
+            if (filelistVariables.UnCmpSize != filelistVariables.CmpSize)
             {
                 filelistVariables.IsCompressed = true;
             }

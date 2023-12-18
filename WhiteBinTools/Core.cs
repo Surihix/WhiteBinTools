@@ -4,6 +4,7 @@ using WhiteBinTools.FilelistClasses;
 using WhiteBinTools.RepackClasses;
 using WhiteBinTools.SupportClasses;
 using WhiteBinTools.UnpackClasses;
+using static WhiteBinTools.SupportClasses.ProgramEnums;
 
 namespace WhiteBinTools
 {
@@ -59,8 +60,8 @@ namespace WhiteBinTools
 
                 // Check argument 1 and 2 and assign
                 // the appropriate enum values to it
-                var gameCode = ProgramEnums.GameCodes.none;
-                if (Enum.TryParse(specifiedGameCode, false, out ProgramEnums.GameCodes convertedGameCode))
+                var gameCode = GameCodes.none;
+                if (Enum.TryParse(specifiedGameCode, false, out GameCodes convertedGameCode))
                 {
                     gameCode = convertedGameCode;
                 }
@@ -103,11 +104,11 @@ namespace WhiteBinTools
 
                         switch (gameCode)
                         {
-                            case ProgramEnums.GameCodes.ff131:
+                            case GameCodes.ff131:
                                 IOhelpers.LogMessage("GameCode is set to ff13-1", logWriter);
                                 break;
 
-                            case ProgramEnums.GameCodes.ff132:
+                            case GameCodes.ff132:
                                 IOhelpers.LogMessage("GameCode is set to ff13-2", logWriter);
                                 break;
                         }

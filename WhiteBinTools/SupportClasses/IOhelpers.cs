@@ -44,7 +44,7 @@ namespace WhiteBinTools.SupportClasses
 
         public static void DisposeIfLogStreamOpen(this StreamWriter logWriter)
         {
-            if (logWriter.BaseStream.CanWrite.Equals(true))
+            if (logWriter.BaseStream.CanWrite)
             {
                 logWriter.Dispose();
             }
