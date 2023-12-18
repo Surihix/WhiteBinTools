@@ -65,6 +65,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="WhiteBinTools\CryptoClasses\CryptFilelist.cs" />
+    <Compile Include="WhiteBinTools\CryptoClasses\CryptoBase.cs" />
+    <Compile Include="WhiteBinTools\CryptoClasses\CryptoFunctions.cs" />
+    <Compile Include="WhiteBinTools\CryptoClasses\Decryption.cs" />
+    <Compile Include="WhiteBinTools\CryptoClasses\Encryption.cs" />
+    <Compile Include="WhiteBinTools\CryptoClasses\Generator.cs" />
+    <Compile Include="WhiteBinTools\CryptoClasses\IntegersArray.cs" />
     <Compile Include="WhiteBinTools\RepackClasses\RepackTypeD.cs" />
     <Compile Include="WhiteBinTools\UnpackClasses\UnpackTypeD.cs" />
     <Compile Include="WhiteBinTools\Core.cs" />

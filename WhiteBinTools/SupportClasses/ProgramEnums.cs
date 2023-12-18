@@ -10,6 +10,13 @@
         }
 
 
+        public enum CryptActions
+        {
+            d,
+            e
+        }
+
+
         public enum Endianness
         {
             LittleEndian,

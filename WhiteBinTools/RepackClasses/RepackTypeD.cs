@@ -29,7 +29,6 @@ namespace WhiteBinTools.RepackClasses
             if (filelistVariables.IsEncrypted)
             {
                 encHeaderAdjustedOffset += 32;
-                "ffxiiicrypt.exe".CheckFileExists(logWriter, "Error: Unable to locate ffxiiicrypt tool in the main app folder to encrypt the filelist file");
             }
 
 
