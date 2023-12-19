@@ -25,11 +25,11 @@ This program allows you to unpack and repack the main white_img archive files fr
 - The single file and the multiple files repacking options will either inject the file at the original position in the archive or append the file at the end of the archive. the file will be injected at the original position if the compressed data size (i.e if its stored compressed) or the file size (i.e if not stored compressed), is lesser than or equal to the size of the file that is being replaced. if its greater than the original size, then the file is appended at the end of the archive.
 
 ## For developers
-- The following additional package is used for Zlib compression and decompression:
-<br>**DotNetZip** - https://www.nuget.org/packages/DotNetZip
+- The following package's Zlib classese were used for Zlib compression and decompression:
+<br>**DotNetZip** - https://github.com/haf/DotNetZip.Semverd
 
 - Refer to this [page](https://github.com/LR-Research-Team/Datalog/wiki/White-Image-BIN-files) for information about the file structures of the filelist and the archive.
-- The functions of this tool are ported to this [reference project](https://github.com/Surihix/WhiteBinTools_dll) which you can compile as a dll file and use in your C# projects.
+- The functions of this program are ported to this [reference project](https://github.com/Surihix/WhiteBinTools_dll) which you can compile as a dll file or directly use the dll file from the Releases section in your C# projects.
 
 ## Special Thanks
 [**Kizari**](https://github.com/Kizari)
