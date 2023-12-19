@@ -7,23 +7,23 @@ namespace WhiteBinTools.FilelistClasses
     {
         public static void GetFilelistOffsets(BinaryReader filelistReader, StreamWriter logWriter, FilelistVariables filelistVariables)
         {
-            var readStartPositionVar = new uint();
+            var readStartPosition = new uint();
             var adjustOffset = new uint();
 
             switch (filelistVariables.IsEncrypted)
             {
                 case true:
-                    readStartPositionVar = 32;
+                    readStartPosition = 32;
                     adjustOffset = 32;
                     break;
 
                 case false:
-                    readStartPositionVar = 0;
+                    readStartPosition = 0;
                     adjustOffset = 0;
                     break;
             }
 
-            filelistReader.BaseStream.Position = readStartPositionVar;
+            filelistReader.BaseStream.Position = readStartPosition;
             filelistVariables.ChunkInfoSectionOffset = filelistReader.ReadUInt32() + adjustOffset;
             filelistVariables.ChunkDataSectionOffset = filelistReader.ReadUInt32() + adjustOffset;
             filelistVariables.TotalFiles = filelistReader.ReadUInt32();

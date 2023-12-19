@@ -20,9 +20,9 @@ namespace WhiteBinTools.SupportClasses
         }
 
 
-        public static void CheckFileExists(this string fileVar, StreamWriter logWriter, string missingErrorMsg)
+        public static void CheckFileExists(this string fileToCheck, StreamWriter logWriter, string missingErrorMsg)
         {
-            if (!File.Exists(fileVar))
+            if (!File.Exists(fileToCheck))
             {
                 LogMessage(missingErrorMsg, logWriter);
                 logWriter.DisposeIfLogStreamOpen();

@@ -107,7 +107,7 @@ namespace WhiteBinTools.UnpackClasses
 
             Directory.Delete(filelistVariables.DefaultChunksExtDir, true);
 
-            if (hasExtracted)
+            if (!hasExtracted)
             {
                 IOhelpers.LogMessage("Specified file does not exist. please specify the correct file path", logWriter);
                 IOhelpers.LogMessage("\nFinished extracting file " + unpackVariables.WhiteBinName, logWriter);

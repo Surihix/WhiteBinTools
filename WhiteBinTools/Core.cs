@@ -85,12 +85,12 @@ namespace WhiteBinTools
 
                 // args for handling a specific file
                 // and directory of unpacked files.
-                // whiteFilePathOrDirVar value is assigned from
+                // whiteFilePathOrDir value is assigned from
                 // the arg only when the args length is more than 4.
-                var whiteFilePathOrDirVar = "";
+                var whiteFilePathOrDir = "";
                 if (args.Length > 4)
                 {
-                    whiteFilePathOrDirVar = args[4];
+                    whiteFilePathOrDir = args[4];
                 }
 
                 IOhelpers.IfFileExistsDel("ProcessLog.txt");
@@ -128,7 +128,7 @@ namespace WhiteBinTools
 
                             case ActionSwitches.uaf:
                                 CheckArguments(totalArgCount, 5);
-                                UnpackTypeB.UnpackSingle(gameCode, filelistFileOrDir, whiteBinOrDir, whiteFilePathOrDirVar, logWriter);
+                                UnpackTypeB.UnpackSingle(gameCode, filelistFileOrDir, whiteBinOrDir, whiteFilePathOrDir, logWriter);
                                 break;
 
                             case ActionSwitches.ufp:
@@ -143,12 +143,12 @@ namespace WhiteBinTools
 
                             case ActionSwitches.raf:
                                 CheckArguments(totalArgCount, 5);
-                                RepackTypeB.RepackSingle(gameCode, filelistFileOrDir, whiteBinOrDir, whiteFilePathOrDirVar, logWriter);
+                                RepackTypeB.RepackSingle(gameCode, filelistFileOrDir, whiteBinOrDir, whiteFilePathOrDir, logWriter);
                                 break;
 
                             case ActionSwitches.rmf:
                                 CheckArguments(totalArgCount, 5);
-                                RepackTypeC.RepackMultiple(gameCode, filelistFileOrDir, whiteBinOrDir, whiteFilePathOrDirVar, logWriter);
+                                RepackTypeC.RepackMultiple(gameCode, filelistFileOrDir, whiteBinOrDir, whiteFilePathOrDir, logWriter);
                                 break;
 
                             case ActionSwitches.rfl:

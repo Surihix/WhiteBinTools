@@ -7,14 +7,14 @@ namespace WhiteBinTools.UnpackClasses
 {
     internal class UnpackProcess
     {
-        public static void PrepareBinVars(string whiteBinFileVar, UnpackVariables unpackVariables)
+        public static void PrepareBinVars(string whiteBinFile, UnpackVariables unpackVariables)
         {
-            unpackVariables.WhiteBinName = Path.GetFileName(whiteBinFileVar);
+            unpackVariables.WhiteBinName = Path.GetFileName(whiteBinFile);
 
-            var inBinFilePath = Path.GetFullPath(whiteBinFileVar);
+            var inBinFilePath = Path.GetFullPath(whiteBinFile);
             unpackVariables.InBinFileDir = Path.GetDirectoryName(inBinFilePath);
 
-            unpackVariables.ExtractDirName = Path.GetFileName(whiteBinFileVar);
+            unpackVariables.ExtractDirName = Path.GetFileName(whiteBinFile);
             unpackVariables.ExtractDir = Path.Combine(unpackVariables.InBinFileDir, "_" + unpackVariables.ExtractDirName);
         }
 
@@ -54,14 +54,14 @@ namespace WhiteBinTools.UnpackClasses
         }
 
 
-        public static void UnpackFile(FilelistVariables filelistVariables, FileStream whiteBin, UnpackVariables unpackVariables)
+        public static void UnpackFile(FilelistVariables filelistVariables, FileStream whiteBinStream, UnpackVariables unpackVariables)
         {
             switch (filelistVariables.IsCompressed)
             {
                 case true:
                     using (var cmpData = new MemoryStream())
                     {
-                        whiteBin.ExCopyTo(cmpData, filelistVariables.Position, filelistVariables.CmpSize);
+                        whiteBinStream.ExCopyTo(cmpData, filelistVariables.Position, filelistVariables.CmpSize);
 
                         using (var outFile = new FileStream(filelistVariables.FullFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
                         {
@@ -76,7 +76,7 @@ namespace WhiteBinTools.UnpackClasses
                     using (var outFile = new FileStream(filelistVariables.FullFilePath, FileMode.OpenOrCreate, FileAccess.Write))
                     {
                         outFile.Seek(0, SeekOrigin.Begin);
-                        whiteBin.ExCopyTo(outFile, filelistVariables.Position, filelistVariables.UnCmpSize);
+                        whiteBinStream.ExCopyTo(outFile, filelistVariables.Position, filelistVariables.UnCmpSize);
                         unpackVariables.UnpackedState = "Copied";
                     }
                     break;

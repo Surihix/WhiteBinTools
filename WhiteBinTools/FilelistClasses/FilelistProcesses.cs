@@ -9,9 +9,9 @@ namespace WhiteBinTools.FilelistClasses
 {
     internal class FilelistProcesses
     {
-        public static void PrepareFilelistVars(FilelistVariables filelistVariables, string filelistFileVar)
+        public static void PrepareFilelistVars(FilelistVariables filelistVariables, string filelistFile)
         {
-            filelistVariables.MainFilelistFile = filelistFileVar;
+            filelistVariables.MainFilelistFile = filelistFile;
 
             var inFilelistFilePath = Path.GetFullPath(filelistVariables.MainFilelistFile);
             filelistVariables.MainFilelistDirectory = Path.GetDirectoryName(inFilelistFilePath);
@@ -19,11 +19,11 @@ namespace WhiteBinTools.FilelistClasses
         }
 
 
-        public static void DecryptProcess(GameCodes gameCodeVar, FilelistVariables filelistVariables, StreamWriter writerName)
+        public static void DecryptProcess(GameCodes gameCode, FilelistVariables filelistVariables, StreamWriter writerName)
         {
             // Check for encryption header in the filelist file,
             // if the game code is set to ff13-1
-            if (gameCodeVar.Equals(GameCodes.ff131))
+            if (gameCode.Equals(GameCodes.ff131))
             {
                 filelistVariables.IsEncrypted = CheckIfEncrypted(filelistVariables.MainFilelistFile);
 
@@ -44,7 +44,7 @@ namespace WhiteBinTools.FilelistClasses
 
             // Check if the filelist is encrypted
             // or not
-            if (gameCodeVar.Equals(GameCodes.ff132))
+            if (gameCode.Equals(GameCodes.ff132))
             {
                 filelistVariables.IsEncrypted = CheckIfEncrypted(filelistVariables.MainFilelistFile);
             }
@@ -111,10 +111,10 @@ namespace WhiteBinTools.FilelistClasses
         }
 
 
-        public static bool CheckIfEncrypted(string filelistFileVar)
+        public static bool CheckIfEncrypted(string filelistFile)
         {
             var isEncrypted = false;
-            using (var encStream = new FileStream(filelistFileVar, FileMode.Open, FileAccess.Read))
+            using (var encStream = new FileStream(filelistFile, FileMode.Open, FileAccess.Read))
             {
                 using (var encStreamReader = new BinaryReader(encStream))
                 {
