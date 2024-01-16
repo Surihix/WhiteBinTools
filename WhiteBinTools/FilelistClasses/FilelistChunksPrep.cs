@@ -31,6 +31,11 @@ namespace WhiteBinTools.FilelistClasses
             filelistVariables.ChunkInfoSize = filelistVariables.ChunkDataSectionOffset - filelistVariables.ChunkInfoSectionOffset;
             filelistVariables.TotalChunks = filelistVariables.ChunkInfoSize / 12;
 
+            if (filelistVariables.TotalChunks > 1000)
+            {
+                IOhelpers.ErrorExit("Error: Chunk count is larger than the normal amount");
+            }
+
             IOhelpers.LogMessage("TotalChunks: " + filelistVariables.TotalChunks, logWriter);
             IOhelpers.LogMessage("No of files: " + filelistVariables.TotalFiles + "\n", logWriter);
         }

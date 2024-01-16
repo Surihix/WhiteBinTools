@@ -82,7 +82,7 @@ namespace WhiteBinTools.UnpackClasses
 
             Directory.Delete(filelistVariables.DefaultChunksExtDir, true);
 
-            IOhelpers.LogMessage("\nExtracted filepaths to " + filelistOutName + ".txt file", logWriter);
+            IOhelpers.LogMessage("\nExtracted filepaths to " + "\"" + filelistOutName + "\"" + ".txt file", logWriter);
         }
     }
 }

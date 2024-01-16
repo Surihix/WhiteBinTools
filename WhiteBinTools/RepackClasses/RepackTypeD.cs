@@ -222,7 +222,7 @@ namespace WhiteBinTools.RepackClasses
                 FilelistProcesses.EncryptProcess(repackVariables, logWriter);
             }
 
-            IOhelpers.LogMessage("\n\nFinished repacking filelist data into " + Path.GetFileName(newFilelistFile), logWriter);
+            IOhelpers.LogMessage("\n\nFinished repacking filelist data into " + "\"" + Path.GetFileName(newFilelistFile) + "\"", logWriter);
         }
     }
 }

@@ -155,7 +155,7 @@ namespace WhiteBinTools.RepackClasses
                 filelistVariables.TmpDcryptFilelistFile.IfFileExistsDel();
             }
 
-            IOhelpers.LogMessage("\nFinished repacking file into " + repackVariables.NewWhiteBinFileName, logWriter);
+            IOhelpers.LogMessage("\nFinished repacking a file into " + "\"" + repackVariables.NewWhiteBinFileName + "\"", logWriter);
         }
     }
 }

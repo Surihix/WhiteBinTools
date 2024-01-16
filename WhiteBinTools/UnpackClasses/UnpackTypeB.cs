@@ -110,11 +110,11 @@ namespace WhiteBinTools.UnpackClasses
             if (!hasExtracted)
             {
                 IOhelpers.LogMessage("Specified file does not exist. please specify the correct file path", logWriter);
-                IOhelpers.LogMessage("\nFinished extracting file " + unpackVariables.WhiteBinName, logWriter);
+                IOhelpers.LogMessage("\nFinished extracting file from " + "\"" + unpackVariables.WhiteBinName + "\"", logWriter);
             }
             else
             {
-                IOhelpers.LogMessage("\nFinished extracting file " + unpackVariables.WhiteBinName, logWriter);
+                IOhelpers.LogMessage("\nFinished extracting file from " + "\"" + unpackVariables.WhiteBinName + "\"", logWriter);
 
                 if (unpackVariables.CountDuplicates > 0)
                 {

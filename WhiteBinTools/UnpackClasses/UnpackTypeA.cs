@@ -103,7 +103,7 @@ namespace WhiteBinTools.UnpackClasses
 
             Directory.Delete(filelistVariables.DefaultChunksExtDir, true);
 
-            IOhelpers.LogMessage("\nFinished extracting file " + unpackVariables.WhiteBinName, logWriter);
+            IOhelpers.LogMessage("\nFinished extracting file " + "\"" + unpackVariables.WhiteBinName + "\"", logWriter);
 
             if (unpackVariables.CountDuplicates > 1)
             {

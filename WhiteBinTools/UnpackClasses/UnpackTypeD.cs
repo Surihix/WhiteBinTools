@@ -3,7 +3,7 @@ using WhiteBinTools.FilelistClasses;
 using WhiteBinTools.SupportClasses;
 using static WhiteBinTools.SupportClasses.ProgramEnums;
 
-namespace WhiteBinTools
+namespace WhiteBinTools.UnpackClasses
 {
     internal class UnpackTypeD
     {
@@ -131,7 +131,7 @@ namespace WhiteBinTools
 
             filelistVariables.TmpDcryptFilelistFile.IfFileExistsDel();
 
-            IOhelpers.LogMessage("\nFinished unpacking " + filelistOutName, logWriter);
+            IOhelpers.LogMessage("\nFinished unpacking " + "\"" + filelistOutName + "\"", logWriter);
         }
     }
 }
