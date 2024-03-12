@@ -33,14 +33,14 @@ namespace WhiteBinTools.UnpackClasses
                 filelistVariables.NoPathFileCount++;
                 filelistVariables.DirectoryPath = "noPath";
                 filelistVariables.FileName = "FILE_" + filelistVariables.NoPathFileCount;
-                filelistVariables.FullFilePath = extractDir + "\\" + filelistVariables.DirectoryPath + "\\" + filelistVariables.FileName;
-                filelistVariables.MainPath = filelistVariables.DirectoryPath + "\\" + filelistVariables.FileName;
+                filelistVariables.FullFilePath = Path.Combine(extractDir, filelistVariables.DirectoryPath, filelistVariables.FileName);
+                filelistVariables.MainPath = Path.Combine(filelistVariables.DirectoryPath, filelistVariables.FileName);
             }
             else
             {
                 filelistVariables.DirectoryPath = Path.GetDirectoryName(filelistVariables.MainPath);
                 filelistVariables.FileName = Path.GetFileName(filelistVariables.MainPath);
-                filelistVariables.FullFilePath = extractDir + "\\" + filelistVariables.DirectoryPath + "\\" + filelistVariables.FileName;
+                filelistVariables.FullFilePath = Path.Combine(extractDir, filelistVariables.DirectoryPath, filelistVariables.FileName);
             }
 
             if (filelistVariables.UnCmpSize != filelistVariables.CmpSize)

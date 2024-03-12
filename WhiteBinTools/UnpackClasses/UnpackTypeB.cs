@@ -18,8 +18,8 @@ namespace WhiteBinTools.UnpackClasses
             FilelistProcesses.PrepareFilelistVars(filelistVariables, filelistFile);
             UnpackProcess.PrepareBinVars(whiteBinFile, unpackVariables);
 
-            filelistVariables.DefaultChunksExtDir = unpackVariables.ExtractDir + "\\_chunks";
-            filelistVariables.ChunkFile = filelistVariables.DefaultChunksExtDir + "\\chunk_";
+            filelistVariables.DefaultChunksExtDir = Path.Combine(unpackVariables.ExtractDir, "_chunks");
+            filelistVariables.ChunkFile = Path.Combine(filelistVariables.DefaultChunksExtDir, "chunk_");
 
 
             if (!Directory.Exists(unpackVariables.ExtractDir))
@@ -79,9 +79,9 @@ namespace WhiteBinTools.UnpackClasses
                             {
                                 using (var whiteBinStream = new FileStream(whiteBinFile, FileMode.Open, FileAccess.Read))
                                 {
-                                    if (!Directory.Exists(unpackVariables.ExtractDir + "\\" + filelistVariables.DirectoryPath))
+                                    if (!Directory.Exists(Path.Combine(unpackVariables.ExtractDir, filelistVariables.DirectoryPath)))
                                     {
-                                        Directory.CreateDirectory(unpackVariables.ExtractDir + "\\" + filelistVariables.DirectoryPath);
+                                        Directory.CreateDirectory(Path.Combine(unpackVariables.ExtractDir, filelistVariables.DirectoryPath));
                                     }
                                     if (File.Exists(filelistVariables.FullFilePath))
                                     {
@@ -94,7 +94,7 @@ namespace WhiteBinTools.UnpackClasses
 
                                 hasExtracted = true;
 
-                                IOhelpers.LogMessage(unpackVariables.UnpackedState + " _" + unpackVariables.ExtractDirName + "\\" + filelistVariables.MainPath, logWriter);
+                                IOhelpers.LogMessage(unpackVariables.UnpackedState + " _" + Path.Combine(unpackVariables.ExtractDirName, filelistVariables.MainPath), logWriter);
                             }
 
                             chunkStringReaderPos = (uint)chunkStringReader.BaseStream.Position;

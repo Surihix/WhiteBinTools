@@ -92,7 +92,7 @@ namespace WhiteBinTools.RepackClasses
                                         updChunkStringsWriter.Write(repackVariables.AsciiCmpSize + ":");
                                         updChunkStringsWriter.Write(repackVariables.RepackPathInChunk + "\0");
 
-                                        IOhelpers.LogMessage(repackVariables.RepackState + " " + repackVariables.NewWhiteBinFileName + "\\" + repackVariables.RepackLogMsg, logWriter);
+                                        IOhelpers.LogMessage(repackVariables.RepackState + " " + Path.Combine(repackVariables.NewWhiteBinFileName, repackVariables.RepackLogMsg), logWriter);
 
                                         chunkStringReaderPos = (uint)chunkStringReader.BaseStream.Position;
                                     }

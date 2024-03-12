@@ -17,10 +17,10 @@ namespace WhiteBinTools.RepackClasses
 
             FilelistProcesses.PrepareFilelistVars(filelistVariables, filelistFile);
 
-            var extractedDir = Path.GetDirectoryName(whiteBinFile) + "\\_" + Path.GetFileName(whiteBinFile);
+            var extractedDir = Path.Combine(Path.GetDirectoryName(whiteBinFile), "_" + Path.GetFileName(whiteBinFile));
             RepackProcesses.PrepareRepackVars(repackVariables, filelistFile, filelistVariables, extractedDir);
 
-            (extractedDir + "\\" + whiteFilePath).CheckFileExists(logWriter, "Error: Specified file to repack in the argument is missing");
+            Path.Combine(extractedDir, whiteFilePath).CheckFileExists(logWriter, "Error: Specified file to repack in the argument is missing");
 
             filelistVariables.DefaultChunksExtDir.IfDirExistsDel();
             Directory.CreateDirectory(filelistVariables.DefaultChunksExtDir);
@@ -84,7 +84,7 @@ namespace WhiteBinTools.RepackClasses
                                     repackVariables.AsciiCmpSize = repackVariables.ConvertedOgStringData[2];
 
                                     // Repack a specific file
-                                    var currentFilePath = repackVariables.OgDirectoryPath + "\\" + repackVariables.OgFileName;
+                                    var currentFilePath = Path.Combine(repackVariables.OgDirectoryPath, repackVariables.OgFileName);
                                     if (currentFilePath == whiteFilePath)
                                     {
                                         switch (repackVariables.WasCompressed)
@@ -121,7 +121,7 @@ namespace WhiteBinTools.RepackClasses
                                                 break;
                                         }
 
-                                        IOhelpers.LogMessage(repackVariables.RepackState + " " + repackVariables.NewWhiteBinFileName + "\\" + repackVariables.RepackLogMsg + " " + packedAs, logWriter);
+                                        IOhelpers.LogMessage(repackVariables.RepackState + " " + Path.Combine(repackVariables.NewWhiteBinFileName, repackVariables.RepackLogMsg) + " " + packedAs, logWriter);
                                     }
 
                                     updChunkStringsWriter.Write(repackVariables.AsciiFilePos + ":");

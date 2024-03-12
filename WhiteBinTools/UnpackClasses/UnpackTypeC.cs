@@ -16,9 +16,9 @@ namespace WhiteBinTools.UnpackClasses
             FilelistProcesses.PrepareFilelistVars(filelistVariables, filelistFile);
 
             var filelistOutName = Path.GetFileName(filelistFile);
-            filelistVariables.DefaultChunksExtDir = filelistVariables.MainFilelistDirectory + "\\_chunks";
-            filelistVariables.ChunkFile = filelistVariables.DefaultChunksExtDir + "\\chunk_";
-            var outChunkFile = filelistVariables.MainFilelistDirectory + "\\" + filelistOutName + ".txt";
+            filelistVariables.DefaultChunksExtDir = Path.Combine(filelistVariables.MainFilelistDirectory, "_chunks");
+            filelistVariables.ChunkFile = Path.Combine(filelistVariables.DefaultChunksExtDir, "chunk_");
+            var outChunkFile = Path.Combine(filelistVariables.MainFilelistDirectory, filelistOutName + ".txt");
 
 
             filelistVariables.DefaultChunksExtDir.IfDirExistsDel();
