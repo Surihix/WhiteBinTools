@@ -25,7 +25,7 @@ namespace WhiteBinTools.UnpackClasses
             filelistVariables.Position = Convert.ToUInt32(filelistVariables.ConvertedStringData[0], 16) * 2048;
             filelistVariables.UnCmpSize = Convert.ToUInt32(filelistVariables.ConvertedStringData[1], 16);
             filelistVariables.CmpSize = Convert.ToUInt32(filelistVariables.ConvertedStringData[2], 16);
-            filelistVariables.MainPath = filelistVariables.ConvertedStringData[3].Replace("/", "\\");
+            filelistVariables.MainPath = filelistVariables.ConvertedStringData[3].Replace("/", Core.PathSeparatorChar);
             filelistVariables.IsCompressed = false;
 
             if (filelistVariables.MainPath == " ")

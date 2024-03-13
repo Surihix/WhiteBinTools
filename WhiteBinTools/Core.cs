@@ -10,6 +10,8 @@ namespace WhiteBinTools
 {
     internal class Core
     {
+        public static readonly string PathSeparatorChar = Convert.ToString(Path.DirectorySeparatorChar);
+
         static void Main(string[] args)
         {
             // Check for arg length to check if the app is 
@@ -60,7 +62,7 @@ namespace WhiteBinTools
 
                 // Check argument 1 and 2 and assign
                 // the appropriate enum values to it
-                var gameCode = GameCodes.none;
+                var gameCode = new GameCodes();
                 if (Enum.TryParse(specifiedGameCode, false, out GameCodes convertedGameCode))
                 {
                     gameCode = convertedGameCode;
@@ -71,7 +73,7 @@ namespace WhiteBinTools
                     Help.ShowCommands();
                 }
 
-                var actionSwitch = ActionSwitches.none;
+                var actionSwitch = new ActionSwitches();
                 if (Enum.TryParse(specifiedActionSwitch, false, out ActionSwitches convertedActionSwitch))
                 {
                     actionSwitch = convertedActionSwitch;
@@ -198,8 +200,7 @@ namespace WhiteBinTools
             ufl,
             raf,
             rmf,
-            rfl,
-            none
+            rfl
         }
 
 

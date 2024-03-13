@@ -36,7 +36,7 @@ namespace WhiteBinTools.RepackClasses
             repackVariables.OgFilePos = Convert.ToUInt32(repackVariables.ConvertedOgStringData[0], 16) * 2048;
             repackVariables.OgUnCmpSize = Convert.ToUInt32(repackVariables.ConvertedOgStringData[1], 16);
             repackVariables.OgCmpSize = Convert.ToUInt32(repackVariables.ConvertedOgStringData[2], 16);
-            repackVariables.OgMainPath = repackVariables.ConvertedOgStringData[3];
+            repackVariables.OgMainPath = repackVariables.ConvertedOgStringData[3].Replace("/", Core.PathSeparatorChar);
 
             if (repackVariables.OgMainPath == " ")
             {

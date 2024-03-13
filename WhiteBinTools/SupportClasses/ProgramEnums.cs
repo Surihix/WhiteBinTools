@@ -5,8 +5,7 @@
         public enum GameCodes
         {
             ff131,
-            ff132,
-            none
+            ff132
         }
 
 
