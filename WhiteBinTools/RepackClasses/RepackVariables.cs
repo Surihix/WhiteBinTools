@@ -8,6 +8,7 @@
 
         public string NewChunkFile { get; set; }
         public string NewChunksExtDir { get; set; }
+        public bool HasEndString { get; set; }
         public uint LastChunkFileNumber { get; set; }
 
         public string NewWhiteBinFileName { get; set; }

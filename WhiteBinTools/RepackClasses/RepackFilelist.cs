@@ -99,7 +99,7 @@ namespace WhiteBinTools.RepackClasses
                             for (int ncf = 0; ncf < filelistVariables.TotalChunks; ncf++)
                             {
                                 var filesInNewChunkCount = FilelistProcesses.GetFilesInChunkCount(repackVariables.NewChunkFile + filelistVariables.ChunkFNameCount);
-                                if (repackVariables.LastChunkFileNumber == filelistVariables.ChunkFNameCount)
+                                if (repackVariables.HasEndString && repackVariables.LastChunkFileNumber == filelistVariables.ChunkFNameCount)
                                 {
                                     filesInNewChunkCount--;
                                 }
