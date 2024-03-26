@@ -20,6 +20,7 @@ namespace WhiteBinTools
             {
                 Console.WriteLine("Warning: Enough arguments not specified. Please use -? or -h switches for more information");
                 Console.WriteLine("");
+                Console.ReadLine();
                 Environment.Exit(0);
             }
 
