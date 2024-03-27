@@ -129,7 +129,7 @@ namespace WhiteBinTools.UnpackClasses
             if (!hasExtracted)
             {
                 IOhelpers.LogMessage("Specified directory does not exist. please specify the correct directory", logWriter);
-                IOhelpers.LogMessage("\nFinished extracting file from " + "\"" + unpackVariables.WhiteBinName + "\"", logWriter);
+                IOhelpers.LogMessage("\nFinished extracting files from " + "\"" + unpackVariables.WhiteBinName + "\"", logWriter);
             }
             else
             {
