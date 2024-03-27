@@ -10,7 +10,7 @@ This program allows you to unpack and repack the main white_img archive files fr
 <br>``-u`` Unpack a bin file
 <br>``-r`` Repack a bin file
 <br>``-uaf`` Unpack a single file from the bin file
-<br>``-umf`` Unpacks files in a specific directory from the bin file. (refer the example given in the program's Help page for knowing how to specific the directory)
+<br>``-umf`` Unpacks files in a specific directory from the bin file. (refer the example given in the program's Help page)
 <br>``-ufl`` Unpack filelist file
 <br>``-ufc`` Unpack filepath chunks from filelist
 <br>``-raf`` Repack a single file into the bin file
