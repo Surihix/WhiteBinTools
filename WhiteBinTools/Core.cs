@@ -20,7 +20,6 @@ namespace WhiteBinTools
             {
                 Console.WriteLine("Warning: Enough arguments not specified. Please use -? or -h switches for more information");
                 Console.WriteLine("");
-                Console.ReadLine();
                 Environment.Exit(0);
             }
 
@@ -192,7 +191,8 @@ namespace WhiteBinTools
                 }
 
                 Console.WriteLine("");
-                IOhelpers.ErrorExit("Crash exception recorded in CrashLog.txt file");
+                Console.WriteLine("Crash exception recorded in CrashLog.txt file");
+                Environment.Exit(2);
             }
         }
 

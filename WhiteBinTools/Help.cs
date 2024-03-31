@@ -44,8 +44,16 @@ namespace WhiteBinTools
             Console.WriteLine("To repack a single file: WhiteBinTools -ff131 -raf " + @"""filelist.bin """ + @" ""whitebin.bin""" + @" ""chr\pc\c201\bin\c201.win32.trb""");
             Console.WriteLine("To repack multiple files: WhiteBinTools -ff131 -rmf " + @"""filelist.bin""" + @" ""whitebin.bin""" + @" ""unpacked_folder""");
             Console.WriteLine("To repack filelist file: WhiteBinTools -ff131 -rfl " + @"""unpacked_filelist_folder""");
+
             Console.WriteLine("");
-            Console.ReadLine();
+            Console.WriteLine("");
+
+            Console.WriteLine("Exit codes:");
+            Console.WriteLine("Code 0: Process was successful");
+            Console.WriteLine("Code 1: One or more specified arguments were invalid");
+            Console.WriteLine("Code 2: An exception has occured with the program");
+            Console.WriteLine("");
+
             Environment.Exit(0);
         }
     }
