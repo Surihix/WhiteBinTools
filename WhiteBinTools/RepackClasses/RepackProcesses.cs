@@ -51,7 +51,7 @@ namespace WhiteBinTools.RepackClasses
                 repackVariables.OgDirectoryPath = Path.GetDirectoryName(repackVariables.OgMainPath);
                 repackVariables.OgFileName = Path.GetFileName(repackVariables.OgMainPath);
                 repackVariables.OgFullFilePath = Path.Combine(extractedDir, repackVariables.OgDirectoryPath, repackVariables.OgFileName);
-                repackVariables.RepackPathInChunk = repackVariables.OgMainPath;
+                repackVariables.RepackPathInChunk = repackVariables.OgMainPath.Replace(Core.PathSeparatorChar, "/");
             }
 
             if (repackVariables.OgUnCmpSize != repackVariables.OgCmpSize)
