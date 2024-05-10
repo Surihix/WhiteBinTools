@@ -102,6 +102,33 @@ namespace WhiteBinTools.FilelistClasses
 
                         IOhelpers.LogMessage("\nDecrypting filelist file....", writerName);
                         CryptFilelist.ProcessFilelist(CryptActions.d, filelistVariables.TmpDcryptFilelistFile);
+
+                        using (var decFilelistReader = new BinaryReader(File.Open(filelistVariables.TmpDcryptFilelistFile, FileMode.Open, FileAccess.Read)))
+                        {
+                            decFilelistReader.BaseStream.Position = 16;
+                            var filelistDataSizeArray = decFilelistReader.ReadBytes(4);
+                            Array.Reverse(filelistDataSizeArray);
+
+                            var filelistDataSize = BitConverter.ToUInt32(filelistDataSizeArray, 0);
+                            var hashOffset = 32 + filelistDataSize + 4;
+
+                            decFilelistReader.BaseStream.Position = hashOffset;
+                            var filelistHash = decFilelistReader.ReadUInt32();
+
+                            if (filelistHash != CryptoFunctions.ComputeCheckSum(decFilelistReader, filelistDataSize / 4, 32))
+                            {
+                                decFilelistReader.Dispose();
+
+                                var errorMsg = "Error: Filelist was not decrypted correctly";
+
+                                IOhelpers.LogMessage(errorMsg, writerName);
+                                writerName.DisposeIfLogStreamOpen();
+
+                                IOhelpers.ErrorExit(errorMsg);
+                            }
+                        }
+
+
                         IOhelpers.LogMessage("Finished decrypting filelist file\n", writerName);
 
                         filelistVariables.MainFilelistFile = filelistVariables.TmpDcryptFilelistFile;
