@@ -163,6 +163,11 @@ namespace WhiteBinTools
                                 RepackTypeD.RepackFilelist(gameCode, filelistFileOrDir, logWriter);
                                 break;
 
+                            case ActionSwitches.rnd:
+                                CheckArguments(totalArgCount, 3);
+                                RepackTypeE.RepackNoDuplicates(gameCode, filelistFileOrDir, whiteBinOrDir, logWriter);
+                                break;
+
                             default:
                                 Console.WriteLine("Error: Proper tool action is not specified");
                                 IOhelpers.ErrorExit("");
@@ -207,7 +212,8 @@ namespace WhiteBinTools
             ufc,
             raf,
             rmf,
-            rfl
+            rfl,
+            rnd
         }
 
 
