@@ -92,7 +92,6 @@
     <Compile Include="WhiteBinTools\CryptoClasses\Generator.cs" />
     <Compile Include="WhiteBinTools\CryptoClasses\IntegersArray.cs" />
     <Compile Include="WhiteBinTools\RepackClasses\RepackTypeD.cs" />
-    <Compile Include="WhiteBinTools\RepackClasses\RepackTypeE.cs" />
     <Compile Include="WhiteBinTools\UnpackClasses\UnpackTypeD.cs" />
     <Compile Include="WhiteBinTools\Core.cs" />
     <Compile Include="WhiteBinTools\FilelistClasses\FilelistVariables.cs" />
