@@ -74,7 +74,8 @@ namespace WhiteBinTools.RepackClasses
                 {
                     using (var encHeader = new FileStream(encHeaderFile, FileMode.Open, FileAccess.Read))
                     {
-                        encHeader.ExCopyTo(emptyFilelistStream, 0, encHeader.Length);
+                        encHeader.Seek(0, SeekOrigin.Begin);
+                        encHeader.CopyStreamTo(emptyFilelistStream, encHeader.Length, false);
                     }
                 }
 
@@ -118,15 +119,19 @@ namespace WhiteBinTools.RepackClasses
                                         var chunkData = currentChunkReader.ReadLine().Split('|');
                                         var fileCode = uint.Parse(chunkData[0]);
 
-                                        entriesWriter.ExWriteBytesUInt32(entriesWritePos, fileCode, Endianness.LittleEndian);
+                                        entriesWriter.BaseStream.Position = entriesWritePos;
+                                        entriesWriter.WriteBytesUInt32(fileCode, false);
 
                                         switch (gameCode)
                                         {
                                             case GameCodes.ff131:
                                                 var chunkNumber = ushort.Parse(chunkData[1]);
 
-                                                entriesWriter.ExWriteBytesUInt16(entriesWritePos + 4, chunkNumber);
-                                                entriesWriter.ExWriteBytesUInt16(entriesWritePos + 6, pathPos);
+                                                entriesWriter.BaseStream.Position = entriesWritePos + 4;
+                                                entriesWriter.WriteBytesUInt16(chunkNumber, false);
+
+                                                entriesWriter.BaseStream.Position = entriesWritePos + 6;
+                                                entriesWriter.WriteBytesUInt16(pathPos, false);
 
                                                 outChunkWriter.Write(chunkData[2] + "\0");
                                                 pathPos += (ushort)(chunkData[2] + "\0").Length;
@@ -135,11 +140,13 @@ namespace WhiteBinTools.RepackClasses
                                             case GameCodes.ff132:
                                                 if (int16RangeValues.Contains(filelistVariables.ChunkFNameCount))
                                                 {
-                                                    entriesWriter.ExWriteBytesUInt16(entriesWritePos + 4, (ushort)(32768 + pathPos));
+                                                    entriesWriter.BaseStream.Position = entriesWritePos + 4;
+                                                    entriesWriter.WriteBytesUInt16((ushort)(32768 + pathPos), false);
                                                 }
                                                 else
                                                 {
-                                                    entriesWriter.ExWriteBytesUInt16(entriesWritePos + 4, pathPos);
+                                                    entriesWriter.BaseStream.Position = entriesWritePos + 4;
+                                                    entriesWriter.WriteBytesUInt16(pathPos, false);
                                                 }
 
                                                 var chunkNumByte = byte.Parse(chunkData[1]);
@@ -185,9 +192,14 @@ namespace WhiteBinTools.RepackClasses
                     using (var chunkInfoWriter = new BinaryWriter(chunkInfoStream))
                     {
 
-                        chunkInfoWriter.ExWriteBytesUInt32(encHeaderAdjustedOffset, chunksInfoWriterPos - encHeaderAdjustedOffset, Endianness.LittleEndian);
-                        chunkInfoWriter.ExWriteBytesUInt32(encHeaderAdjustedOffset + 4, chunksDataStartPos - encHeaderAdjustedOffset, Endianness.LittleEndian);
-                        chunkInfoWriter.ExWriteBytesUInt32(encHeaderAdjustedOffset + 8, filelistVariables.TotalFiles, Endianness.LittleEndian);
+                        chunkInfoWriter.BaseStream.Position = encHeaderAdjustedOffset;
+                        chunkInfoWriter.WriteBytesUInt32(chunksInfoWriterPos - encHeaderAdjustedOffset, false);
+
+                        chunkInfoWriter.BaseStream.Position = encHeaderAdjustedOffset + 4;
+                        chunkInfoWriter.WriteBytesUInt32(chunksDataStartPos - encHeaderAdjustedOffset, false);
+
+                        chunkInfoWriter.BaseStream.Position = encHeaderAdjustedOffset + 8;
+                        chunkInfoWriter.WriteBytesUInt32(filelistVariables.TotalFiles, false);
 
 
                         for (int fc = 0; fc < filelistVariables.TotalChunks; fc++)
@@ -199,9 +211,14 @@ namespace WhiteBinTools.RepackClasses
                             var cmpSize = (uint)cmpChunkArray.Length;
                             chunkDataStream.Write(cmpChunkArray, 0, cmpChunkArray.Length);
 
-                            chunkInfoWriter.ExWriteBytesUInt32(chunksInfoWriterPos, uncmpSize, Endianness.LittleEndian);
-                            chunkInfoWriter.ExWriteBytesUInt32(chunksInfoWriterPos + 4, cmpSize, Endianness.LittleEndian);
-                            chunkInfoWriter.ExWriteBytesUInt32(chunksInfoWriterPos + 8, chunkStart, Endianness.LittleEndian);
+                            chunkInfoWriter.BaseStream.Position = chunksInfoWriterPos;
+                            chunkInfoWriter.WriteBytesUInt32(uncmpSize, false);
+
+                            chunkInfoWriter.BaseStream.Position = chunksInfoWriterPos + 4;
+                            chunkInfoWriter.WriteBytesUInt32(cmpSize, false);
+
+                            chunkInfoWriter.BaseStream.Position = chunksInfoWriterPos + 8;
+                            chunkInfoWriter.WriteBytesUInt32(chunkStart, false);
 
                             chunkStart += cmpSize;
                             chunksInfoWriterPos += 12;

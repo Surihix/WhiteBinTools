@@ -47,13 +47,13 @@ namespace WhiteBinTools.CryptoClasses
                         using (var decryptedStreamBinWriter = new BinaryWriter(File.Open(inFile + ".dec", FileMode.Append, FileAccess.Write)))
                         {
                             inFileReader.BaseStream.Position = 0;
-                            inFileReader.BaseStream.ExCopyTo(decryptedStreamBinWriter.BaseStream, 0, writePos);
+                            inFileReader.BaseStream.CopyStreamTo(decryptedStreamBinWriter.BaseStream, writePos, false);
 
                             var blockCount = cryptBodySize / 8;
                             Decryption.DecryptBlocks(xorTable, blockCount, readPos, writePos, inFileReader, decryptedStreamBinWriter, false);
 
                             inFileReader.BaseStream.Position = decryptedStreamBinWriter.BaseStream.Length;
-                            inFileReader.BaseStream.ExCopyTo(decryptedStreamBinWriter.BaseStream, decryptedStreamBinWriter.BaseStream.Length, remainderBytes);
+                            inFileReader.BaseStream.CopyStreamTo(decryptedStreamBinWriter.BaseStream, remainderBytes, false);
                         }
 
                         inFileReader.Dispose();
@@ -67,20 +67,20 @@ namespace WhiteBinTools.CryptoClasses
                         using (var chkSumStreamBinWriter = new BinaryWriter(File.Open(inFile + ".tmp2", FileMode.Append, FileAccess.Write)))
                         {
                             inFileReader.BaseStream.Position = 0;
-                            inFileReader.BaseStream.ExCopyTo(chkSumStreamBinWriter.BaseStream, 0, readPos);
+                            inFileReader.BaseStream.CopyStreamTo(chkSumStreamBinWriter.BaseStream, readPos, false);
 
                             inFileReader.BaseStream.Position = readPos;
-                            inFileReader.BaseStream.ExCopyTo(chkSumStreamBinWriter.BaseStream, readPos, cryptBodySize - 8);
+                            inFileReader.BaseStream.CopyStreamTo(chkSumStreamBinWriter.BaseStream, cryptBodySize - 8, false);
 
                             inFileReader.BaseStream.Position = readPos + cryptBodySize - 8;
-                            inFileReader.BaseStream.ExCopyTo(chkSumStreamBinWriter.BaseStream, readPos + cryptBodySize - 8, 4);
+                            inFileReader.BaseStream.CopyStreamTo(chkSumStreamBinWriter.BaseStream, 4, false);
 
                             var checkSum = inFileReader.ComputeCheckSum((cryptBodySize - 8) / 4, readPos);
 
                             chkSumStreamBinWriter.Write(checkSum);
 
                             inFileReader.BaseStream.Position = chkSumStreamBinWriter.BaseStream.Length;
-                            inFileReader.BaseStream.ExCopyTo(chkSumStreamBinWriter.BaseStream, chkSumStreamBinWriter.BaseStream.Length, remainderBytes);
+                            inFileReader.BaseStream.CopyStreamTo(chkSumStreamBinWriter.BaseStream, remainderBytes, false);
                         }
 
                         inFileReader.Dispose();
@@ -92,7 +92,7 @@ namespace WhiteBinTools.CryptoClasses
                             using (var encryptedStreamBinWriter = new BinaryWriter(File.Open(inFile + ".enc", FileMode.Append, FileAccess.Write)))
                             {
                                 inFileReaderTmp.BaseStream.Position = 0;
-                                inFileReaderTmp.BaseStream.ExCopyTo(encryptedStreamBinWriter.BaseStream, 0, writePos);
+                                inFileReaderTmp.BaseStream.CopyStreamTo(encryptedStreamBinWriter.BaseStream, writePos, false);
 
                                 var blockCount = cryptBodySize / 8;
                                 Encryption.EncryptBlocks(xorTable, blockCount, readPos, writePos, inFileReaderTmp, encryptedStreamBinWriter, false);

@@ -230,8 +230,11 @@ namespace WhiteBinTools.FilelistClasses
                 {
                     filelistToEncrypt.Seek(0, SeekOrigin.Begin);
 
-                    filelistToEncryptWriter.ExWriteBytesUInt32(16, filelistDataSize, Endianness.BigEndian);
-                    filelistToEncryptWriter.ExWriteBytesUInt32((uint)filelistToEncrypt.Length - 16, filelistDataSize, Endianness.LittleEndian);
+                    filelistToEncryptWriter.BaseStream.Position = 16;
+                    filelistToEncryptWriter.WriteBytesUInt32(filelistDataSize, true);
+
+                    filelistToEncryptWriter.BaseStream.Position = (uint)filelistToEncrypt.Length - 16;
+                    filelistToEncryptWriter.WriteBytesUInt32(filelistDataSize, false);
                 }
             }
 

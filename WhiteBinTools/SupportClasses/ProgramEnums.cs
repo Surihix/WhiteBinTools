@@ -14,12 +14,5 @@
             d,
             e
         }
-
-
-        public enum Endianness
-        {
-            LittleEndian,
-            BigEndian
-        }
     }
 }

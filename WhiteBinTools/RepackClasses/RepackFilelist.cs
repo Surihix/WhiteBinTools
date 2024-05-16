@@ -23,7 +23,8 @@ namespace WhiteBinTools.RepackClasses
             {
                 using (var newFilelistBase = new FileStream(repackVariables.NewFilelistFile, FileMode.Append, FileAccess.Write))
                 {
-                    oldFilelistBase.ExCopyTo(newFilelistBase, 0, filelistVariables.ChunkDataSectionOffset);
+                    oldFilelistBase.Seek(0, SeekOrigin.Begin);
+                    oldFilelistBase.CopyStreamTo(newFilelistBase, filelistVariables.ChunkDataSectionOffset, false);
                 }
             }
 
@@ -53,9 +54,14 @@ namespace WhiteBinTools.RepackClasses
                             newFilelistChunks.Write(chunkCmpData, 0, chunkCmpData.Length);
                             chunkCmpSize = (uint)chunkCmpData.Length;
 
-                            newChunksInfoWriter.ExWriteBytesUInt32(chunkInfoWriterPos, chunkUncmpSize, Endianness.LittleEndian);
-                            newChunksInfoWriter.ExWriteBytesUInt32(chunkInfoWriterPos + 4, chunkCmpSize, Endianness.LittleEndian);
-                            newChunksInfoWriter.ExWriteBytesUInt32(chunkInfoWriterPos + 8, chunkStartVal, Endianness.LittleEndian);
+                            newChunksInfoWriter.BaseStream.Position = chunkInfoWriterPos;
+                            newChunksInfoWriter.WriteBytesUInt32(chunkUncmpSize, false);
+
+                            newChunksInfoWriter.BaseStream.Position = chunkInfoWriterPos + 4;
+                            newChunksInfoWriter.WriteBytesUInt32(chunkCmpSize, false);
+
+                            newChunksInfoWriter.BaseStream.Position = chunkInfoWriterPos + 8;
+                            newChunksInfoWriter.WriteBytesUInt32(chunkStartVal, false);
 
                             var newChunkStartVal = chunkStartVal + chunkCmpSize;
                             chunkStartVal = newChunkStartVal;
@@ -127,9 +133,11 @@ namespace WhiteBinTools.RepackClasses
                                                 }
                                             }
 
-                                            newFileInfoWriter.ExWriteBytesUInt16(fileInfoWriterPos, filePosInChunkToWrite);
+                                            newFileInfoWriter.BaseStream.Position = fileInfoWriterPos;
+                                            newFileInfoWriter.WriteBytesUInt16(filePosInChunkToWrite, false);
 
-                                            var readString = newChunkReader.BinaryToString(filePosInChunk);
+                                            newChunkReader.BaseStream.Position = filePosInChunk;
+                                            var readString = newChunkReader.ReadStringTillNull();
 
                                             filePosInChunk = (ushort)newChunkReader.BaseStream.Position;
                                             filePosInChunkToWrite = (ushort)newChunkReader.BaseStream.Position;

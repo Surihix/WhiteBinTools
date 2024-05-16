@@ -70,7 +70,8 @@ namespace WhiteBinTools.UnpackClasses
                         var chunkStringReaderPos = (uint)0;
                         for (int f = 0; f < filesInChunkCount; f++)
                         {
-                            var convertedString = chunkStringReader.BinaryToString(chunkStringReaderPos);
+                            chunkStringReader.BaseStream.Position = chunkStringReaderPos;
+                            var convertedString = chunkStringReader.ReadStringTillNull();
 
                             if (convertedString.StartsWith("end"))
                             {

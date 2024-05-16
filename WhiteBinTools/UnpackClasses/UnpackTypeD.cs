@@ -35,7 +35,8 @@ namespace WhiteBinTools.UnpackClasses
                     {
                         using (var encHeader = new FileStream(Path.Combine(extractedFilelistDir, "EncryptionHeader_(DON'T DELETE)"), FileMode.OpenOrCreate, FileAccess.Write))
                         {
-                            filelistStream.ExCopyTo(encHeader, 0, 32);
+                            filelistStream.Seek(0, SeekOrigin.Begin);
+                            filelistStream.CopyStreamTo(encHeader, 32, false);
                         }
                     }
 
@@ -71,7 +72,8 @@ namespace WhiteBinTools.UnpackClasses
                                 {
                                     using (var dcmpChunkReader = new BinaryReader(dcmpChunkStream))
                                     {
-                                        filelistStream.ExCopyTo(cmpChunkStream, chunkStart, compressedSize);
+                                        filelistStream.Seek(chunkStart, SeekOrigin.Begin);
+                                        filelistStream.CopyStreamTo(cmpChunkStream, compressedSize, false);
 
                                         cmpChunkStream.Seek(0, SeekOrigin.Begin);
                                         cmpChunkStream.ZlibDecompress(dcmpChunkStream);
@@ -81,7 +83,8 @@ namespace WhiteBinTools.UnpackClasses
                                         uint currentPathReadPos = 0;
                                         while (currentPathReadPos != unCompressedSize)
                                         {
-                                            var filePath = dcmpChunkReader.BinaryToString(currentPathReadPos);
+                                            dcmpChunkReader.BaseStream.Position = currentPathReadPos;
+                                            var filePath = dcmpChunkReader.ReadStringTillNull();
 
                                             if (filePath == "end")
                                             {
