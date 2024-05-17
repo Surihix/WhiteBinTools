@@ -23,7 +23,13 @@ namespace WhiteBinTools.FilelistClasses
         public uint TotalChunks { get; set; }
         public uint ChunkFNameCount { get; set; }
 
-        public Dictionary<uint, byte[]> ChunkDataDict = new Dictionary<uint, byte[]>();
+        public Dictionary<int, byte[]> ChunkDataDict = new Dictionary<int, byte[]>();
+        public int CurrentChunkNumber { get; set; }
+
+        public uint FileCode { get; set; }
+        public int PathStringChunk { get; set; }
+        public ushort PathStringPos { get; set; }
+        public byte UnkEntryVal { get; set; }
 
         public string PathString { get; set; }
         public string[] ConvertedStringData { get; set; }

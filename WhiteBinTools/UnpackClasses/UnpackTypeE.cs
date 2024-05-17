@@ -16,13 +16,7 @@ namespace WhiteBinTools.UnpackClasses
             FilelistProcesses.PrepareFilelistVars(filelistVariables, filelistFile);
 
             var filelistOutName = Path.GetFileName(filelistFile);
-            filelistVariables.DefaultChunksExtDir = Path.Combine(filelistVariables.MainFilelistDirectory, "_chunks");
-            filelistVariables.ChunkFile = Path.Combine(filelistVariables.DefaultChunksExtDir, "chunk_");
             var outChunkFile = Path.Combine(filelistVariables.MainFilelistDirectory, filelistOutName + ".txt");
-
-
-            filelistVariables.DefaultChunksExtDir.IfDirExistsDel();
-            Directory.CreateDirectory(filelistVariables.DefaultChunksExtDir);
 
             outChunkFile.IfFileExistsDel();
 
@@ -34,8 +28,13 @@ namespace WhiteBinTools.UnpackClasses
                 using (var filelistReader = new BinaryReader(filelistStream))
                 {
                     FilelistChunksPrep.GetFilelistOffsets(filelistReader, logWriter, filelistVariables);
-                    FilelistChunksPrep.UnpackChunks(filelistStream, filelistVariables.ChunkFile, filelistVariables);
+                    FilelistChunksPrep.BuildChunks(filelistStream, filelistVariables);
                 }
+            }
+
+            if (gameCode.Equals(GameCodes.ff132))
+            {
+                filelistVariables.CurrentChunkNumber = -1;
             }
 
             if (filelistVariables.IsEncrypted)
@@ -47,44 +46,30 @@ namespace WhiteBinTools.UnpackClasses
 
             // Write all file paths strings
             // to a text file
-            filelistVariables.ChunkFNameCount = 0;
-            for (int cf = 0; cf < filelistVariables.TotalChunks; cf++)
+            using (var outchunkWriter = new StreamWriter(outChunkFile, true))
             {
-                var filesInChunkCount = FilelistProcesses.GetFilesInChunkCount(filelistVariables.ChunkFile + filelistVariables.ChunkFNameCount);
-
-                // Open a chunk file for reading
-                using (var currentChunkStream = new FileStream(filelistVariables.ChunkFile + filelistVariables.ChunkFNameCount, FileMode.Open, FileAccess.Read))
+                using (var entriesStream = new MemoryStream())
                 {
-                    using (var chunkStringReader = new BinaryReader(currentChunkStream))
+                    entriesStream.Write(filelistVariables.EntriesData, 0, filelistVariables.EntriesData.Length);
+                    entriesStream.Seek(0, SeekOrigin.Begin);
+
+                    using (var entriesReader = new BinaryReader(entriesStream))
                     {
-
-                        using (var outChunkStream = new FileStream(outChunkFile, FileMode.Append, FileAccess.Write))
+                        long entriesReadPos = 4;
+                        for (int f = 0; f < filelistVariables.TotalFiles; f++)
                         {
-                            using (var outChunkWriter = new StreamWriter(outChunkStream))
-                            {
+                            FilelistProcesses.GetCurrentFileEntry(gameCode, entriesReader, entriesReadPos, filelistVariables);
+                            entriesReadPos += 8;
 
-                                var chunkStringReaderPos = (uint)0;
-                                for (int f = 0; f < filesInChunkCount; f++)
-                                {
-                                    chunkStringReader.BaseStream.Position = chunkStringReaderPos;
-                                    var convertedString = chunkStringReader.ReadStringTillNull();
-
-                                    outChunkWriter.WriteLine(convertedString);
-
-                                    chunkStringReaderPos = (uint)chunkStringReader.BaseStream.Position;
-                                }
-                            }
+                            outchunkWriter.WriteLine(filelistVariables.PathString);
                         }
+
+                        outchunkWriter.WriteLine("end");
                     }
                 }
-
-                filelistVariables.ChunkFNameCount++;
             }
-
-            Directory.Delete(filelistVariables.DefaultChunksExtDir, true);
 
             IOhelpers.LogMessage("\nExtracted filepaths to " + "\"" + filelistOutName + "\"" + ".txt file", logWriter);
         }
-
     }
 }

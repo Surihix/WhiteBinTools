@@ -95,7 +95,7 @@
     <Compile Include="WhiteBinTools\SupportClasses\BinaryReaderHelpers.cs" />
     <Compile Include="WhiteBinTools\SupportClasses\BinaryWriterHelpers.cs" />
     <Compile Include="WhiteBinTools\SupportClasses\StreamHelpers.cs" />
-    <Compile Include="WhiteBinTools\UnpackClasses\UnpackTypeA_Test.cs" />
+    <Compile Include="WhiteBinTools\UnpackClasses\UnpackTypeA.cs" />
     <Compile Include="WhiteBinTools\UnpackClasses\UnpackTypeD.cs" />
     <Compile Include="WhiteBinTools\Core.cs" />
     <Compile Include="WhiteBinTools\FilelistClasses\FilelistVariables.cs" />
@@ -113,7 +113,6 @@
     <Compile Include="WhiteBinTools\UnpackClasses\UnpackTypeE.cs" />
     <Compile Include="WhiteBinTools\UnpackClasses\UnpackVariables.cs" />
     <Compile Include="WhiteBinTools\UnpackClasses\UnpackProcess.cs" />
-    <Compile Include="WhiteBinTools\UnpackClasses\UnpackTypeA.cs" />
     <Compile Include="WhiteBinTools\UnpackClasses\UnpackTypeB.cs" />
     <Compile Include="WhiteBinTools\UnpackClasses\UnpackTypeC.cs" />
     <Compile Include="WhiteBinTools\Help.cs" />

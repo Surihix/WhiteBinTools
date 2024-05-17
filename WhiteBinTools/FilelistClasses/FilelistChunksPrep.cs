@@ -94,7 +94,7 @@ namespace WhiteBinTools.FilelistClasses
         }
 
 
-        public static void UnpackChunks2(FileStream filelistStream, FilelistVariables filelistVariables)
+        public static void BuildChunks(FileStream filelistStream, FilelistVariables filelistVariables)
         {
             // Make a memorystream for holding all Chunks info
             using (var chunkInfoStream = new MemoryStream())
@@ -129,7 +129,7 @@ namespace WhiteBinTools.FilelistClasses
                                 var readCmpBytes = chunkStream.Read(chunkBuffer, 0, chunkBuffer.Length);
                                 chunkToDcmp.Write(chunkBuffer, 0, readCmpBytes);
 
-                                filelistVariables.ChunkDataDict.Add((uint)c, chunkToDcmp.ZlibDecompressBuffer());
+                                filelistVariables.ChunkDataDict.Add(c, chunkToDcmp.ZlibDecompressBuffer());
                             }
 
                             chunkInfoReadVal += 12;

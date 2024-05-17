@@ -47,88 +47,88 @@ namespace WhiteBinTools.UnpackClasses
                     }
 
 
-                    var entryReadPos = 12;
-                    if (filelistVariables.IsEncrypted)
-                    {
-                        entryReadPos = 44;
-                    }
-                    var chunkReadPos = filelistVariables.ChunkInfoSectionOffset;
-                    filelistVariables.ChunkFNameCount = 0;
+                    //var entryReadPos = 12;
+                    //if (filelistVariables.IsEncrypted)
+                    //{
+                    //    entryReadPos = 44;
+                    //}
+                    //var chunkReadPos = filelistVariables.ChunkInfoSectionOffset;
+                    //filelistVariables.ChunkFNameCount = 0;
 
-                    for (int c = 0; c < filelistVariables.TotalChunks; c++)
-                    {
-                        var currentChunkFile = outChunkFile + $"{filelistVariables.ChunkFNameCount}.txt";
+                    //for (int c = 0; c < filelistVariables.TotalChunks; c++)
+                    //{
+                    //    var currentChunkFile = outChunkFile + $"{filelistVariables.ChunkFNameCount}.txt";
 
-                        using (var chunkDataStream = new StreamWriter(currentChunkFile, true))
-                        {
-                            filelistReader.BaseStream.Position = chunkReadPos;
-                            var unCompressedSize = filelistReader.ReadUInt32();
-                            var compressedSize = filelistReader.ReadUInt32();
-                            var chunkStart = filelistVariables.ChunkDataSectionOffset + filelistReader.ReadUInt32();
+                    //    using (var chunkDataStream = new StreamWriter(currentChunkFile, true))
+                    //    {
+                    //        filelistReader.BaseStream.Position = chunkReadPos;
+                    //        var unCompressedSize = filelistReader.ReadUInt32();
+                    //        var compressedSize = filelistReader.ReadUInt32();
+                    //        var chunkStart = filelistVariables.ChunkDataSectionOffset + filelistReader.ReadUInt32();
 
-                            using (var cmpChunkStream = new MemoryStream())
-                            {
-                                using (var dcmpChunkStream = new MemoryStream())
-                                {
-                                    using (var dcmpChunkReader = new BinaryReader(dcmpChunkStream))
-                                    {
-                                        filelistStream.Seek(chunkStart, SeekOrigin.Begin);
-                                        filelistStream.CopyStreamTo(cmpChunkStream, compressedSize, false);
+                    //        using (var cmpChunkStream = new MemoryStream())
+                    //        {
+                    //            using (var dcmpChunkStream = new MemoryStream())
+                    //            {
+                    //                using (var dcmpChunkReader = new BinaryReader(dcmpChunkStream))
+                    //                {
+                    //                    filelistStream.Seek(chunkStart, SeekOrigin.Begin);
+                    //                    filelistStream.CopyStreamTo(cmpChunkStream, compressedSize, false);
 
-                                        cmpChunkStream.Seek(0, SeekOrigin.Begin);
-                                        cmpChunkStream.ZlibDecompress(dcmpChunkStream);
+                    //                    cmpChunkStream.Seek(0, SeekOrigin.Begin);
+                    //                    cmpChunkStream.ZlibDecompress(dcmpChunkStream);
 
-                                        dcmpChunkStream.Seek(0, SeekOrigin.Begin);
+                    //                    dcmpChunkStream.Seek(0, SeekOrigin.Begin);
 
-                                        uint currentPathReadPos = 0;
-                                        while (currentPathReadPos != unCompressedSize)
-                                        {
-                                            dcmpChunkReader.BaseStream.Position = currentPathReadPos;
-                                            var filePath = dcmpChunkReader.ReadStringTillNull();
+                    //                    uint currentPathReadPos = 0;
+                    //                    while (currentPathReadPos != unCompressedSize)
+                    //                    {
+                    //                        dcmpChunkReader.BaseStream.Position = currentPathReadPos;
+                    //                        var filePath = dcmpChunkReader.ReadStringTillNull();
 
-                                            if (filePath == "end")
-                                            {
-                                                break;
-                                            }
+                    //                        if (filePath == "end")
+                    //                        {
+                    //                            break;
+                    //                        }
 
-                                            filelistReader.BaseStream.Position = entryReadPos;
-                                            var fileCode = filelistReader.ReadUInt32();
-                                            ushort chunkNumber = 0;
-                                            ushort unkVal = 0;
+                    //                        filelistReader.BaseStream.Position = entryReadPos;
+                    //                        var fileCode = filelistReader.ReadUInt32();
+                    //                        ushort chunkNumber = 0;
+                    //                        ushort unkVal = 0;
 
-                                            switch (gameCode)
-                                            {
-                                                case GameCodes.ff131:
-                                                    chunkNumber = filelistReader.ReadUInt16();
-                                                    _ = filelistReader.ReadUInt16();
-                                                    break;
+                    //                        switch (gameCode)
+                    //                        {
+                    //                            case GameCodes.ff131:
+                    //                                chunkNumber = filelistReader.ReadUInt16();
+                    //                                _ = filelistReader.ReadUInt16();
+                    //                                break;
 
-                                                case GameCodes.ff132:
-                                                    _ = filelistReader.ReadUInt16();
-                                                    chunkNumber = filelistReader.ReadByte();
-                                                    unkVal = filelistReader.ReadByte();
-                                                    break;
-                                            }
+                    //                            case GameCodes.ff132:
+                    //                                _ = filelistReader.ReadUInt16();
+                    //                                chunkNumber = filelistReader.ReadByte();
+                    //                                unkVal = filelistReader.ReadByte();
+                    //                                break;
+                    //                        }
 
-                                            chunkDataStream.Write(fileCode + "|");
-                                            chunkDataStream.Write(chunkNumber + "|");
-                                            if (gameCode.Equals(GameCodes.ff132))
-                                            {
-                                                chunkDataStream.Write(unkVal + "|");
-                                            }
-                                            chunkDataStream.WriteLine(filePath);
+                    //                        chunkDataStream.Write(fileCode + "|");
+                    //                        chunkDataStream.Write(chunkNumber + "|");
+                    //                        if (gameCode.Equals(GameCodes.ff132))
+                    //                        {
+                    //                            chunkDataStream.Write(unkVal + "|");
+                    //                        }
+                    //                        chunkDataStream.WriteLine(filePath);
 
-                                            currentPathReadPos = (uint)dcmpChunkReader.BaseStream.Position;
-                                            entryReadPos += 8;
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                    //                        currentPathReadPos = (uint)dcmpChunkReader.BaseStream.Position;
+                    //                        entryReadPos += 8;
+                    //                    }
+                    //                }
+                    //            }
+                    //        }
+                    //    }
 
-                        chunkReadPos += 12;
-                        filelistVariables.ChunkFNameCount++;
-                    }
+                    //    chunkReadPos += 12;
+                    //    filelistVariables.ChunkFNameCount++;
+                    //}
                 }
             }
 

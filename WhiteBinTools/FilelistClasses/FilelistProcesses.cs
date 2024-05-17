@@ -130,7 +130,6 @@ namespace WhiteBinTools.FilelistClasses
                             }
                         }
 
-
                         IOhelpers.LogMessage("Finished decrypting filelist file\n", writerName);
 
                         filelistVariables.MainFilelistFile = filelistVariables.TmpDcryptFilelistFile;
@@ -161,19 +160,43 @@ namespace WhiteBinTools.FilelistClasses
         }
 
 
-        public static void GetCurrentFileEntry(GameCodes gameCode, BinaryReader entriesReader, FilelistVariables filelistVariables)
+        public static void GetCurrentFileEntry(GameCodes gameCode, BinaryReader entriesReader, long entriesReadPos, FilelistVariables filelistVariables)
         {
+            entriesReader.BaseStream.Position = entriesReadPos;
+            filelistVariables.FileCode = entriesReader.ReadBytesUInt32(false);
+
             if (gameCode.Equals(GameCodes.ff131))
             {
-                filelistVariables.ChunkFNameCount = entriesReader.ReadBytesUInt16(false);
-                var pathPos = entriesReader.ReadBytesUInt16(false);
+                filelistVariables.PathStringChunk = entriesReader.ReadBytesUInt16(false);
+                filelistVariables.PathStringPos = entriesReader.ReadBytesUInt16(false);
 
-                var currentChunkData = filelistVariables.ChunkDataDict[filelistVariables.ChunkFNameCount];
-                GeneratePathString(pathPos, currentChunkData, filelistVariables);
+                var currentChunkData = filelistVariables.ChunkDataDict[filelistVariables.PathStringChunk];
+                GeneratePathString(filelistVariables.PathStringPos, currentChunkData, filelistVariables);
             }
             else if (gameCode.Equals(GameCodes.ff132))
             {
+                filelistVariables.PathStringPos = entriesReader.ReadBytesUInt16(false);
+                filelistVariables.PathStringChunk = entriesReader.ReadByte();
+                filelistVariables.UnkEntryVal = entriesReader.ReadByte();
 
+                if (filelistVariables.PathStringPos == 0)
+                {
+                    filelistVariables.CurrentChunkNumber++;
+                }
+
+                if (filelistVariables.PathStringPos == 32768)
+                {
+                    filelistVariables.CurrentChunkNumber++;
+                    filelistVariables.PathStringPos -= 32768;
+                }
+
+                if (filelistVariables.PathStringPos > 32768)
+                {
+                    filelistVariables.PathStringPos -= 32768;
+                }
+
+                var currentChunkData = filelistVariables.ChunkDataDict[filelistVariables.CurrentChunkNumber];
+                GeneratePathString(filelistVariables.PathStringPos, currentChunkData, filelistVariables);
             }
         }
 
