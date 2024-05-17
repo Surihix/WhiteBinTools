@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using WhiteBinTools.CryptoClasses;
 using WhiteBinTools.RepackClasses;
 using WhiteBinTools.SupportClasses;
@@ -156,6 +158,42 @@ namespace WhiteBinTools.FilelistClasses
             }
 
             return isEncrypted;
+        }
+
+
+        public static void GetCurrentFileEntry(GameCodes gameCode, BinaryReader entriesReader, FilelistVariables filelistVariables)
+        {
+            if (gameCode.Equals(GameCodes.ff131))
+            {
+                filelistVariables.ChunkFNameCount = entriesReader.ReadBytesUInt16(false);
+                var pathPos = entriesReader.ReadBytesUInt16(false);
+
+                var currentChunkData = filelistVariables.ChunkDataDict[filelistVariables.ChunkFNameCount];
+                GeneratePathString(pathPos, currentChunkData, filelistVariables);
+            }
+            else if (gameCode.Equals(GameCodes.ff132))
+            {
+
+            }
+        }
+
+        static void GeneratePathString(ushort pathPos, byte[] currentChunkData, FilelistVariables filelistVariables)
+        {
+            var readBytesList = new List<byte>();
+
+            for (int i = pathPos; i < currentChunkData.Length; i++)
+            {
+                if (currentChunkData[i] == 0)
+                {
+                    break;
+                }
+                else
+                {
+                    readBytesList.Add(currentChunkData[i]);
+                }
+            }
+
+            filelistVariables.PathString = Encoding.UTF8.GetString(readBytesList.ToArray());
         }
 
 

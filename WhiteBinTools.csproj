@@ -95,6 +95,7 @@
     <Compile Include="WhiteBinTools\SupportClasses\BinaryReaderHelpers.cs" />
     <Compile Include="WhiteBinTools\SupportClasses\BinaryWriterHelpers.cs" />
     <Compile Include="WhiteBinTools\SupportClasses\StreamHelpers.cs" />
+    <Compile Include="WhiteBinTools\UnpackClasses\UnpackTypeA_Test.cs" />
     <Compile Include="WhiteBinTools\UnpackClasses\UnpackTypeD.cs" />
     <Compile Include="WhiteBinTools\Core.cs" />
     <Compile Include="WhiteBinTools\FilelistClasses\FilelistVariables.cs" />

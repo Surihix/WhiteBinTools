@@ -1,4 +1,6 @@
-﻿namespace WhiteBinTools.FilelistClasses
+﻿using System.Collections.Generic;
+
+namespace WhiteBinTools.FilelistClasses
 {
     internal class FilelistVariables
     {
@@ -7,6 +9,7 @@
         public string TmpDcryptFilelistFile { get; set; }
         public string DefaultChunksExtDir { get; set; }
         public string ChunkFile { get; set; }
+        public byte[] EntriesData { get; set; }
         public bool IsEncrypted { get; set; }
 
         public uint ChunkInfoSectionOffset { get; set; }
@@ -20,6 +23,9 @@
         public uint TotalChunks { get; set; }
         public uint ChunkFNameCount { get; set; }
 
+        public Dictionary<uint, byte[]> ChunkDataDict = new Dictionary<uint, byte[]>();
+
+        public string PathString { get; set; }
         public string[] ConvertedStringData { get; set; }
         public uint Position { get; set; }
         public uint UnCmpSize { get; set; }

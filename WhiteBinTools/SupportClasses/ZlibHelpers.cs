@@ -13,6 +13,11 @@ namespace WhiteBinTools.SupportClasses
             }
         }
 
+        public static byte[] ZlibDecompressBuffer(this MemoryStream cmpStreamName)
+        {
+            return ZlibStream.UncompressBuffer(cmpStreamName.ToArray());
+        }
+
         public static byte[] ZlibCompress(this string fileToCmp)
         {
             var dataToCompressBuffer = File.ReadAllBytes(fileToCmp);

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
-using WhiteBinTools.SupportClasses;
 using WhiteBinTools.FilelistClasses;
+using WhiteBinTools.SupportClasses;
 
 namespace WhiteBinTools.UnpackClasses
 {
