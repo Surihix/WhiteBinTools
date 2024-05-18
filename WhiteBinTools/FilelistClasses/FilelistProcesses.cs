@@ -44,8 +44,8 @@ namespace WhiteBinTools.FilelistClasses
             }
 
 
-            // Check if the filelist is encrypted
-            // or not
+            // Check for encryption header in the filelist file,
+            // if the game code is set to ff13-2
             if (gameCode.Equals(GameCodes.ff132))
             {
                 filelistVariables.IsEncrypted = CheckIfEncrypted(filelistVariables.MainFilelistFile);
@@ -167,16 +167,16 @@ namespace WhiteBinTools.FilelistClasses
 
             if (gameCode.Equals(GameCodes.ff131))
             {
-                filelistVariables.PathStringChunk = entriesReader.ReadBytesUInt16(false);
+                filelistVariables.ChunkNumber = entriesReader.ReadBytesUInt16(false);
                 filelistVariables.PathStringPos = entriesReader.ReadBytesUInt16(false);
 
-                var currentChunkData = filelistVariables.ChunkDataDict[filelistVariables.PathStringChunk];
+                var currentChunkData = filelistVariables.ChunkDataDict[filelistVariables.ChunkNumber];
                 GeneratePathString(filelistVariables.PathStringPos, currentChunkData, filelistVariables);
             }
             else if (gameCode.Equals(GameCodes.ff132))
             {
                 filelistVariables.PathStringPos = entriesReader.ReadBytesUInt16(false);
-                filelistVariables.PathStringChunk = entriesReader.ReadByte();
+                filelistVariables.ChunkNumber = entriesReader.ReadByte();
                 filelistVariables.UnkEntryVal = entriesReader.ReadByte();
 
                 if (filelistVariables.PathStringPos == 0)

@@ -56,8 +56,9 @@ namespace WhiteBinTools.UnpackClasses
 
                 using (var entriesReader = new BinaryReader(entriesStream))
                 {
+
                     // Extracting files section 
-                    long entriesReadPos = 4;
+                    long entriesReadPos = 0;
                     unpackVariables.CountDuplicates = 0;
 
                     for (int f = 0; f < filelistVariables.TotalFiles; f++)

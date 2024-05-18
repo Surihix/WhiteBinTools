@@ -55,7 +55,10 @@ namespace WhiteBinTools.UnpackClasses
 
                     using (var entriesReader = new BinaryReader(entriesStream))
                     {
-                        long entriesReadPos = 4;
+
+                        // Process each file entry from 
+                        // the entry section
+                        long entriesReadPos = 0;
                         for (int f = 0; f < filelistVariables.TotalFiles; f++)
                         {
                             FilelistProcesses.GetCurrentFileEntry(gameCode, entriesReader, entriesReadPos, filelistVariables);

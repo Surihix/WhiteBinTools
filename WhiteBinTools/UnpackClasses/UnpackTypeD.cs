@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using WhiteBinTools.FilelistClasses;
 using WhiteBinTools.SupportClasses;
 using static WhiteBinTools.SupportClasses.ProgramEnums;
@@ -17,6 +18,8 @@ namespace WhiteBinTools.UnpackClasses
 
             var filelistOutName = Path.GetFileName(filelistFile);
             var extractedFilelistDir = Path.Combine(filelistVariables.MainFilelistDirectory, "_" + filelistOutName);
+            var encHeaderFile = Path.Combine(extractedFilelistDir, "~EncryptionHeader_(DON'T DELETE)");
+            var countsFile = Path.Combine(extractedFilelistDir, "~Counts.txt");
             var outChunkFile = Path.Combine(extractedFilelistDir, "Chunk_");
 
             extractedFilelistDir.IfDirExistsDel();
@@ -30,109 +33,101 @@ namespace WhiteBinTools.UnpackClasses
                 using (var filelistReader = new BinaryReader(filelistStream))
                 {
                     FilelistChunksPrep.GetFilelistOffsets(filelistReader, logWriter, filelistVariables);
+                    FilelistChunksPrep.BuildChunks(filelistStream, filelistVariables);
 
                     if (filelistVariables.IsEncrypted)
                     {
-                        using (var encHeader = new FileStream(Path.Combine(extractedFilelistDir, "EncryptionHeader_(DON'T DELETE)"), FileMode.OpenOrCreate, FileAccess.Write))
+                        using (var encHeader = new FileStream(encHeaderFile, FileMode.OpenOrCreate, FileAccess.Write))
                         {
                             filelistStream.Seek(0, SeekOrigin.Begin);
                             filelistStream.CopyStreamTo(encHeader, 32, false);
                         }
                     }
 
-                    using (var countsStream = new StreamWriter(Path.Combine(extractedFilelistDir, "~Counts.txt"), true))
+                    using (var countsStream = new StreamWriter(countsFile, true))
                     {
                         countsStream.WriteLine(filelistVariables.TotalFiles);
                         countsStream.WriteLine(filelistVariables.TotalChunks);
                     }
-
-
-                    //var entryReadPos = 12;
-                    //if (filelistVariables.IsEncrypted)
-                    //{
-                    //    entryReadPos = 44;
-                    //}
-                    //var chunkReadPos = filelistVariables.ChunkInfoSectionOffset;
-                    //filelistVariables.ChunkFNameCount = 0;
-
-                    //for (int c = 0; c < filelistVariables.TotalChunks; c++)
-                    //{
-                    //    var currentChunkFile = outChunkFile + $"{filelistVariables.ChunkFNameCount}.txt";
-
-                    //    using (var chunkDataStream = new StreamWriter(currentChunkFile, true))
-                    //    {
-                    //        filelistReader.BaseStream.Position = chunkReadPos;
-                    //        var unCompressedSize = filelistReader.ReadUInt32();
-                    //        var compressedSize = filelistReader.ReadUInt32();
-                    //        var chunkStart = filelistVariables.ChunkDataSectionOffset + filelistReader.ReadUInt32();
-
-                    //        using (var cmpChunkStream = new MemoryStream())
-                    //        {
-                    //            using (var dcmpChunkStream = new MemoryStream())
-                    //            {
-                    //                using (var dcmpChunkReader = new BinaryReader(dcmpChunkStream))
-                    //                {
-                    //                    filelistStream.Seek(chunkStart, SeekOrigin.Begin);
-                    //                    filelistStream.CopyStreamTo(cmpChunkStream, compressedSize, false);
-
-                    //                    cmpChunkStream.Seek(0, SeekOrigin.Begin);
-                    //                    cmpChunkStream.ZlibDecompress(dcmpChunkStream);
-
-                    //                    dcmpChunkStream.Seek(0, SeekOrigin.Begin);
-
-                    //                    uint currentPathReadPos = 0;
-                    //                    while (currentPathReadPos != unCompressedSize)
-                    //                    {
-                    //                        dcmpChunkReader.BaseStream.Position = currentPathReadPos;
-                    //                        var filePath = dcmpChunkReader.ReadStringTillNull();
-
-                    //                        if (filePath == "end")
-                    //                        {
-                    //                            break;
-                    //                        }
-
-                    //                        filelistReader.BaseStream.Position = entryReadPos;
-                    //                        var fileCode = filelistReader.ReadUInt32();
-                    //                        ushort chunkNumber = 0;
-                    //                        ushort unkVal = 0;
-
-                    //                        switch (gameCode)
-                    //                        {
-                    //                            case GameCodes.ff131:
-                    //                                chunkNumber = filelistReader.ReadUInt16();
-                    //                                _ = filelistReader.ReadUInt16();
-                    //                                break;
-
-                    //                            case GameCodes.ff132:
-                    //                                _ = filelistReader.ReadUInt16();
-                    //                                chunkNumber = filelistReader.ReadByte();
-                    //                                unkVal = filelistReader.ReadByte();
-                    //                                break;
-                    //                        }
-
-                    //                        chunkDataStream.Write(fileCode + "|");
-                    //                        chunkDataStream.Write(chunkNumber + "|");
-                    //                        if (gameCode.Equals(GameCodes.ff132))
-                    //                        {
-                    //                            chunkDataStream.Write(unkVal + "|");
-                    //                        }
-                    //                        chunkDataStream.WriteLine(filePath);
-
-                    //                        currentPathReadPos = (uint)dcmpChunkReader.BaseStream.Position;
-                    //                        entryReadPos += 8;
-                    //                    }
-                    //                }
-                    //            }
-                    //        }
-                    //    }
-
-                    //    chunkReadPos += 12;
-                    //    filelistVariables.ChunkFNameCount++;
-                    //}
                 }
             }
 
-            filelistVariables.TmpDcryptFilelistFile.IfFileExistsDel();
+            if (gameCode.Equals(GameCodes.ff132))
+            {
+                filelistVariables.CurrentChunkNumber = -1;
+            }
+
+            if (filelistVariables.IsEncrypted)
+            {
+                filelistVariables.TmpDcryptFilelistFile.IfFileExistsDel();
+                filelistVariables.MainFilelistFile = filelistFile;
+            }
+
+            // Build an empty dictionary
+            var outChunksDict = new Dictionary<int, List<string>>();
+            for (int c = 0; c < filelistVariables.TotalChunks; c++)
+            {
+                var chunkDataList = new List<string>();
+                outChunksDict.Add(c, chunkDataList);
+            }
+
+
+            // Collect all of the chunk data into
+            // the empty dictionary
+            using (var entriesStream = new MemoryStream())
+            {
+                entriesStream.Write(filelistVariables.EntriesData, 0, filelistVariables.EntriesData.Length);
+                entriesStream.Seek(0, SeekOrigin.Begin);
+
+                using (var entriesReader = new BinaryReader(entriesStream))
+                {
+
+                    // Process each file entry from 
+                    // the entry section
+                    long entriesReadPos = 0;
+                    var stringData = "";
+
+                    for (int f = 0; f < filelistVariables.TotalFiles; f++)
+                    {
+                        FilelistProcesses.GetCurrentFileEntry(gameCode, entriesReader, entriesReadPos, filelistVariables);
+                        entriesReadPos += 8;
+
+                        stringData = "";
+
+                        if (gameCode.Equals(GameCodes.ff132))
+                        {
+                            stringData += filelistVariables.FileCode + "|";
+                            stringData += filelistVariables.ChunkNumber + "|";
+                            stringData += filelistVariables.UnkEntryVal + "|";
+                            stringData += filelistVariables.PathString;
+
+                            outChunksDict[filelistVariables.CurrentChunkNumber].Add(stringData);
+                        }
+                        else
+                        {
+                            stringData += filelistVariables.FileCode + "|";
+                            stringData += filelistVariables.ChunkNumber + "|";
+                            stringData += filelistVariables.PathString;
+
+                            outChunksDict[filelistVariables.ChunkNumber].Add(stringData);
+                        }
+                    }
+                }
+            }
+
+            // Write all of the collected data from
+            // the dictionary into multiple txt
+            // files
+            for (int d = 0; d < filelistVariables.TotalChunks; d++)
+            {
+                using (var chunkWriter = new StreamWriter(outChunkFile + d + ".txt", true))
+                {
+                    foreach (var stringData in outChunksDict[d])
+                    {
+                        chunkWriter.WriteLine(stringData);
+                    }
+                }
+            }
 
             IOhelpers.LogMessage("\nFinished unpacking " + "\"" + filelistOutName + "\"", logWriter);
         }

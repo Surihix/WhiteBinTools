@@ -25,5 +25,12 @@ namespace WhiteBinTools.SupportClasses
 
             return compressedDataBuffer;
         }
+
+        public static byte[] ZlibCompressBuffer(this byte[] dataToCmp)
+        {
+            var compressedDataBuffer = ZlibStream.CompressBuffer(dataToCmp);
+
+            return compressedDataBuffer;
+        }
     }
 }
