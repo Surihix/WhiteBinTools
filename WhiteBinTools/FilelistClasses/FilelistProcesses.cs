@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Text;
 using WhiteBinTools.CryptoClasses;
 using WhiteBinTools.RepackClasses;
@@ -66,10 +64,7 @@ namespace WhiteBinTools.FilelistClasses
                 using (var encCheckReader = new BinaryReader(File.Open(filelistVariables.MainFilelistFile, FileMode.Open, FileAccess.Read)))
                 {
                     encCheckReader.BaseStream.Position = 16;
-                    var cryptBodySizeVal = encCheckReader.ReadBytes(4);
-                    Array.Reverse(cryptBodySizeVal);
-
-                    var cryptBodySize = BitConverter.ToUInt32(cryptBodySizeVal, 0);
+                    var cryptBodySize = encCheckReader.ReadBytesUInt32(true);
                     cryptBodySize += 8;
 
                     if (cryptBodySize % 8 != 0)
@@ -108,10 +103,7 @@ namespace WhiteBinTools.FilelistClasses
                         using (var decFilelistReader = new BinaryReader(File.Open(filelistVariables.TmpDcryptFilelistFile, FileMode.Open, FileAccess.Read)))
                         {
                             decFilelistReader.BaseStream.Position = 16;
-                            var filelistDataSizeArray = decFilelistReader.ReadBytes(4);
-                            Array.Reverse(filelistDataSizeArray);
-
-                            var filelistDataSize = BitConverter.ToUInt32(filelistDataSizeArray, 0);
+                            var filelistDataSize = decFilelistReader.ReadBytesUInt32(true);
                             var hashOffset = 32 + filelistDataSize + 4;
 
                             decFilelistReader.BaseStream.Position = hashOffset;
@@ -163,19 +155,18 @@ namespace WhiteBinTools.FilelistClasses
         public static void GetCurrentFileEntry(GameCodes gameCode, BinaryReader entriesReader, long entriesReadPos, FilelistVariables filelistVariables)
         {
             entriesReader.BaseStream.Position = entriesReadPos;
-            filelistVariables.FileCode = entriesReader.ReadBytesUInt32(false);
+            filelistVariables.FileCode = entriesReader.ReadUInt32();
 
             if (gameCode.Equals(GameCodes.ff131))
             {
-                filelistVariables.ChunkNumber = entriesReader.ReadBytesUInt16(false);
-                filelistVariables.PathStringPos = entriesReader.ReadBytesUInt16(false);
+                filelistVariables.ChunkNumber = entriesReader.ReadUInt16();
+                filelistVariables.PathStringPos = entriesReader.ReadUInt16();
 
-                var currentChunkData = filelistVariables.ChunkDataDict[filelistVariables.ChunkNumber];
-                GeneratePathString(filelistVariables.PathStringPos, currentChunkData, filelistVariables);
+                GeneratePathString(filelistVariables.PathStringPos, filelistVariables.ChunkDataDict[filelistVariables.ChunkNumber], filelistVariables);
             }
             else if (gameCode.Equals(GameCodes.ff132))
             {
-                filelistVariables.PathStringPos = entriesReader.ReadBytesUInt16(false);
+                filelistVariables.PathStringPos = entriesReader.ReadUInt16();
                 filelistVariables.ChunkNumber = entriesReader.ReadByte();
                 filelistVariables.UnkEntryVal = entriesReader.ReadByte();
 
@@ -195,28 +186,20 @@ namespace WhiteBinTools.FilelistClasses
                     filelistVariables.PathStringPos -= 32768;
                 }
 
-                var currentChunkData = filelistVariables.ChunkDataDict[filelistVariables.CurrentChunkNumber];
-                GeneratePathString(filelistVariables.PathStringPos, currentChunkData, filelistVariables);
+                GeneratePathString(filelistVariables.PathStringPos, filelistVariables.ChunkDataDict[filelistVariables.CurrentChunkNumber], filelistVariables);
             }
         }
 
         static void GeneratePathString(ushort pathPos, byte[] currentChunkData, FilelistVariables filelistVariables)
         {
-            var readBytesList = new List<byte>();
+            var length = 0;
 
-            for (int i = pathPos; i < currentChunkData.Length; i++)
+            for (int i = pathPos; i < currentChunkData.Length && currentChunkData[i] != 0; i++)
             {
-                if (currentChunkData[i] == 0)
-                {
-                    break;
-                }
-                else
-                {
-                    readBytesList.Add(currentChunkData[i]);
-                }
+                length++;
             }
 
-            filelistVariables.PathString = Encoding.UTF8.GetString(readBytesList.ToArray());
+            filelistVariables.PathString = Encoding.UTF8.GetString(currentChunkData, pathPos, length);
         }
 
 

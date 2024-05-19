@@ -152,7 +152,7 @@ namespace WhiteBinTools.RepackClasses
                                     tmpEntriesReader.BaseStream.Position = tmpEntryReaderPos + 4;
                                     tmpEntryReaderPos += 8;
 
-                                    if (tmpEntriesReader.ReadBytesUInt16(false) > 32767)
+                                    if (tmpEntriesReader.ReadUInt16() > 32767)
                                     {
                                         posInChunkVal += 32768;
                                     }
