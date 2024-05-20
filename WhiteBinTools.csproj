@@ -101,7 +101,7 @@
     <Compile Include="WhiteBinTools\FilelistClasses\FilelistVariables.cs" />
     <Compile Include="WhiteBinTools\FilelistClasses\FilelistProcesses.cs" />
     <Compile Include="WhiteBinTools\FilelistClasses\FilelistChunksPrep.cs" />
-    <Compile Include="WhiteBinTools\RepackClasses\RepackFilelist.cs" />
+    <Compile Include="WhiteBinTools\RepackClasses\RepackFilelistData.cs" />
     <Compile Include="WhiteBinTools\SupportClasses\ProgramEnums.cs" />
     <Compile Include="WhiteBinTools\SupportClasses\IOhelpers.cs" />
     <Compile Include="WhiteBinTools\RepackClasses\RepackTypeA.cs" />

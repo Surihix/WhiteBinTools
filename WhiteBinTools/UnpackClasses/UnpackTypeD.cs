@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using WhiteBinTools.FilelistClasses;
 using WhiteBinTools.SupportClasses;
 using static WhiteBinTools.SupportClasses.ProgramEnums;
@@ -120,7 +121,7 @@ namespace WhiteBinTools.UnpackClasses
             // files
             for (int d = 0; d < filelistVariables.TotalChunks; d++)
             {
-                using (var chunkWriter = new StreamWriter(outChunkFile + d + ".txt", true))
+                using (var chunkWriter = new StreamWriter(outChunkFile + d + ".txt", true, new UTF8Encoding(false)))
                 {
                     foreach (var stringData in outChunksDict[d])
                     {

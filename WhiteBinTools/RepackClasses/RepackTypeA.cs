@@ -134,7 +134,7 @@ namespace WhiteBinTools.RepackClasses
 
             IOhelpers.LogMessage("\nBuilding filelist....", logWriter);
 
-            RepackFilelist.BuildFilelist(filelistVariables, newChunksDict, repackVariables, gameCode);
+            RepackFilelistData.BuildFilelist(filelistVariables, newChunksDict, repackVariables, gameCode);
 
             if (filelistVariables.IsEncrypted)
             {

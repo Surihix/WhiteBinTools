@@ -7,18 +7,13 @@ using static WhiteBinTools.SupportClasses.ProgramEnums;
 
 namespace WhiteBinTools.RepackClasses
 {
-    internal class RepackFilelist
+    internal class RepackFilelistData
     {
         public static void BuildFilelist(FilelistVariables filelistVariables, Dictionary<int, List<byte>> newChunksDict, RepackVariables repackVariables, GameCodes gameCode)
         {
             // Add 'end' string to the last chunk
             // in the dictionary
-            var endStringData = Encoding.UTF8.GetBytes("end\0");
-            foreach (var e in endStringData)
-            {
-                newChunksDict[filelistVariables.LastChunkNumber].Add(e);
-            }
-
+            newChunksDict[filelistVariables.LastChunkNumber].AddRange(Encoding.UTF8.GetBytes("end\0"));
 
             // Update chunk info offsets and
             // compress chunks in two streams
