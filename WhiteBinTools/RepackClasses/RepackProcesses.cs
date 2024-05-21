@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using WhiteBinTools.FilelistClasses;
 using WhiteBinTools.SupportClasses;
+using static WhiteBinTools.SupportClasses.ProgramEnums;
 
 namespace WhiteBinTools.RepackClasses
 {
@@ -13,12 +16,6 @@ namespace WhiteBinTools.RepackClasses
             repackVariables.NewFilelistFile = Path.Combine(filelistVariables.MainFilelistDirectory, repackVariables.FilelistFileName);
             repackVariables.NewWhiteBinFileName = Path.GetFileName(extractedDir).Remove(0, 1);
             repackVariables.NewWhiteBinFile = Path.Combine(Path.GetDirectoryName(extractedDir), repackVariables.NewWhiteBinFileName);
-
-            filelistVariables.DefaultChunksExtDir = Path.Combine(extractedDir, "_chunks");
-            filelistVariables.ChunkFile = Path.Combine(filelistVariables.DefaultChunksExtDir, "chunk_");
-
-            repackVariables.NewChunksExtDir = Path.Combine(extractedDir, "_newChunks");
-            repackVariables.NewChunkFile = Path.Combine(repackVariables.NewChunksExtDir, "newChunk_");
         }
 
 
@@ -27,6 +24,24 @@ namespace WhiteBinTools.RepackClasses
             repackVariables.OldFilelistFileBckup = filelistFile + ".bak";
             repackVariables.OldFilelistFileBckup.IfFileExistsDel();
             File.Copy(filelistFile, repackVariables.OldFilelistFileBckup);
+        }
+
+        
+        public static void CreateWhiteBinBackup(string whiteBinFile, RepackVariables repackVariables)
+        {
+            repackVariables.OldWhiteBinFileBackup = whiteBinFile + ".bak";
+            repackVariables.OldWhiteBinFileBackup.IfFileExistsDel();
+            File.Copy(repackVariables.NewWhiteBinFile, repackVariables.OldWhiteBinFileBackup);
+        }
+
+
+        public static void CreateEmptyNewChunksDict(FilelistVariables filelistVariables, Dictionary<int, List<byte>> newChunksDict)
+        {
+            for (int c = 0; c < filelistVariables.TotalChunks; c++)
+            {
+                var chunkDataList = new List<byte>();
+                newChunksDict.Add(c, chunkDataList);
+            }
         }
 
 
@@ -169,6 +184,30 @@ namespace WhiteBinTools.RepackClasses
             {
                 packedAs = "(Injected)";
                 RepackTypeInject(repackVariables, injectBin, repackVariables.OgFullFilePath);
+            }
+        }
+
+
+        public static void BuildPathForChunk(RepackVariables repackVariables, GameCodes gameCode, FilelistVariables filelistVariables, Dictionary<int, List<byte>> newChunksDict)
+        {
+            var stringBuilder = new StringBuilder();
+
+            stringBuilder.Append(repackVariables.AsciiFilePos).Append(":").
+                Append(repackVariables.AsciiUnCmpSize).Append(":").
+                Append(repackVariables.AsciiCmpSize).Append(":").
+                Append(repackVariables.RepackPathInChunk).Append("\0");
+
+            var stringData = stringBuilder.ToString();
+
+            if (gameCode.Equals(GameCodes.ff132))
+            {
+                newChunksDict[filelistVariables.CurrentChunkNumber].AddRange(Encoding.UTF8.GetBytes(stringData));
+                filelistVariables.LastChunkNumber = filelistVariables.CurrentChunkNumber;
+            }
+            else
+            {
+                newChunksDict[filelistVariables.ChunkNumber].AddRange(Encoding.UTF8.GetBytes(stringData));
+                filelistVariables.LastChunkNumber = filelistVariables.ChunkNumber;
             }
         }
     }

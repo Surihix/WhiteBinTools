@@ -112,7 +112,7 @@
     <Compile Include="WhiteBinTools\SupportClasses\ZlibHelpers.cs" />
     <Compile Include="WhiteBinTools\UnpackClasses\UnpackTypeE.cs" />
     <Compile Include="WhiteBinTools\UnpackClasses\UnpackVariables.cs" />
-    <Compile Include="WhiteBinTools\UnpackClasses\UnpackProcess.cs" />
+    <Compile Include="WhiteBinTools\UnpackClasses\UnpackProcesses.cs" />
     <Compile Include="WhiteBinTools\UnpackClasses\UnpackTypeB.cs" />
     <Compile Include="WhiteBinTools\UnpackClasses\UnpackTypeC.cs" />
     <Compile Include="WhiteBinTools\Help.cs" />

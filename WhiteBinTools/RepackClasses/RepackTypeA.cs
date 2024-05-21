@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using WhiteBinTools.FilelistClasses;
 using WhiteBinTools.SupportClasses;
 using static WhiteBinTools.SupportClasses.ProgramEnums;
@@ -44,28 +43,24 @@ namespace WhiteBinTools.RepackClasses
                         filelistStream.Seek(0, SeekOrigin.Begin);
                         filelistVariables.EncryptedHeaderData = new byte[32];
                         filelistStream.Read(filelistVariables.EncryptedHeaderData, 0, 32);
+
+                        filelistStream.Dispose();
+                        File.Delete(filelistVariables.MainFilelistFile);
                     }
                 }
             }
+
+            filelistFile.IfFileExistsDel();
 
             if (gameCode.Equals(GameCodes.ff132))
             {
                 filelistVariables.CurrentChunkNumber = -1;
             }
 
-            if (filelistVariables.IsEncrypted)
-            {
-                File.Delete(filelistVariables.MainFilelistFile);
-            }
-
             // Build an empty dictionary
             // for the chunks 
             var newChunksDict = new Dictionary<int, List<byte>>();
-            for (int c = 0; c < filelistVariables.TotalChunks; c++)
-            {
-                var chunkDataList = new List<byte>();
-                newChunksDict.Add(c, chunkDataList);
-            }
+            RepackProcesses.CreateEmptyNewChunksDict(filelistVariables, newChunksDict);
 
            
             filelistVariables.LastChunkNumber = 0;
@@ -82,7 +77,6 @@ namespace WhiteBinTools.RepackClasses
 
                         // Repacking files section
                         long entriesReadPos = 0;
-                        var stringData = "";
                         for (int f = 0; f < filelistVariables.TotalFiles; f++)
                         {
                             FilelistProcesses.GetCurrentFileEntry(gameCode, entriesReader, entriesReadPos, filelistVariables);
@@ -104,24 +98,7 @@ namespace WhiteBinTools.RepackClasses
 
                             RepackProcesses.RepackTypeAppend(repackVariables, newWhiteBinStream, repackVariables.OgFullFilePath);
 
-                            var stringBuilder = new StringBuilder();
-                            stringBuilder.Append(repackVariables.AsciiFilePos).Append(":").
-                                Append(repackVariables.AsciiUnCmpSize).Append(":").
-                                Append(repackVariables.AsciiCmpSize).Append(":").
-                                Append(repackVariables.RepackPathInChunk).Append("\0");
-                            
-                            stringData = stringBuilder.ToString();
-
-                            if (gameCode.Equals(GameCodes.ff132))
-                            {
-                                newChunksDict[filelistVariables.CurrentChunkNumber].AddRange(Encoding.UTF8.GetBytes(stringData));
-                                filelistVariables.LastChunkNumber = filelistVariables.CurrentChunkNumber;
-                            }
-                            else
-                            {
-                                newChunksDict[filelistVariables.ChunkNumber].AddRange(Encoding.UTF8.GetBytes(stringData));
-                                filelistVariables.LastChunkNumber = filelistVariables.ChunkNumber;
-                            }
+                            RepackProcesses.BuildPathForChunk(repackVariables, gameCode, filelistVariables, newChunksDict);
 
                             IOhelpers.LogMessage(repackVariables.RepackState + " " + Path.Combine(repackVariables.NewWhiteBinFileName, repackVariables.RepackLogMsg), logWriter);
                         }
@@ -130,10 +107,7 @@ namespace WhiteBinTools.RepackClasses
             }
 
 
-            filelistFile.IfFileExistsDel();
-
             IOhelpers.LogMessage("\nBuilding filelist....", logWriter);
-
             RepackFilelistData.BuildFilelist(filelistVariables, newChunksDict, repackVariables, gameCode);
 
             if (filelistVariables.IsEncrypted)

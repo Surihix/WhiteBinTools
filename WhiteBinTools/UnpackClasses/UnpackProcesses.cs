@@ -5,7 +5,7 @@ using WhiteBinTools.SupportClasses;
 
 namespace WhiteBinTools.UnpackClasses
 {
-    internal class UnpackProcess
+    internal class UnpackProcesses
     {
         public static void PrepareBinVars(string whiteBinFile, UnpackVariables unpackVariables)
         {

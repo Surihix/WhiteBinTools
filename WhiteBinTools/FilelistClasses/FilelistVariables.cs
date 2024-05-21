@@ -8,8 +8,6 @@ namespace WhiteBinTools.FilelistClasses
         public string MainFilelistFile { get; set; }
         public string MainFilelistDirectory { get; set; }
         public string TmpDcryptFilelistFile { get; set; }
-        public string DefaultChunksExtDir { get; set; }
-        public string ChunkFile { get; set; }
         public byte[] EntriesData { get; set; }
         public bool IsEncrypted { get; set; }
         public byte[] EncryptedHeaderData { get; set; }

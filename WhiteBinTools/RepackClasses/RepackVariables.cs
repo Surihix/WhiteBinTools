@@ -6,11 +6,6 @@
         public string NewFilelistFile { get; set; }
         public string OldFilelistFileBckup { get; set; }
 
-        public string NewChunkFile { get; set; }
-        public string NewChunksExtDir { get; set; }
-        public bool HasEndString { get; set; }
-        public uint LastChunkFileNumber { get; set; }
-
         public string NewWhiteBinFileName { get; set; }
         public string NewWhiteBinFile { get; set; }
         public string OldWhiteBinFileBackup { get; set; }

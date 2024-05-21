@@ -16,7 +16,7 @@ namespace WhiteBinTools.UnpackClasses
             var unpackVariables = new UnpackVariables();
 
             FilelistProcesses.PrepareFilelistVars(filelistVariables, filelistFile);
-            UnpackProcess.PrepareBinVars(whiteBinFile, unpackVariables);
+            UnpackProcesses.PrepareBinVars(whiteBinFile, unpackVariables);
 
             if (!Directory.Exists(unpackVariables.ExtractDir))
             {
@@ -66,7 +66,7 @@ namespace WhiteBinTools.UnpackClasses
                         FilelistProcesses.GetCurrentFileEntry(gameCode, entriesReader, entriesReadPos, filelistVariables);
                         entriesReadPos += 8;
 
-                        UnpackProcess.PrepareExtraction(filelistVariables.PathString, filelistVariables, unpackVariables.ExtractDir);
+                        UnpackProcesses.PrepareExtraction(filelistVariables.PathString, filelistVariables, unpackVariables.ExtractDir);
 
                         // Extract a specific file
                         if (filelistVariables.MainPath == whiteFilePath)
@@ -83,7 +83,7 @@ namespace WhiteBinTools.UnpackClasses
                                     unpackVariables.CountDuplicates++;
                                 }
 
-                                UnpackProcess.UnpackFile(filelistVariables, whiteBinStream, unpackVariables);
+                                UnpackProcesses.UnpackFile(filelistVariables, whiteBinStream, unpackVariables);
                             }
 
                             hasExtracted = true;

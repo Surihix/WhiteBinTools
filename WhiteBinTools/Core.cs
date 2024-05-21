@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using WhiteBinTools.FilelistClasses;
 using WhiteBinTools.RepackClasses;
 using WhiteBinTools.SupportClasses;
 using WhiteBinTools.UnpackClasses;
@@ -40,8 +39,8 @@ namespace WhiteBinTools
                 Help.ShowCommands();
             }
 
-            //try
-            //{
+            try
+            {
                 // Basic arguments
                 // Assign the arguments to the proper variables
                 var specifiedGameCode = args[0].Replace("-", "");
@@ -163,9 +162,6 @@ namespace WhiteBinTools
                                 RepackTypeD.RepackFilelist(gameCode, filelistFileOrDir, logWriter);
                                 break;
 
-                            case ActionSwitches.tl:
-                                break;
-
                             default:
                                 Console.WriteLine("Error: Proper tool action is not specified");
                                 IOhelpers.ErrorExit("");
@@ -173,30 +169,24 @@ namespace WhiteBinTools
                         }
                     }
                 }
-            //}
-            //catch (Exception ex)
-            //{
-            //    Console.WriteLine("Error: " + ex);
-            //    IOhelpers.IfFileExistsDel("CrashLog.txt");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: " + ex);
+                IOhelpers.IfFileExistsDel("CrashLog.txt");
 
-            //    var filelistVariables = new FilelistVariables();
-            //    if (Directory.Exists(filelistVariables.DefaultChunksExtDir))
-            //    {
-            //        Directory.Delete(filelistVariables.DefaultChunksExtDir, true);
-            //    }
+                using (FileStream crashLogFile = new FileStream("CrashLog.txt", FileMode.Append, FileAccess.Write))
+                {
+                    using (StreamWriter crashLogWriter = new StreamWriter(crashLogFile))
+                    {
+                        crashLogWriter.WriteLine("Error: " + ex);
+                    }
+                }
 
-            //    using (FileStream crashLogFile = new FileStream("CrashLog.txt", FileMode.Append, FileAccess.Write))
-            //    {
-            //        using (StreamWriter crashLogWriter = new StreamWriter(crashLogFile))
-            //        {
-            //            crashLogWriter.WriteLine("Error: " + ex);
-            //        }
-            //    }
-
-            //    Console.WriteLine("");
-            //    Console.WriteLine("Crash exception recorded in CrashLog.txt file");
-            //    Environment.Exit(2);
-            //}
+                Console.WriteLine("");
+                Console.WriteLine("Crash exception recorded in CrashLog.txt file");
+                Environment.Exit(2);
+            }
         }
 
 
@@ -210,8 +200,7 @@ namespace WhiteBinTools
             ufc,
             raf,
             rmf,
-            rfl,
-            tl
+            rfl
         }
 
 

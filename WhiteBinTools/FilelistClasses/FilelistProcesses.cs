@@ -29,18 +29,12 @@ namespace WhiteBinTools.FilelistClasses
 
                 if (filelistVariables.IsEncrypted)
                 {
-                    if (Directory.Exists(filelistVariables.DefaultChunksExtDir))
-                    {
-                        Directory.Delete(filelistVariables.DefaultChunksExtDir, true);
-                    }
-
                     IOhelpers.LogMessage("Error: Detected encrypted filelist file. set the game code to '-ff132' for handling this type of filelist", writerName);
 
                     writerName.DisposeIfLogStreamOpen();
                     IOhelpers.ErrorExit("");
                 }
             }
-
 
             // Check for encryption header in the filelist file,
             // if the game code is set to ff13-2
@@ -200,25 +194,6 @@ namespace WhiteBinTools.FilelistClasses
             }
 
             filelistVariables.PathString = Encoding.UTF8.GetString(currentChunkData, pathPos, length);
-        }
-
-
-        public static uint GetFilesInChunkCount(string chunkToRead)
-        {
-            var filesInChunkCount = (uint)0;
-            using (var fileCountReader = new StreamReader(chunkToRead))
-            {
-                while (!fileCountReader.EndOfStream)
-                {
-                    var currentNullChar = fileCountReader.Read();
-                    if (currentNullChar == 0)
-                    {
-                        filesInChunkCount++;
-                    }
-                }
-            }
-
-            return filesInChunkCount;
         }
 
 
