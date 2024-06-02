@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
-using WhiteBinTools.RepackClasses;
-using WhiteBinTools.SupportClasses;
-using WhiteBinTools.UnpackClasses;
-using static WhiteBinTools.SupportClasses.ProgramEnums;
+using WhiteBinTools.Repack;
+using WhiteBinTools.Support;
+using WhiteBinTools.Unpack;
+using static WhiteBinTools.Support.ProgramEnums;
 
 namespace WhiteBinTools
 {
@@ -13,6 +13,8 @@ namespace WhiteBinTools
 
         static void Main(string[] args)
         {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+
             // Check for arg length to check if the app is 
             // launched with either of the help switches
             if (args.Length < 1)
@@ -61,23 +63,13 @@ namespace WhiteBinTools
 
                 // Check argument 1 and 2 and assign
                 // the appropriate enum values to it
-                var gameCode = new GameCodes();
-                if (Enum.TryParse(specifiedGameCode, false, out GameCodes convertedGameCode))
-                {
-                    gameCode = convertedGameCode;
-                }
-                else
+                if (Enum.TryParse(specifiedGameCode, false, out GameCodes gameCode) == false)
                 {
                     Console.WriteLine("Warning: Specified game code was incorrect");
                     Help.ShowCommands();
                 }
 
-                var actionSwitch = new ActionSwitches();
-                if (Enum.TryParse(specifiedActionSwitch, false, out ActionSwitches convertedActionSwitch))
-                {
-                    actionSwitch = convertedActionSwitch;
-                }
-                else
+                if (Enum.TryParse(specifiedActionSwitch, false, out ActionSwitches actionSwitch) == false)
                 {
                     Console.WriteLine("Warning: Specified tool action was invalid");
                     Help.ShowCommands();
@@ -106,11 +98,11 @@ namespace WhiteBinTools
                         switch (gameCode)
                         {
                             case GameCodes.ff131:
-                                IOhelpers.LogMessage("GameCode is set to ff13-1", logWriter);
+                                logWriter.LogMessage("GameCode is set to ff13-1");
                                 break;
 
                             case GameCodes.ff132:
-                                IOhelpers.LogMessage("GameCode is set to ff13-2", logWriter);
+                                logWriter.LogMessage("GameCode is set to ff13-2");
                                 break;
                         }
 
