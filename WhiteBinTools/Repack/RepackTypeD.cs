@@ -31,13 +31,17 @@ namespace WhiteBinTools.Repack
             var repackVariables = new RepackVariables();
             repackVariables.NewFilelistFile = Path.Combine(Path.GetDirectoryName(extractedFilelistDir), Path.GetFileName(extractedFilelistDir).Remove(0, 1));
 
-            if (File.Exists(repackVariables.NewFilelistFile))
+            if (Core.ShouldBckup)
             {
-                (repackVariables.NewFilelistFile + ".bak").IfFileExistsDel();
+                if (File.Exists(repackVariables.NewFilelistFile))
+                {
+                    (repackVariables.NewFilelistFile + ".bak").IfFileExistsDel();
 
-                File.Copy(repackVariables.NewFilelistFile, repackVariables.NewFilelistFile + ".bak");
-                File.Delete(repackVariables.NewFilelistFile);
+                    File.Copy(repackVariables.NewFilelistFile, repackVariables.NewFilelistFile + ".bak");
+                }
             }
+
+            repackVariables.NewFilelistFile.IfFileExistsDel();
 
             using (var countsReader = new StreamReader(countsFile))
             {

@@ -19,15 +19,20 @@ namespace WhiteBinTools.Repack
             FilelistProcesses.PrepareFilelistVars(filelistVariables, filelistFile);
             RepackProcesses.PrepareRepackVars(repackVariables, filelistFile, filelistVariables, extractedDir);
 
-            RepackProcesses.CreateFilelistBackup(filelistFile, repackVariables);
-
-            repackVariables.OldWhiteBinFileBackup = repackVariables.NewWhiteBinFile + ".bak";
-            repackVariables.OldWhiteBinFileBackup.IfFileExistsDel();
-            if (File.Exists(repackVariables.NewWhiteBinFile))
+            if (Core.ShouldBckup)
             {
-                File.Move(repackVariables.NewWhiteBinFile, repackVariables.OldWhiteBinFileBackup);
+                RepackProcesses.CreateFilelistBackup(filelistFile, repackVariables);
+
+                repackVariables.OldWhiteBinFileBackup = repackVariables.NewWhiteBinFile + ".bak";
+                repackVariables.OldWhiteBinFileBackup.IfFileExistsDel();
+
+                if (File.Exists(repackVariables.NewWhiteBinFile))
+                {
+                    File.Move(repackVariables.NewWhiteBinFile, repackVariables.OldWhiteBinFileBackup);
+                }
             }
 
+            repackVariables.NewWhiteBinFile.IfFileExistsDel();
 
             FilelistCrypto.DecryptProcess(gameCode, filelistVariables, logWriter);
 

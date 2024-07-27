@@ -19,12 +19,14 @@ namespace WhiteBinTools
             Console.WriteLine("-uaf = Unpack a single file from the bin file");
             Console.WriteLine("-umf = Unpack files in a specific directory from the bin file");
             Console.WriteLine("-ufl = Unpack filelist file");
-            Console.WriteLine("");
             Console.WriteLine("-ufc = Unpack filepath chunks from the filelist");
             Console.WriteLine("");
             Console.WriteLine("-raf = Repack a single file into the bin file");
             Console.WriteLine("-rmf = Repack multiple files into the bin file");
             Console.WriteLine("-rfl = Repack filelist file");
+            Console.WriteLine("");
+            Console.WriteLine("-cfj = Convert filelist to Json file");
+            Console.WriteLine("-cjf = convert Json file to filelist file");
             Console.WriteLine("");
             Console.WriteLine("-? or -h = Display this help page");
 
@@ -38,12 +40,14 @@ namespace WhiteBinTools
             Console.WriteLine("To unpack a single file: WhiteBinTools -ff131 -uaf " + @"""filelist.bin""" + @" ""whitebin.bin""" + @" ""chr\pc\c201\bin\c201.win32.trb""");
             Console.WriteLine("To unpack multiple files: WhiteBinTools -ff131 -umf " + @"""filelist.bin""" + @" ""whitebin.bin""" + @" ""chr\pc\*""");
             Console.WriteLine("To unpack filelist file: WhiteBinTools -ff131 -ufl " + @"""filelist.bin""");
-            Console.WriteLine("");
             Console.WriteLine("To unpack filepath chunks: WhiteBinTools -ff131 -ufc " + @"""filelist.bin""");
             Console.WriteLine("");
             Console.WriteLine("To repack a single file: WhiteBinTools -ff131 -raf " + @"""filelist.bin """ + @" ""whitebin.bin""" + @" ""chr\pc\c201\bin\c201.win32.trb""");
             Console.WriteLine("To repack multiple files: WhiteBinTools -ff131 -rmf " + @"""filelist.bin""" + @" ""whitebin.bin""" + @" ""unpacked_folder""");
             Console.WriteLine("To repack filelist file: WhiteBinTools -ff131 -rfl " + @"""unpacked_filelist_folder""");
+            Console.WriteLine("");
+            Console.WriteLine("To convert filelist to Json file: WhiteBinTools -ff131 -cfj " + @"""filelist.bin""");
+            Console.WriteLine("To convert Json file to filelist: WhiteBinTools -ff131 -cjf " + @"""filelist.bin.json""");
 
             Console.WriteLine("");
             Console.WriteLine("");

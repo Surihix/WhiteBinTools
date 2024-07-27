@@ -22,9 +22,12 @@ namespace WhiteBinTools.Repack
             FilelistProcesses.PrepareFilelistVars(filelistVariables, filelistFile);
             RepackProcesses.PrepareRepackVars(repackVariables, filelistFile, filelistVariables, extractedDir);
 
-            logWriter.LogMessage("\nBacking up filelist and image bin files....\n");
-            RepackProcesses.CreateFilelistBackup(filelistFile, repackVariables);
-            RepackProcesses.CreateWhiteBinBackup(whiteBinFile, repackVariables);
+            if (Core.ShouldBckup)
+            {
+                logWriter.LogMessage("\nBacking up filelist and image bin files....\n");
+                RepackProcesses.CreateFilelistBackup(filelistFile, repackVariables);
+                RepackProcesses.CreateWhiteBinBackup(whiteBinFile, repackVariables);
+            }
 
 
             FilelistCrypto.DecryptProcess(gameCode, filelistVariables, logWriter);
