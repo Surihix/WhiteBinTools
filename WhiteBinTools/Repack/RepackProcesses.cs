@@ -128,7 +128,7 @@ namespace WhiteBinTools.Repack
         }
 
 
-        static void RepackFiles(RepackVariables repackVariables, FileStream whiteBinStream, string fileToPack)
+        private static void RepackFiles(RepackVariables repackVariables, FileStream whiteBinStream, string fileToPack)
         {
             switch (repackVariables.WasCompressed)
             {

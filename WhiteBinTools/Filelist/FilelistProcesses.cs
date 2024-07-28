@@ -54,7 +54,7 @@ namespace WhiteBinTools.Filelist
             }
         }
 
-        static void GeneratePathString(ushort pathPos, byte[] currentChunkData, FilelistVariables filelistVariables)
+        private static void GeneratePathString(ushort pathPos, byte[] currentChunkData, FilelistVariables filelistVariables)
         {
             var length = 0;
 

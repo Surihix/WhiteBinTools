@@ -4,9 +4,9 @@ namespace WhiteBinTools.Crypto
 {
     internal class CryptoBase
     {
-        static uint BlockCounterEval { get; set; }
+        private static uint BlockCounterEval { get; set; }
 
-        static uint BlockCounterFval { get; set; }
+        private static uint BlockCounterFval { get; set; }
 
         public static void BlockCounterSetup(uint blockCounter, ref uint xorTableOffset)
         {

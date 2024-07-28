@@ -110,7 +110,7 @@ namespace WhiteBinTools.Crypto
             }
         }
 
-        static void CreateFinalFile(string ogFile, string processedFile)
+        private static void CreateFinalFile(string ogFile, string processedFile)
         {
             var ogFileName = Path.GetFileName(ogFile);
             var ogFileDir = Path.GetDirectoryName(ogFile);
