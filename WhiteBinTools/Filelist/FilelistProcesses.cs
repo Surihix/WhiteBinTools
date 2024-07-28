@@ -25,6 +25,7 @@ namespace WhiteBinTools.Filelist
             {
                 filelistVariables.ChunkNumber = entriesReader.ReadUInt16();
                 filelistVariables.PathStringPos = entriesReader.ReadUInt16();
+                filelistVariables.LastChunkNumber = filelistVariables.ChunkNumber;
 
                 GeneratePathString(filelistVariables.PathStringPos, filelistVariables.ChunkDataDict[filelistVariables.ChunkNumber], filelistVariables);
             }
@@ -33,6 +34,7 @@ namespace WhiteBinTools.Filelist
                 filelistVariables.PathStringPos = entriesReader.ReadUInt16();
                 filelistVariables.ChunkNumber = entriesReader.ReadByte();
                 filelistVariables.UnkEntryVal = entriesReader.ReadByte();
+                filelistVariables.LastChunkNumber = filelistVariables.CurrentChunkNumber;
 
                 if (filelistVariables.PathStringPos == 0)
                 {

@@ -64,8 +64,6 @@ namespace WhiteBinTools.Repack
             RepackProcesses.CreateEmptyNewChunksDict(filelistVariables, newChunksDict);
 
 
-            filelistVariables.LastChunkNumber = 0;
-
             using (var entriesStream = new MemoryStream())
             {
                 entriesStream.Write(filelistVariables.EntriesData, 0, filelistVariables.EntriesData.Length);
@@ -92,38 +90,36 @@ namespace WhiteBinTools.Repack
                         var currentFilePath = Path.Combine(repackVariables.OgDirectoryPath, repackVariables.OgFileName);
                         if (currentFilePath == whiteFilePath)
                         {
-                            switch (repackVariables.WasCompressed)
+                            if (repackVariables.WasCompressed)
                             {
-                                case true:
-                                    RepackProcesses.CleanOldFile(repackVariables.NewWhiteBinFile, repackVariables.OgFilePos, repackVariables.OgCmpSize);
+                                RepackProcesses.CleanOldFile(repackVariables.NewWhiteBinFile, repackVariables.OgFilePos, repackVariables.OgCmpSize);
 
-                                    var zlibTmpCmpData = repackVariables.OgFullFilePath.ZlibCompress();
-                                    var zlibCmpFileSize = (uint)zlibTmpCmpData.Length;
+                                var zlibTmpCmpData = repackVariables.OgFullFilePath.ZlibCompress();
+                                var zlibCmpFileSize = (uint)zlibTmpCmpData.Length;
 
-                                    if (zlibCmpFileSize < repackVariables.OgCmpSize || zlibCmpFileSize == repackVariables.OgCmpSize)
-                                    {
-                                        RepackProcesses.InjectProcess(repackVariables, ref packedAs);
-                                    }
-                                    else
-                                    {
-                                        RepackProcesses.AppendProcess(repackVariables, ref packedAs);
-                                    }
-                                    break;
+                                if (zlibCmpFileSize < repackVariables.OgCmpSize || zlibCmpFileSize == repackVariables.OgCmpSize)
+                                {
+                                    RepackProcesses.InjectProcess(repackVariables, ref packedAs);
+                                }
+                                else
+                                {
+                                    RepackProcesses.AppendProcess(repackVariables, ref packedAs);
+                                }
+                            }
+                            else
+                            {
+                                RepackProcesses.CleanOldFile(repackVariables.NewWhiteBinFile, repackVariables.OgFilePos, repackVariables.OgUnCmpSize);
 
-                                case false:
-                                    RepackProcesses.CleanOldFile(repackVariables.NewWhiteBinFile, repackVariables.OgFilePos, repackVariables.OgUnCmpSize);
+                                var dummyFileSize = (uint)new FileInfo(repackVariables.OgFullFilePath).Length;
 
-                                    var dummyFileSize = (uint)new FileInfo(repackVariables.OgFullFilePath).Length;
-
-                                    if (dummyFileSize < repackVariables.OgUnCmpSize || dummyFileSize == repackVariables.OgUnCmpSize)
-                                    {
-                                        RepackProcesses.InjectProcess(repackVariables, ref packedAs);
-                                    }
-                                    else
-                                    {
-                                        RepackProcesses.AppendProcess(repackVariables, ref packedAs);
-                                    }
-                                    break;
+                                if (dummyFileSize < repackVariables.OgUnCmpSize || dummyFileSize == repackVariables.OgUnCmpSize)
+                                {
+                                    RepackProcesses.InjectProcess(repackVariables, ref packedAs);
+                                }
+                                else
+                                {
+                                    RepackProcesses.AppendProcess(repackVariables, ref packedAs);
+                                }
                             }
 
                             logWriter.LogMessage(repackVariables.RepackState + " " + Path.Combine(repackVariables.NewWhiteBinFileName, repackVariables.RepackLogMsg) + " " + packedAs);

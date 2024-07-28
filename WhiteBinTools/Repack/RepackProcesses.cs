@@ -130,25 +130,23 @@ namespace WhiteBinTools.Repack
 
         private static void RepackFiles(RepackVariables repackVariables, FileStream whiteBinStream, string fileToPack)
         {
-            switch (repackVariables.WasCompressed)
+            if (repackVariables.WasCompressed)
             {
-                case true:
-                    var cmpData = fileToPack.ZlibCompress();
-                    whiteBinStream.Write(cmpData, 0, cmpData.Length);
+                var cmpData = fileToPack.ZlibCompress();
+                whiteBinStream.Write(cmpData, 0, cmpData.Length);
 
-                    var cmpFileSizeInDecimal = (uint)cmpData.Length;
-                    repackVariables.AsciiCmpSize = cmpFileSizeInDecimal.ToString("x");
-                    break;
+                var cmpFileSizeInDecimal = (uint)cmpData.Length;
+                repackVariables.AsciiCmpSize = cmpFileSizeInDecimal.ToString("x");
+            }
+            else
+            {
+                repackVariables.AsciiCmpSize = repackVariables.AsciiUnCmpSize;
 
-                case false:
-                    repackVariables.AsciiCmpSize = repackVariables.AsciiUnCmpSize;
-
-                    using (var unCmpFile = new FileStream(fileToPack, FileMode.Open, FileAccess.Read))
-                    {
-                        unCmpFile.Seek(0, SeekOrigin.Begin);
-                        unCmpFile.CopyTo(whiteBinStream);
-                    }
-                    break;
+                using (var unCmpFile = new FileStream(fileToPack, FileMode.Open, FileAccess.Read))
+                {
+                    unCmpFile.Seek(0, SeekOrigin.Begin);
+                    unCmpFile.CopyTo(whiteBinStream);
+                }
             }
         }
 

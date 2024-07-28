@@ -68,8 +68,6 @@ namespace WhiteBinTools.Repack
             RepackProcesses.CreateEmptyNewChunksDict(filelistVariables, newChunksDict);
 
            
-            filelistVariables.LastChunkNumber = 0;
-
             using (var newWhiteBinStream = new FileStream(repackVariables.NewWhiteBinFile, FileMode.Append, FileAccess.Write))
             {
                 using (var entriesStream = new MemoryStream())

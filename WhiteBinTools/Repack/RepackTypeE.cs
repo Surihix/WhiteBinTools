@@ -136,7 +136,6 @@ namespace WhiteBinTools.Repack
 
 
                 // Process each path in chunks
-                filelistVariables.LastChunkNumber = (int)filelistVariables.TotalChunks - 1;
 
                 using (var entriesStream = new MemoryStream())
                 {
@@ -162,6 +161,7 @@ namespace WhiteBinTools.Repack
 
                         while (runMainLoop)
                         {
+                            filelistVariables.LastChunkNumber = chunkCounter;
                             currentChunk = chunkStringStartChara + chunkCounter + "\"";
                             tmpValueRead = CheckParseJsonProperty(jsonReader, currentChunk, $"Error: {currentChunk} property string in the json file is invalid");
 

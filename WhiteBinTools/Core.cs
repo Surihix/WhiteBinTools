@@ -10,7 +10,7 @@ namespace WhiteBinTools
     internal class Core
     {
         public static readonly string PathSeparatorChar = Convert.ToString(Path.DirectorySeparatorChar);
-        public static bool ShouldBckup;
+        public static bool ShouldBckup { get; set; }
 
         static void Main(string[] args)
         {
