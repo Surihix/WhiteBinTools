@@ -112,8 +112,8 @@
     <Compile Include="WhiteBinTools\Repack\RepackVariables.cs" />
     <Compile Include="WhiteBinTools\Repack\RepackProcesses.cs" />
     <Compile Include="WhiteBinTools\Support\ZlibHelpers.cs" />
+    <Compile Include="WhiteBinTools\Unpack\UnpackTypePaths.cs" />
     <Compile Include="WhiteBinTools\Unpack\UnpackTypeE.cs" />
-    <Compile Include="WhiteBinTools\Unpack\UnpackTypeF.cs" />
     <Compile Include="WhiteBinTools\Unpack\UnpackVariables.cs" />
     <Compile Include="WhiteBinTools\Unpack\UnpackProcesses.cs" />
     <Compile Include="WhiteBinTools\Unpack\UnpackTypeB.cs" />

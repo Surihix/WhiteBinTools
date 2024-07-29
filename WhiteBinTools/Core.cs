@@ -135,14 +135,6 @@ namespace WhiteBinTools
                                 UnpackTypeD.UnpackFilelist(gameCode, filelistFile, logWriter);
                                 break;
 
-                            case ActionSwitches.ufc:
-                                CheckArguments(argsLength, 3, actionSwitch);
-
-                                filelistFile = args[2];
-
-                                UnpackTypeD.UnpackFilelist(gameCode, filelistFile, logWriter);
-                                break;
-
                             case ActionSwitches.raf:
                                 CheckArguments(argsLength, 5, actionSwitch);
 
@@ -182,7 +174,7 @@ namespace WhiteBinTools
 
                                 filelistFile = args[2];
 
-                                UnpackTypeF.UnpackFilelistJson(gameCode, filelistFile, logWriter);
+                                UnpackTypeE.UnpackFilelistJson(gameCode, filelistFile, logWriter);
                                 break;
 
                             case ActionSwitches.cjf:
@@ -193,6 +185,14 @@ namespace WhiteBinTools
                                 DetermineBckup(actionSwitch, argsLength, args);
 
                                 RepackTypeE.RepackJsonFilelist(gameCode, jsonFile, logWriter);
+                                break;
+
+                            case ActionSwitches.ufp:
+                                CheckArguments(argsLength, 3, actionSwitch);
+
+                                filelistFile = args[2];
+
+                                UnpackTypePaths.UnpackFilelistPaths(gameCode, filelistFile, logWriter);
                                 break;
                         }
                     }
@@ -225,12 +225,12 @@ namespace WhiteBinTools
             uaf,
             umf,
             ufl,
-            ufc,
             raf,
             rmf,
             rfl,
             cfj,
-            cjf
+            cjf,
+            ufp
         }
 
 
