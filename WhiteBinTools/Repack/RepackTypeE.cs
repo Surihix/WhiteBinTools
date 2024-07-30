@@ -12,7 +12,7 @@ namespace WhiteBinTools.Repack
     {
         public static void RepackJsonFilelist(GameCodes gameCode, string jsonFile, StreamWriter logWriter)
         {
-            jsonFile.CheckFileExists(logWriter, "Error: json file specified in the argument is missing");
+            jsonFile.CheckFileExists(logWriter, "Error: JSON file specified in the argument is missing");
 
             var filelistVariables = new FilelistVariables();
 
@@ -81,7 +81,7 @@ namespace WhiteBinTools.Repack
                 }
 
                 tmpValueRead = CheckParseJsonProperty(jsonReader, "\"chunkCount\":", "Error: chunkCount property string in the json file is invalid");
-                if (!uint.TryParse(tmpValueRead.ToString().Split(':')[1], out uint chunkCount))
+                if (!uint.TryParse(tmpValueRead.ToString().Split(':')[1].TrimEnd(','), out uint chunkCount))
                 {
                     IOhelpers.ErrorExit("Error: unable to parse chunkCount property's value");
                 }
@@ -152,7 +152,7 @@ namespace WhiteBinTools.Repack
 
                         var currentData = new string[] { };
                         var splitChara = new string[] { ", " };
-                        var splitChara2 = new string[] { ": " };
+                        var splitChara2 = new string[] { "\": " };
                         var fileCodeData = string.Empty;
                         var unkValueData = string.Empty;
 
