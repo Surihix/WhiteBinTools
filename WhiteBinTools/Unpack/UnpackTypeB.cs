@@ -101,7 +101,7 @@ namespace WhiteBinTools.Unpack
             }
             else
             {
-                logWriter.LogMessage("\nFinished extracting file from " + "\"" + unpackVariables.WhiteBinName + "\"");
+                logWriter.LogMessage("\nFinished unpacking file from " + "\"" + unpackVariables.WhiteBinName + "\"");
 
                 if (unpackVariables.CountDuplicates > 0)
                 {

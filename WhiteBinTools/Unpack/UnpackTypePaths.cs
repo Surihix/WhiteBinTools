@@ -72,7 +72,7 @@ namespace WhiteBinTools.Unpack
                 }
             }
 
-            logWriter.LogMessage("\nFinished unpacking filepaths to " + "\"" + filelistOutName + "\"" + ".txt file");
+            logWriter.LogMessage("\nFinished writing filepaths to " + "\"" + filelistOutName + "\"" + ".txt file");
         }
     }
 }
