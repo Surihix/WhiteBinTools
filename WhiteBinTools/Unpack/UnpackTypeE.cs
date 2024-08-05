@@ -101,7 +101,7 @@ namespace WhiteBinTools.Unpack
 
                             if (gameCode.Equals(GameCodes.ff131))
                             {
-                                DetermineArrayClosure(chunkNumberJson, filelistVariables.ChunkNumber, outJsonWriter, f, filelistVariables.TotalFiles);
+                                DetermineArrayClosure(chunkNumberJson, filelistVariables.ChunkNumber, outJsonWriter);
                                 chunkNumberJson = filelistVariables.ChunkNumber;
 
                                 outJsonWriter.Write("               { \"fileCode\": ");
@@ -109,7 +109,7 @@ namespace WhiteBinTools.Unpack
                             }
                             else
                             {
-                                DetermineArrayClosure(chunkNumberJson, filelistVariables.CurrentChunkNumber, outJsonWriter, f, filelistVariables.TotalFiles);
+                                DetermineArrayClosure(chunkNumberJson, filelistVariables.CurrentChunkNumber, outJsonWriter);
                                 chunkNumberJson = filelistVariables.CurrentChunkNumber;
 
                                 outJsonWriter.Write("               { \"fileCode\": ");
@@ -132,11 +132,11 @@ namespace WhiteBinTools.Unpack
                 outJsonWriter.WriteLine("}");
             }
 
-            logWriter.LogMessage("\n\nFinished writing filelist data to " + "\"" + filelistOutName + "\"" + ".json file");
+            logWriter.LogMessage("\n\nFinished writing filelist data to " + "\"" + Path.GetFileName(outJsonFile) + "\"");
         }
 
 
-        private static void DetermineArrayClosure(int chunkNumberJson, int chunkNumberProcess, StreamWriter outJsonWriter, int f, uint totalFileCount)
+        private static void DetermineArrayClosure(int chunkNumberJson, int chunkNumberProcess, StreamWriter outJsonWriter)
         {
             if (chunkNumberJson != chunkNumberProcess)
             {

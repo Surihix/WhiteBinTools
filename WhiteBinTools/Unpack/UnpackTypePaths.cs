@@ -15,8 +15,7 @@ namespace WhiteBinTools.Unpack
 
             FilelistProcesses.PrepareFilelistVars(filelistVariables, filelistFile);
 
-            var filelistOutName = Path.GetFileNameWithoutExtension(filelistFile);
-            var outTxtFile = Path.Combine(filelistVariables.MainFilelistDirectory, filelistOutName + ".txt");
+            var outTxtFile = Path.Combine(filelistVariables.MainFilelistDirectory, Path.GetFileName(filelistFile) + ".txt");
 
             outTxtFile.IfFileExistsDel();
 
@@ -72,7 +71,7 @@ namespace WhiteBinTools.Unpack
                 }
             }
 
-            logWriter.LogMessage("\nFinished writing filepaths to " + "\"" + filelistOutName + "\"" + ".txt file");
+            logWriter.LogMessage("\nFinished writing filepaths to " + "\"" + Path.GetFileName(outTxtFile) + "\"");
         }
     }
 }

@@ -96,8 +96,7 @@ namespace WhiteBinTools.Unpack
 
             if (!hasExtracted)
             {
-                logWriter.LogMessage("Specified file does not exist. please specify the correct file path");
-                logWriter.LogMessage("\nFinished extracting file from " + "\"" + unpackVariables.WhiteBinName + "\"");
+                logWriter.LogMessage("Specified file does not exist. please specify the correct file path.");
             }
             else
             {

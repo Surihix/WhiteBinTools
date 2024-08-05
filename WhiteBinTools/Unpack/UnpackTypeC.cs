@@ -114,8 +114,7 @@ namespace WhiteBinTools.Unpack
 
             if (!hasExtracted)
             {
-                logWriter.LogMessage("Specified directory does not exist. please specify the correct directory");
-                logWriter.LogMessage("\nFinished unpacking multiple files from " + "\"" + unpackVariables.WhiteBinName + "\"");
+                logWriter.LogMessage("Specified directory does not exist. please specify the correct directory.");
             }
             else
             {
