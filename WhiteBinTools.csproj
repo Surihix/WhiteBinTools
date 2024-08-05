@@ -94,9 +94,10 @@
     <Compile Include="WhiteBinTools\Filelist\FilelistCrypto.cs" />
     <Compile Include="WhiteBinTools\Repack\RepackTypeD.cs" />
     <Compile Include="WhiteBinTools\Repack\RepackTypeE.cs" />
-    <Compile Include="WhiteBinTools\Support\BinaryReaderHelpers.cs" />
-    <Compile Include="WhiteBinTools\Support\BinaryWriterHelpers.cs" />
-    <Compile Include="WhiteBinTools\Support\StreamHelpers.cs" />
+    <Compile Include="WhiteBinTools\Support\Extensions\BinaryReaderHelpers.cs" />
+    <Compile Include="WhiteBinTools\Support\Extensions\BinaryWriterHelpers.cs" />
+    <Compile Include="WhiteBinTools\Support\Extensions\LoggingHelpers.cs" />
+    <Compile Include="WhiteBinTools\Support\Extensions\StreamHelpers.cs" />
     <Compile Include="WhiteBinTools\Unpack\UnpackTypeA.cs" />
     <Compile Include="WhiteBinTools\Unpack\UnpackTypeD.cs" />
     <Compile Include="WhiteBinTools\Core.cs" />
@@ -111,7 +112,7 @@
     <Compile Include="WhiteBinTools\Repack\RepackTypeC.cs" />
     <Compile Include="WhiteBinTools\Repack\RepackVariables.cs" />
     <Compile Include="WhiteBinTools\Repack\RepackProcesses.cs" />
-    <Compile Include="WhiteBinTools\Support\ZlibHelpers.cs" />
+    <Compile Include="WhiteBinTools\Support\ZlibMethods.cs" />
     <Compile Include="WhiteBinTools\Unpack\UnpackTypePaths.cs" />
     <Compile Include="WhiteBinTools\Unpack\UnpackTypeE.cs" />
     <Compile Include="WhiteBinTools\Unpack\UnpackVariables.cs" />

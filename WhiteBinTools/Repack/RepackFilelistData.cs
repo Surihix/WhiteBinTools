@@ -39,7 +39,7 @@ namespace WhiteBinTools.Repack
                             var currentChunk = newChunksDict[c].ToArray();
                             chunkUncmpSize = (uint)currentChunk.Length;
 
-                            var currentChunkCmp = currentChunk.ZlibCompressBuffer();
+                            var currentChunkCmp = ZlibMethods.ZlibCompressBuffer(currentChunk);
                             chunkCmpSize = (uint)currentChunkCmp.Length;
 
                             chunkStart = (uint)chunkDataStream.Length;

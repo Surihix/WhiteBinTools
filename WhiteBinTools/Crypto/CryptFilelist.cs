@@ -42,7 +42,7 @@ namespace WhiteBinTools.Crypto
                 switch (cryptAction)
                 {
                     case CryptActions.d:
-                        (inFile + ".dec").IfFileExistsDel();
+                        IOhelpers.IfFileExistsDel(inFile + ".dec");
 
                         using (var decryptedStreamBinWriter = new BinaryWriter(File.Open(inFile + ".dec", FileMode.Append, FileAccess.Write)))
                         {
@@ -62,7 +62,7 @@ namespace WhiteBinTools.Crypto
                         break;
 
                     case CryptActions.e:
-                        (inFile + ".tmp2").IfFileExistsDel();
+                        IOhelpers.IfFileExistsDel(inFile + ".tmp2");
 
                         using (var chkSumStreamBinWriter = new BinaryWriter(File.Open(inFile + ".tmp2", FileMode.Append, FileAccess.Write)))
                         {
@@ -85,7 +85,7 @@ namespace WhiteBinTools.Crypto
 
                         inFileReader.Dispose();
 
-                        (inFile + ".enc").IfFileExistsDel();
+                        IOhelpers.IfFileExistsDel(inFile + ".enc");
 
                         using (var inFileReaderTmp = new BinaryReader(File.Open(inFile + ".tmp2", FileMode.Open, FileAccess.Read)))
                         {
@@ -102,7 +102,7 @@ namespace WhiteBinTools.Crypto
                             }
                         }
 
-                        (inFile + ".tmp2").IfFileExistsDel();
+                        IOhelpers.IfFileExistsDel(inFile + ".tmp2");
 
                         CreateFinalFile(inFile, inFile + ".enc");
                         break;

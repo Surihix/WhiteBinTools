@@ -10,11 +10,11 @@ namespace WhiteBinTools.Repack
     {
         public static void RepackSingle(GameCodes gameCode, string filelistFile, string whiteBinFile, string whiteFilePath, StreamWriter logWriter)
         {
-            filelistFile.CheckFileExists(logWriter, "Error: Filelist file specified in the argument is missing");
-            whiteBinFile.CheckFileExists(logWriter, "Error: Image bin file specified in the argument is missing");
+            IOhelpers.CheckFileExists(filelistFile, logWriter, "Error: Filelist file specified in the argument is missing");
+            IOhelpers.CheckFileExists(whiteBinFile, logWriter, "Error: Image bin file specified in the argument is missing");
 
             var extractedDir = Path.Combine(Path.GetDirectoryName(whiteBinFile), "_" + Path.GetFileName(whiteBinFile));
-            Path.Combine(extractedDir, whiteFilePath).CheckFileExists(logWriter, "Error: Specified file to repack in the argument is missing");
+            IOhelpers.CheckFileExists(Path.Combine(extractedDir, whiteFilePath), logWriter, "Error: Specified file to repack in the argument is missing");
 
             var filelistVariables = new FilelistVariables();
             var repackVariables = new RepackVariables();
@@ -51,7 +51,7 @@ namespace WhiteBinTools.Repack
                 }
             }
 
-            filelistFile.IfFileExistsDel();
+            IOhelpers.IfFileExistsDel(filelistFile);
 
             if (gameCode.Equals(GameCodes.ff132))
             {
@@ -94,7 +94,7 @@ namespace WhiteBinTools.Repack
                             {
                                 RepackProcesses.CleanOldFile(repackVariables.NewWhiteBinFile, repackVariables.OgFilePos, repackVariables.OgCmpSize);
 
-                                var zlibTmpCmpData = repackVariables.OgFullFilePath.ZlibCompress();
+                                var zlibTmpCmpData = ZlibMethods.ZlibCompress(repackVariables.OgFullFilePath);
                                 var zlibCmpFileSize = (uint)zlibTmpCmpData.Length;
 
                                 if (zlibCmpFileSize < repackVariables.OgCmpSize || zlibCmpFileSize == repackVariables.OgCmpSize)

@@ -10,9 +10,9 @@ namespace WhiteBinTools.Repack
     {
         public static void RepackMultiple(GameCodes gameCode, string filelistFile, string whiteBinFile, string whiteExtractedDir, StreamWriter logWriter)
         {
-            filelistFile.CheckFileExists(logWriter, "Error: Filelist file specified in the argument is missing");
-            whiteBinFile.CheckFileExists(logWriter, "Error: Image bin file specified in the argument is missing");
-            whiteExtractedDir.CheckDirExists(logWriter, "Error: Unpacked directory specified in the argument is missing");
+            IOhelpers.CheckFileExists(filelistFile, logWriter, "Error: Filelist file specified in the argument is missing");
+            IOhelpers.CheckFileExists(whiteBinFile, logWriter, "Error: Image bin file specified in the argument is missing");
+            IOhelpers.CheckDirExists(whiteExtractedDir, logWriter, "Error: Unpacked directory specified in the argument is missing");
 
             var filelistVariables = new FilelistVariables();
             var repackVariables = new RepackVariables();
@@ -49,7 +49,7 @@ namespace WhiteBinTools.Repack
                 }
             }
 
-            filelistFile.IfFileExistsDel();
+            IOhelpers.IfFileExistsDel(filelistFile);
 
             if (gameCode.Equals(GameCodes.ff132))
             {
@@ -92,7 +92,7 @@ namespace WhiteBinTools.Repack
                             {
                                 RepackProcesses.CleanOldFile(repackVariables.NewWhiteBinFile, repackVariables.OgFilePos, repackVariables.OgCmpSize);
 
-                                var zlibTmpCmpData = repackVariables.OgFullFilePath.ZlibCompress();
+                                var zlibTmpCmpData = ZlibMethods.ZlibCompress(repackVariables.OgFullFilePath);
                                 var zlibCmpFileSize = (uint)zlibTmpCmpData.Length;
 
                                 if (zlibCmpFileSize < repackVariables.OgCmpSize || zlibCmpFileSize == repackVariables.OgCmpSize)

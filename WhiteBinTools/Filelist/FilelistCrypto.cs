@@ -70,14 +70,14 @@ namespace WhiteBinTools.Filelist
                 switch (wasDecrypted)
                 {
                     case true:
-                        filelistVariables.TmpDcryptFilelistFile.IfFileExistsDel();
+                        IOhelpers.IfFileExistsDel(filelistVariables.TmpDcryptFilelistFile);
                         File.Copy(filelistVariables.MainFilelistFile, filelistVariables.TmpDcryptFilelistFile);
 
                         filelistVariables.MainFilelistFile = filelistVariables.TmpDcryptFilelistFile;
                         break;
 
                     case false:
-                        filelistVariables.TmpDcryptFilelistFile.IfFileExistsDel();
+                        IOhelpers.IfFileExistsDel(filelistVariables.TmpDcryptFilelistFile);
                         File.Copy(filelistVariables.MainFilelistFile, filelistVariables.TmpDcryptFilelistFile);
 
                         logWriter.LogMessage("\nDecrypting filelist file....");

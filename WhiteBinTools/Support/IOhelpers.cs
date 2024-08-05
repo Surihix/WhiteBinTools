@@ -3,54 +3,36 @@ using System.IO;
 
 namespace WhiteBinTools.Support
 {
-    internal static class IOhelpers
+    internal class IOhelpers
     {
-        public static void ErrorExit(this string errorMsg)
+        public static void ErrorExit(string errorMsg)
         {
             Console.WriteLine(errorMsg);
             Environment.Exit(1);
         }
 
 
-        public static void LogMessage(this StreamWriter logWriter, string message)
-        {
-            logWriter.WriteLine(message);
-            Console.WriteLine(message);
-        }
-
-
-        public static void CheckFileExists(this string fileToCheck, StreamWriter logWriter, string missingErrorMsg)
+        public static void CheckFileExists(string fileToCheck, StreamWriter logWriter, string missingErrorMsg)
         {
             if (!File.Exists(fileToCheck))
             {
-                LogMessage(logWriter, missingErrorMsg);
-                logWriter.DisposeIfLogStreamOpen();
+                logWriter.LogMessage(missingErrorMsg);
                 ErrorExit("");
             }
         }
 
 
-        public static void CheckDirExists(this string directoryPath, StreamWriter logWriter, string missingErrorMsg)
+        public static void CheckDirExists(string directoryPath, StreamWriter logWriter, string missingErrorMsg)
         {
             if (!Directory.Exists(directoryPath))
             {
-                LogMessage(logWriter, missingErrorMsg);
-                logWriter.DisposeIfLogStreamOpen();
+                logWriter.LogMessage(missingErrorMsg);
                 ErrorExit("");
             }
         }
 
 
-        public static void DisposeIfLogStreamOpen(this StreamWriter logWriter)
-        {
-            if (logWriter.BaseStream.CanWrite)
-            {
-                logWriter.Dispose();
-            }
-        }
-
-
-        public static void IfFileExistsDel(this string filePath)
+        public static void IfFileExistsDel(string filePath)
         {
             if (File.Exists(filePath))
             {
@@ -59,7 +41,7 @@ namespace WhiteBinTools.Support
         }
 
 
-        public static void IfDirExistsDel(this string directoryPath)
+        public static void IfDirExistsDel(string directoryPath)
         {
             if (Directory.Exists(directoryPath))
             {

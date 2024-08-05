@@ -9,7 +9,7 @@ namespace WhiteBinTools.Unpack
     {
         public static void UnpackFilelistJson(GameCodes gameCode, string filelistFile, StreamWriter logWriter)
         {
-            filelistFile.CheckFileExists(logWriter, "Error: Filelist file specified in the argument is missing");
+            IOhelpers.CheckFileExists(filelistFile, logWriter, "Error: Filelist file specified in the argument is missing");
 
             var filelistVariables = new FilelistVariables();
 
@@ -18,7 +18,7 @@ namespace WhiteBinTools.Unpack
             var filelistOutName = Path.GetFileName(filelistFile);
             var outJsonFile = Path.Combine(filelistVariables.MainFilelistDirectory, filelistOutName + ".json");
 
-            outJsonFile.IfFileExistsDel();
+            IOhelpers.IfFileExistsDel(outJsonFile);
 
 
             FilelistCrypto.DecryptProcess(gameCode, filelistVariables, logWriter);
@@ -42,7 +42,7 @@ namespace WhiteBinTools.Unpack
             var encTag = uint.MinValue;
             if (filelistVariables.IsEncrypted)
             {
-                filelistVariables.TmpDcryptFilelistFile.IfFileExistsDel();
+                IOhelpers.IfFileExistsDel(filelistVariables.TmpDcryptFilelistFile);
                 filelistVariables.MainFilelistFile = filelistFile;
 
                 using (var encDataReader = new BinaryReader(File.Open(filelistFile, FileMode.Open, FileAccess.Read)))

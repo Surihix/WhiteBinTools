@@ -77,7 +77,7 @@ namespace WhiteBinTools.Filelist
                                 var readCmpBytes = chunkStream.Read(chunkBuffer, 0, chunkBuffer.Length);
                                 chunkToDcmp.Write(chunkBuffer, 0, readCmpBytes);
 
-                                filelistVariables.ChunkDataDict.Add(c, chunkToDcmp.ZlibDecompressBuffer());
+                                filelistVariables.ChunkDataDict.Add(c, ZlibMethods.ZlibDecompressBuffer(chunkToDcmp));
                             }
 
                             chunkInfoReadVal += 12;

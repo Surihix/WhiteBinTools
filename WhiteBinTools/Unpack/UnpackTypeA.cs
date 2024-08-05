@@ -9,8 +9,8 @@ namespace WhiteBinTools.Unpack
     {
         public static void UnpackFull(GameCodes gameCode, string filelistFile, string whiteBinFile, StreamWriter logWriter)
         {
-            filelistFile.CheckFileExists(logWriter, "Error: Filelist file specified in the argument is missing");
-            whiteBinFile.CheckFileExists(logWriter, "Error: Image bin file specified in the argument is missing");
+            IOhelpers.CheckFileExists(filelistFile, logWriter, "Error: Filelist file specified in the argument is missing");
+            IOhelpers.CheckFileExists(whiteBinFile, logWriter, "Error: Image bin file specified in the argument is missing");
 
             var filelistVariables = new FilelistVariables();
             var unpackVariables = new UnpackVariables();
@@ -21,7 +21,7 @@ namespace WhiteBinTools.Unpack
             if (Directory.Exists(unpackVariables.ExtractDir))
             {
                 logWriter.LogMessage("Detected previous unpack. deleting....");
-                unpackVariables.ExtractDir.IfDirExistsDel();
+                IOhelpers.IfDirExistsDel(unpackVariables.ExtractDir);
             }
 
             Directory.CreateDirectory(unpackVariables.ExtractDir);
@@ -45,7 +45,7 @@ namespace WhiteBinTools.Unpack
 
             if (filelistVariables.IsEncrypted)
             {
-                filelistVariables.TmpDcryptFilelistFile.IfFileExistsDel();
+                IOhelpers.IfFileExistsDel(filelistVariables.TmpDcryptFilelistFile);
                 filelistVariables.MainFilelistFile = filelistFile;
             }
 

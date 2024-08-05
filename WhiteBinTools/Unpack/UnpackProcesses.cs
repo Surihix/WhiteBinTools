@@ -67,7 +67,7 @@ namespace WhiteBinTools.Unpack
                         using (var outFile = new FileStream(filelistVariables.FullFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
                         {
                             cmpData.Seek(0, SeekOrigin.Begin);
-                            cmpData.ZlibDecompress(outFile);
+                            ZlibMethods.ZlibDecompress(cmpData, outFile);
                             unpackVariables.UnpackedState = "Decompressed";
                         }
                     }

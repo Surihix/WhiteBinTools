@@ -22,7 +22,7 @@ namespace WhiteBinTools.Repack
         public static void CreateFilelistBackup(string filelistFile, RepackVariables repackVariables)
         {
             repackVariables.OldFilelistFileBckup = filelistFile + ".bak";
-            repackVariables.OldFilelistFileBckup.IfFileExistsDel();
+            IOhelpers.IfFileExistsDel(repackVariables.OldFilelistFileBckup);
             File.Copy(filelistFile, repackVariables.OldFilelistFileBckup);
         }
 
@@ -30,7 +30,7 @@ namespace WhiteBinTools.Repack
         public static void CreateWhiteBinBackup(string whiteBinFile, RepackVariables repackVariables)
         {
             repackVariables.OldWhiteBinFileBackup = whiteBinFile + ".bak";
-            repackVariables.OldWhiteBinFileBackup.IfFileExistsDel();
+            IOhelpers.IfFileExistsDel(repackVariables.OldWhiteBinFileBackup);
             File.Copy(repackVariables.NewWhiteBinFile, repackVariables.OldWhiteBinFileBackup);
         }
 
@@ -132,7 +132,7 @@ namespace WhiteBinTools.Repack
         {
             if (repackVariables.WasCompressed)
             {
-                var cmpData = fileToPack.ZlibCompress();
+                var cmpData = ZlibMethods.ZlibCompress(fileToPack);
                 whiteBinStream.Write(cmpData, 0, cmpData.Length);
 
                 var cmpFileSizeInDecimal = (uint)cmpData.Length;

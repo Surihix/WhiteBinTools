@@ -12,7 +12,7 @@ namespace WhiteBinTools.Repack
     {
         public static void RepackJsonFilelist(GameCodes gameCode, string jsonFile, StreamWriter logWriter)
         {
-            jsonFile.CheckFileExists(logWriter, "Error: JSON file specified in the argument is missing");
+            IOhelpers.CheckFileExists(jsonFile, logWriter, "Error: JSON file specified in the argument is missing");
 
             var filelistVariables = new FilelistVariables();
 
@@ -104,13 +104,13 @@ namespace WhiteBinTools.Repack
                 {
                     if (File.Exists(repackVariables.NewFilelistFile))
                     {
-                        (repackVariables.NewFilelistFile + ".bak").IfFileExistsDel();
+                        IOhelpers.IfFileExistsDel(repackVariables.NewFilelistFile + ".bak");
 
                         File.Copy(repackVariables.NewFilelistFile, repackVariables.NewFilelistFile + ".bak");
                     }
                 }
 
-                repackVariables.NewFilelistFile.IfFileExistsDel();
+                IOhelpers.IfFileExistsDel(repackVariables.NewFilelistFile);
 
                 // Build an empty dictionary
                 // for the chunks 

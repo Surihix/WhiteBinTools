@@ -11,12 +11,12 @@ namespace WhiteBinTools.Repack
     {
         public static void RepackFilelist(GameCodes gameCode, string extractedFilelistDir, StreamWriter logWriter)
         {
-            extractedFilelistDir.CheckDirExists(logWriter, "Error: Unpacked filelist directory specified in the argument is missing");
+            IOhelpers.CheckDirExists(extractedFilelistDir, logWriter, "Error: Unpacked filelist directory specified in the argument is missing");
 
             var encHeaderFile = Path.Combine(extractedFilelistDir, "~EncryptionHeader_(DON'T DELETE)");
             var countsFile = Path.Combine(extractedFilelistDir, "~Counts.txt");
 
-            countsFile.CheckFileExists(logWriter, "Error: Unable to locate the '~Counts.txt' file");
+            IOhelpers.CheckFileExists(countsFile, logWriter, "Error: Unable to locate the '~Counts.txt' file");
 
             // Assume the filelist is supposed to be 
             // encrypted if the encHeader file exists
@@ -35,13 +35,13 @@ namespace WhiteBinTools.Repack
             {
                 if (File.Exists(repackVariables.NewFilelistFile))
                 {
-                    (repackVariables.NewFilelistFile + ".bak").IfFileExistsDel();
+                    IOhelpers.IfFileExistsDel(repackVariables.NewFilelistFile + ".bak");
 
                     File.Copy(repackVariables.NewFilelistFile, repackVariables.NewFilelistFile + ".bak");
                 }
             }
 
-            repackVariables.NewFilelistFile.IfFileExistsDel();
+            IOhelpers.IfFileExistsDel(repackVariables.NewFilelistFile);
 
             using (var countsReader = new StreamReader(countsFile))
             {

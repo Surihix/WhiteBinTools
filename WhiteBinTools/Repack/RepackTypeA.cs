@@ -10,8 +10,8 @@ namespace WhiteBinTools.Repack
     {
         public static void RepackAll(GameCodes gameCode, string filelistFile, string extractedDir, StreamWriter logWriter)
         {
-            filelistFile.CheckFileExists(logWriter, "Error: Filelist file specified in the argument is missing");
-            extractedDir.CheckDirExists(logWriter, "Error: Unpacked directory specified in the argument is missing");
+            IOhelpers.CheckFileExists(filelistFile, logWriter, "Error: Filelist file specified in the argument is missing");
+            IOhelpers.CheckDirExists(extractedDir, logWriter, "Error: Unpacked directory specified in the argument is missing");
 
             var filelistVariables = new FilelistVariables();
             var repackVariables = new RepackVariables();
@@ -24,7 +24,7 @@ namespace WhiteBinTools.Repack
                 RepackProcesses.CreateFilelistBackup(filelistFile, repackVariables);
 
                 repackVariables.OldWhiteBinFileBackup = repackVariables.NewWhiteBinFile + ".bak";
-                repackVariables.OldWhiteBinFileBackup.IfFileExistsDel();
+                IOhelpers.IfFileExistsDel(repackVariables.OldWhiteBinFileBackup);
 
                 if (File.Exists(repackVariables.NewWhiteBinFile))
                 {
@@ -32,7 +32,7 @@ namespace WhiteBinTools.Repack
                 }
             }
 
-            repackVariables.NewWhiteBinFile.IfFileExistsDel();
+            IOhelpers.IfFileExistsDel(repackVariables.NewWhiteBinFile);
 
             FilelistCrypto.DecryptProcess(gameCode, filelistVariables, logWriter);
 
@@ -55,7 +55,7 @@ namespace WhiteBinTools.Repack
                 }
             }
 
-            filelistFile.IfFileExistsDel();
+            IOhelpers.IfFileExistsDel(filelistFile);
 
             if (gameCode.Equals(GameCodes.ff132))
             {
@@ -67,7 +67,7 @@ namespace WhiteBinTools.Repack
             var newChunksDict = new Dictionary<int, List<byte>>();
             RepackProcesses.CreateEmptyNewChunksDict(filelistVariables, newChunksDict);
 
-           
+
             using (var newWhiteBinStream = new FileStream(repackVariables.NewWhiteBinFile, FileMode.Append, FileAccess.Write))
             {
                 using (var entriesStream = new MemoryStream())

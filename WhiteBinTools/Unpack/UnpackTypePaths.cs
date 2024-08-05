@@ -9,7 +9,7 @@ namespace WhiteBinTools.Unpack
     {
         public static void UnpackFilelistPaths(GameCodes gameCode, string filelistFile, StreamWriter logWriter)
         {
-            filelistFile.CheckFileExists(logWriter, "Error: Filelist file specified in the argument is missing");
+            IOhelpers.CheckFileExists(filelistFile, logWriter, "Error: Filelist file specified in the argument is missing");
 
             var filelistVariables = new FilelistVariables();
 
@@ -17,7 +17,7 @@ namespace WhiteBinTools.Unpack
 
             var outTxtFile = Path.Combine(filelistVariables.MainFilelistDirectory, Path.GetFileName(filelistFile) + ".txt");
 
-            outTxtFile.IfFileExistsDel();
+            IOhelpers.IfFileExistsDel(outTxtFile);
 
 
             FilelistCrypto.DecryptProcess(gameCode, filelistVariables, logWriter);
@@ -38,7 +38,7 @@ namespace WhiteBinTools.Unpack
 
             if (filelistVariables.IsEncrypted)
             {
-                filelistVariables.TmpDcryptFilelistFile.IfFileExistsDel();
+                IOhelpers.IfFileExistsDel(filelistVariables.TmpDcryptFilelistFile);
                 filelistVariables.MainFilelistFile = filelistFile;
             }
 
