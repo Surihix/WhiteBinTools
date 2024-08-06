@@ -327,7 +327,7 @@ namespace WhiteBinTools.Repack
                     FilelistCrypto.EncryptProcess(repackVariables, logWriter);
                 }
 
-                logWriter.LogMessage("\n\nFinished repacking filelist data into " + "\"" + Path.GetFileName(repackVariables.NewFilelistFile) + "\"");
+                logWriter.LogMessage($"\n\nFinished repacking JSON data to \"{Path.GetFileName(repackVariables.NewFilelistFile)}\"");
             }
         }
 

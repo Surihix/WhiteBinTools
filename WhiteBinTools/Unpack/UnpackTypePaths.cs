@@ -71,7 +71,7 @@ namespace WhiteBinTools.Unpack
                 }
             }
 
-            logWriter.LogMessage("\nFinished writing filepaths to " + "\"" + Path.GetFileName(outTxtFile) + "\"");
+            logWriter.LogMessage($"\nFinished writing filepaths to \"{Path.GetFileName(outTxtFile)}\"");
         }
     }
 }

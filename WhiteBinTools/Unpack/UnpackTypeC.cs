@@ -112,18 +112,18 @@ namespace WhiteBinTools.Unpack
                 }
             }
 
-            if (!hasExtracted)
+            if (hasExtracted)
             {
-                logWriter.LogMessage("Specified directory does not exist. please specify the correct directory.");
-            }
-            else
-            {
-                logWriter.LogMessage("\nFinished unpacking multiple files from " + "\"" + unpackVariables.WhiteBinName + "\"");
+                logWriter.LogMessage($"\nFinished unpacking multiple files from \"{unpackVariables.WhiteBinName}\"");
 
                 if (unpackVariables.CountDuplicates > 0)
                 {
                     logWriter.LogMessage(unpackVariables.CountDuplicates + " duplicate file(s)");
                 }
+            }
+            else
+            {
+                logWriter.LogMessage("Specified directory does not exist. please specify the correct directory.");
             }
         }
     }

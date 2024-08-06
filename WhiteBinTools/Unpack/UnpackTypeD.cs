@@ -130,7 +130,7 @@ namespace WhiteBinTools.Unpack
                 }
             }
 
-            logWriter.LogMessage("\nFinished unpacking " + "\"" + Path.GetFileName(filelistFile) + "\"");
+            logWriter.LogMessage($"\nFinished unpacking \"{filelistOutName}\"");
         }
     }
 }
