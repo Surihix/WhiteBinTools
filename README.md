@@ -41,7 +41,7 @@ This program allows you to unpack and repack the main white_img archive files fr
 
   2. If the game code is set to `-ff132`, then this would be the structure:
     <br> ` FileCode | Chunk Number | Type Value | Virtual Path data `
-    <br> The Chunk Number value will increase only after two Chunk_## text files. so for example, if the Chunk Number is `0` in Chunk_0.txt file, then the number will increase to `1` in Chunk_2.txt file. this only applies when the gamecode is set to `-ff132`. 
+    <br> The Chunk Number value will increase only after two Chunk_## text files. so for example, if the Chunk Number is `0` in "Chunk_0.txt" file, then the number will increase to `1` in "Chunk_2.txt" file. this only applies when the gamecode is set to `-ff132`. 
 
 - When repacking the Json file back to filelist, ensure that the structure of the text data in the Json file is similar to what it was when dumped by the `cfj` function switch.
 
