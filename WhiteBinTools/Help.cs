@@ -52,6 +52,19 @@ namespace WhiteBinTools
             Console.WriteLine("");
             Console.WriteLine("");
 
+            Console.WriteLine("Optional backup:");
+            Console.WriteLine("If you want the files to be backed up during the repacking or conversion functions,");
+            Console.WriteLine("then specify -bak as the last argument.");
+            Console.WriteLine("");
+            Console.WriteLine("The backup functionality is supported by these following switches:");
+            Console.WriteLine("-r, -raf, -rmf, -rfl, -cjf");
+            Console.WriteLine("");
+            Console.WriteLine("Example:");
+            Console.WriteLine("WhiteBinTools -ff131 -r " + @"""filelist.bin""" + @" ""unpacked_folder"" -bak");
+
+            Console.WriteLine("");
+            Console.WriteLine("");
+
             Console.WriteLine("Exit codes:");
             Console.WriteLine("Code 0: Process was successful");
             Console.WriteLine("Code 1: One or more specified arguments were invalid");
