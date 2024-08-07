@@ -1,21 +1,24 @@
 ﻿using System;
 using System.IO;
-using WhiteBinTools.FilelistClasses;
-using WhiteBinTools.RepackClasses;
-using WhiteBinTools.SupportClasses;
-using WhiteBinTools.UnpackClasses;
-using static WhiteBinTools.SupportClasses.ProgramEnums;
+using WhiteBinTools.Repack;
+using WhiteBinTools.Support;
+using WhiteBinTools.Unpack;
+using static WhiteBinTools.Support.ProgramEnums;
 
 namespace WhiteBinTools
 {
     internal class Core
     {
         public static readonly string PathSeparatorChar = Convert.ToString(Path.DirectorySeparatorChar);
+        public static bool ShouldBckup { get; set; }
 
         static void Main(string[] args)
         {
-            // Check for arg length to check if the app is 
-            // launched with either of the help switches
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+
+            // Check for arg length to see
+            // if the app is launched with
+            // either of the help switches
             if (args.Length < 1)
             {
                 Console.WriteLine("Warning: Enough arguments not specified. Please use -? or -h switches for more information");
@@ -33,139 +36,163 @@ namespace WhiteBinTools
             // launched with any of the supported tool functions
             // This prevents exceptions from occuring if
             // the basic args is not provided.
-            if (args.Length < 2)
+
+            var argsLength = args.Length;
+
+            if (argsLength < 2)
             {
                 Console.WriteLine("Warning: Enough arguments not specified");
                 Console.WriteLine("");
                 Help.ShowCommands();
             }
 
+
+            // Assign the gameCode and
+            // actionSwitch args
+            if (Enum.TryParse(args[0].Replace("-", ""), false, out GameCodes gameCode) == false)
+            {
+                Console.WriteLine("Warning: Specified game code was incorrect");
+                Help.ShowCommands();
+            }
+
+            if (Enum.TryParse(args[1].Replace("-", ""), false, out ActionSwitches actionSwitch) == false)
+            {
+                Console.WriteLine("Warning: Specified tool action was invalid");
+                Help.ShowCommands();
+            }
+
             try
             {
-                // Basic arguments
-                // Assign the arguments to the proper variables
-                var specifiedGameCode = args[0].Replace("-", "");
-                var specifiedActionSwitch = args[1].Replace("-", "");
-                var filelistFileOrDir = args[2];
-
-                // whiteBinOrDir value is assigned from
-                // the arg only when the length of
-                // the args is more than 3.
-                // This is to accomodate for the filepaths
-                // feature.
-                var whiteBinOrDir = "";
-                if (args.Length > 3)
-                {
-                    whiteBinOrDir = args[3];
-                }
-
-
-                // Check argument 1 and 2 and assign
-                // the appropriate enum values to it
-                var gameCode = new GameCodes();
-                if (Enum.TryParse(specifiedGameCode, false, out GameCodes convertedGameCode))
-                {
-                    gameCode = convertedGameCode;
-                }
-                else
-                {
-                    Console.WriteLine("Warning: Specified game code was incorrect");
-                    Help.ShowCommands();
-                }
-
-                var actionSwitch = new ActionSwitches();
-                if (Enum.TryParse(specifiedActionSwitch, false, out ActionSwitches convertedActionSwitch))
-                {
-                    actionSwitch = convertedActionSwitch;
-                }
-                else
-                {
-                    Console.WriteLine("Warning: Specified tool action was invalid");
-                    Help.ShowCommands();
-                }
-
-
-                // args for handling a specific file
-                // and directory of unpacked files.
-                // whiteFilePathOrDir value is assigned from
-                // the arg only when the args length is more than 4.
-                var whiteFilePathOrDir = "";
-                if (args.Length > 4)
-                {
-                    whiteFilePathOrDir = args[4];
-                }
-
                 IOhelpers.IfFileExistsDel("ProcessLog.txt");
-                var totalArgCount = args.Length;
-
 
                 using (var logStream = new FileStream("ProcessLog.txt", FileMode.Append, FileAccess.Write, FileShare.Write))
                 {
                     using (var logWriter = new StreamWriter(logStream))
                     {
-
-                        switch (gameCode)
+                        if (gameCode.Equals(GameCodes.ff131))
                         {
-                            case GameCodes.ff131:
-                                IOhelpers.LogMessage("GameCode is set to ff13-1", logWriter);
-                                break;
-
-                            case GameCodes.ff132:
-                                IOhelpers.LogMessage("GameCode is set to ff13-2", logWriter);
-                                break;
+                            logWriter.LogMessage("GameCode is set to ff13-1");
+                        }
+                        else
+                        {
+                            logWriter.LogMessage("GameCode is set to ff13-2");
                         }
 
+                        // Initialise commonly used
+                        // variables
+                        var filelistFile = string.Empty;
+                        var whiteBinFile = string.Empty;
+                        var extractedBinDir = string.Empty;
+                        var whitePath = string.Empty;
 
                         switch (actionSwitch)
                         {
                             case ActionSwitches.u:
-                                CheckArguments(totalArgCount, 3);
-                                UnpackTypeA.UnpackFull(gameCode, filelistFileOrDir, whiteBinOrDir, logWriter);
+                                CheckArguments(argsLength, 4, actionSwitch);
+
+                                filelistFile = args[2];
+                                whiteBinFile = args[3];
+
+                                UnpackTypeA.UnpackFull(gameCode, filelistFile, whiteBinFile, logWriter);
                                 break;
 
                             case ActionSwitches.r:
-                                CheckArguments(totalArgCount, 3);
-                                RepackTypeA.RepackAll(gameCode, filelistFileOrDir, whiteBinOrDir, logWriter);
+                                CheckArguments(argsLength, 4, actionSwitch);
+
+                                filelistFile = args[2];
+                                extractedBinDir = args[3];
+
+                                DetermineBckup(actionSwitch, argsLength, args);
+
+                                RepackTypeA.RepackAll(gameCode, filelistFile, extractedBinDir, logWriter);
                                 break;
 
                             case ActionSwitches.uaf:
-                                CheckArguments(totalArgCount, 5);
-                                UnpackTypeB.UnpackSingle(gameCode, filelistFileOrDir, whiteBinOrDir, whiteFilePathOrDir, logWriter);
+                                CheckArguments(argsLength, 5, actionSwitch);
+
+                                filelistFile = args[2];
+                                whiteBinFile = args[3];
+                                whitePath = args[4];
+
+                                UnpackTypeB.UnpackSingle(gameCode, filelistFile, whiteBinFile, whitePath, logWriter);
                                 break;
 
                             case ActionSwitches.umf:
-                                CheckArguments(totalArgCount, 5);
-                                UnpackTypeC.UnpackMultiple(gameCode, filelistFileOrDir, whiteBinOrDir, whiteFilePathOrDir, logWriter);
+                                CheckArguments(argsLength, 5, actionSwitch);
+
+                                filelistFile = args[2];
+                                whiteBinFile = args[3];
+                                var whiteDir = args[4];
+
+                                UnpackTypeC.UnpackMultiple(gameCode, filelistFile, whiteBinFile, whiteDir, logWriter);
                                 break;
 
                             case ActionSwitches.ufl:
-                                CheckArguments(totalArgCount, 2);
-                                UnpackTypeD.UnpackFilelist(gameCode, filelistFileOrDir, logWriter);
-                                break;
+                                CheckArguments(argsLength, 3, actionSwitch);
 
-                            case ActionSwitches.ufc:
-                                CheckArguments(totalArgCount, 2);
-                                UnpackTypeE.UnpackFilelistChunks(gameCode, filelistFileOrDir, logWriter);
+                                filelistFile = args[2];
+
+                                UnpackTypeD.UnpackFilelist(gameCode, filelistFile, logWriter);
                                 break;
 
                             case ActionSwitches.raf:
-                                CheckArguments(totalArgCount, 5);
-                                RepackTypeB.RepackSingle(gameCode, filelistFileOrDir, whiteBinOrDir, whiteFilePathOrDir, logWriter);
+                                CheckArguments(argsLength, 5, actionSwitch);
+
+                                filelistFile = args[2];
+                                whiteBinFile = args[3];
+                                whitePath = args[4];
+
+                                DetermineBckup(actionSwitch, argsLength, args);
+
+                                RepackTypeB.RepackSingle(gameCode, filelistFile, whiteBinFile, whitePath, logWriter);
                                 break;
 
                             case ActionSwitches.rmf:
-                                CheckArguments(totalArgCount, 5);
-                                RepackTypeC.RepackMultiple(gameCode, filelistFileOrDir, whiteBinOrDir, whiteFilePathOrDir, logWriter);
+                                CheckArguments(argsLength, 5, actionSwitch);
+
+                                filelistFile = args[2];
+                                whiteBinFile = args[3];
+                                extractedBinDir = args[4];
+
+                                DetermineBckup(actionSwitch, argsLength, args);
+
+                                RepackTypeC.RepackMultiple(gameCode, filelistFile, whiteBinFile, extractedBinDir, logWriter);
                                 break;
 
                             case ActionSwitches.rfl:
-                                CheckArguments(totalArgCount, 2);
-                                RepackTypeD.RepackFilelist(gameCode, filelistFileOrDir, logWriter);
+                                CheckArguments(argsLength, 3, actionSwitch);
+
+                                var extractedFilelistDir = args[2];
+
+                                DetermineBckup(actionSwitch, argsLength, args);
+
+                                RepackTypeD.RepackFilelist(gameCode, extractedFilelistDir, logWriter);
                                 break;
 
-                            default:
-                                Console.WriteLine("Error: Proper tool action is not specified");
-                                IOhelpers.ErrorExit("");
+                            case ActionSwitches.cfj:
+                                CheckArguments(argsLength, 3, actionSwitch);
+
+                                filelistFile = args[2];
+
+                                UnpackTypeE.UnpackFilelistJson(gameCode, filelistFile, logWriter);
+                                break;
+
+                            case ActionSwitches.cjf:
+                                CheckArguments(argsLength, 3, actionSwitch);
+
+                                var jsonFile = args[2];
+
+                                DetermineBckup(actionSwitch, argsLength, args);
+
+                                RepackTypeE.RepackJsonFilelist(gameCode, jsonFile, logWriter);
+                                break;
+
+                            case ActionSwitches.ufp:
+                                CheckArguments(argsLength, 3, actionSwitch);
+
+                                filelistFile = args[2];
+
+                                UnpackTypePaths.UnpackFilelistPaths(gameCode, filelistFile, logWriter);
                                 break;
                         }
                     }
@@ -175,12 +202,6 @@ namespace WhiteBinTools
             {
                 Console.WriteLine("Error: " + ex);
                 IOhelpers.IfFileExistsDel("CrashLog.txt");
-
-                var filelistVariables = new FilelistVariables();
-                if (Directory.Exists(filelistVariables.DefaultChunksExtDir))
-                {
-                    Directory.Delete(filelistVariables.DefaultChunksExtDir, true);
-                }
 
                 using (FileStream crashLogFile = new FileStream("CrashLog.txt", FileMode.Append, FileAccess.Write))
                 {
@@ -197,25 +218,66 @@ namespace WhiteBinTools
         }
 
 
-        enum ActionSwitches
+        private enum ActionSwitches
         {
             u,
             r,
             uaf,
             umf,
             ufl,
-            ufc,
             raf,
             rmf,
-            rfl
+            rfl,
+            cfj,
+            cjf,
+            ufp
         }
 
 
-        static void CheckArguments(int totalLength, int requiredLength)
+        private static void CheckArguments(int totalLength, int requiredLength, ActionSwitches actionSwitch)
         {
             if (totalLength < requiredLength)
             {
-                IOhelpers.ErrorExit("Error: Specified action requires one or more arguments");
+                IOhelpers.ErrorExit($"Error: Specified action '{actionSwitch}' requires one or more arguments");
+            }
+        }
+
+
+        private static void DetermineBckup(ActionSwitches actionSwitch, int argsLength, string[] args)
+        {
+            switch (actionSwitch)
+            {
+                case ActionSwitches.r:
+                    if (argsLength > 4)
+                    {
+                        if (args[4] == "-bak")
+                        {
+                            ShouldBckup = true;
+                        }
+                    }
+                    break;
+
+                case ActionSwitches.raf:
+                case ActionSwitches.rmf:
+                    if (argsLength > 5)
+                    {
+                        if (args[5] == "-bak")
+                        {
+                            ShouldBckup = true;
+                        }
+                    }
+                    break;
+
+                case ActionSwitches.rfl:
+                case ActionSwitches.cjf:
+                    if (argsLength > 3)
+                    {
+                        if (args[3] == "-bak")
+                        {
+                            ShouldBckup = true;
+                        }
+                    }
+                    break;
             }
         }
     }
