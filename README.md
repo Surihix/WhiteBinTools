@@ -16,6 +16,8 @@ This program allows you to unpack and repack the main white_img archive files fr
 <br>``-raf`` Repack a single file into the bin file
 <br>``-rmf`` Repack multiple files into the bin file
 <br>``-rfl`` Repack filelist file
+<br>``cfj`` Convert filelist to Json file
+<br>``cjf`` convert Json file to filelist file
 <br>``-?`` or ``-h`` Display the help page
 <br>
 
@@ -24,6 +26,8 @@ This program allows you to unpack and repack the main white_img archive files fr
 - The game code switch determines how this app handles the filelist and white bin file during unpacking and repacking. this is very important during repacking and if an incorrect game code switch is specified, then the filelist and white bin file will not be repacked correctly.
 - If you want to unpack or repack a single file, then provide the virtual file path of that file after the white bin file or the unpacked folder argument. refer to the app's help page that can be accessed with the `-?` or `-h` switches. 
 - The single file and the multiple files repacking options will either inject the file at the original position in the archive or append the file at the end of the archive. the file will be injected at the original position if the compressed data size (i.e if its stored compressed) or the file size (i.e if not stored compressed), is lesser than or equal to the size of the file that is being replaced. if its greater than the original size, then the file is appended at the end of the archive.
+- When repacking the Json file back to filelist, ensure that the structure of the text data in the Json file is similar to what it was when dumped by the `cfj` function switch.
+- An optional `-bak` switch can be specified to backup the filelist and white_img files, when using any of the repack functions.
 
 ## For developers
 - The following package's Zlib classes were used for Zlib compression and decompression:
