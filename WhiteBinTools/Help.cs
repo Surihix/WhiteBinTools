@@ -53,14 +53,14 @@ namespace WhiteBinTools
             Console.WriteLine("");
 
             Console.WriteLine("Optional backup:");
-            Console.WriteLine("If you want the files to be backed up during the repacking or conversion functions,");
+            Console.WriteLine("If you want the original filelist and whitebin files to be backed up during the repacking functions,");
             Console.WriteLine("then specify -bak as the last argument.");
             Console.WriteLine("");
-            Console.WriteLine("The backup functionality is supported by these following switches:");
+            Console.WriteLine("This backup functionality is supported by these following switches:");
             Console.WriteLine("-r, -raf, -rmf, -rfl, -cjf");
             Console.WriteLine("");
-            Console.WriteLine("Example:");
-            Console.WriteLine("WhiteBinTools -ff131 -r " + @"""filelist.bin""" + @" ""unpacked_folder"" -bak");
+            Console.WriteLine("Example with 13-1 game code:");
+            Console.WriteLine("WhiteBinTools -ff131 -raf " + @"""filelist.bin""" + @" ""whitebin.bin""" + @" ""chr\pc\c201\bin\c201.win32.trb"" -bak");
 
             Console.WriteLine("");
             Console.WriteLine("");
