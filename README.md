@@ -43,7 +43,7 @@ This program allows you to unpack and repack the main white_img archive files fr
     <br> ` FileCode | Chunk Number | Unk Value | Virtual Path data `
     <br> The Chunk Number value will increase only after two Chunk_## text files. so for example, if the Chunk Number is `0` in "Chunk_0.txt" file, then the number will increase to `1` in "Chunk_2.txt" file. this only applies when the gamecode is set to `-ff132`. 
 
-- When repacking the Json file back to filelist, ensure that the structure of the text data in the Json file is similar to what it was when dumped by the `cfj` function switch.
+- When repacking the Json file back to filelist, ensure that the structure of the text data in the Json file is similar to what it was when dumped by the `-cfj` function switch.
 
 ## For developers
 - The following package's Zlib classes were used for Zlib compression and decompression:
