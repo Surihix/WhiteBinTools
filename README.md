@@ -24,9 +24,9 @@ This program allows you to unpack and repack the main white_img archive files fr
 ## Important notes
 - Filelist file and the white bin file or the unpacked folder, has to be specified after the game code and the tool action argument switches.
 
-- The game code switch determines how this app handles the filelist and white bin file during unpacking and repacking. this is very important and if an incorrect game code switch is specified, then the program will crash when processing the filelist file.
+- The game code switch determines how this app handles the filelist and white bin file during the unpacking and repacking functions. this is very important and if an incorrect game code switch is specified, then the program will crash when processing the filelist file.
 
-- If you want to unpack or repack a single file, then provide the virtual file path of that file after the white bin file or the unpacked folder argument. refer to the app's help page that can be accessed with the `-?` or `-h` switches. 
+- If you want to unpack or repack a single file, then provide the virtual file path of that file after the white bin file or the unpacked folder argument. refer to the app's help page, which can be accessed with the `-?` or `-h` switches. 
 
 - An optional `-bak` switch can be specified to backup the filelist and white_img files, when using any of the repack functions.
 
