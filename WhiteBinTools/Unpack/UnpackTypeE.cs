@@ -32,7 +32,7 @@ namespace WhiteBinTools.Unpack
                 }
             }
 
-            if (gameCode.Equals(GameCodes.ff132))
+            if (gameCode == GameCodes.ff132)
             {
                 filelistVariables.CurrentChunkNumber = -1;
             }
@@ -99,7 +99,7 @@ namespace WhiteBinTools.Unpack
                             FilelistProcesses.GetCurrentFileEntry(gameCode, entriesReader, entriesReadPos, filelistVariables);
                             entriesReadPos += 8;
 
-                            if (gameCode.Equals(GameCodes.ff131))
+                            if (gameCode == GameCodes.ff131)
                             {
                                 DetermineArrayClosure(chunkNumberJson, filelistVariables.ChunkNumber, outJsonWriter);
                                 chunkNumberJson = filelistVariables.ChunkNumber;

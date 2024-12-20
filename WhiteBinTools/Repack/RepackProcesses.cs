@@ -192,7 +192,7 @@ namespace WhiteBinTools.Repack
 
             var stringData = stringBuilder.ToString();
 
-            if (gameCode.Equals(GameCodes.ff132))
+            if (gameCode == GameCodes.ff132)
             {
                 newChunksDict[filelistVariables.CurrentChunkNumber].AddRange(Encoding.UTF8.GetBytes(stringData));
                 filelistVariables.LastChunkNumber = filelistVariables.CurrentChunkNumber;

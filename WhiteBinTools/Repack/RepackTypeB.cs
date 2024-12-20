@@ -53,7 +53,7 @@ namespace WhiteBinTools.Repack
 
             IOhelpers.IfFileExistsDel(filelistFile);
 
-            if (gameCode.Equals(GameCodes.ff132))
+            if (gameCode == GameCodes.ff132)
             {
                 filelistVariables.CurrentChunkNumber = -1;
             }

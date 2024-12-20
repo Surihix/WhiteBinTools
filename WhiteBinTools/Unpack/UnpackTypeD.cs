@@ -53,7 +53,7 @@ namespace WhiteBinTools.Unpack
                 }
             }
 
-            if (gameCode.Equals(GameCodes.ff132))
+            if (gameCode == GameCodes.ff132)
             {
                 filelistVariables.CurrentChunkNumber = -1;
             }
@@ -95,7 +95,7 @@ namespace WhiteBinTools.Unpack
 
                         stringData = "";
 
-                        if (gameCode.Equals(GameCodes.ff132))
+                        if (gameCode == GameCodes.ff132)
                         {
                             stringData += filelistVariables.FileCode + "|";
                             stringData += filelistVariables.ChunkNumber + "|";

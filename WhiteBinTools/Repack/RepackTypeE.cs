@@ -121,7 +121,7 @@ namespace WhiteBinTools.Repack
                 // the odd number chunks if the code
                 // is set to 2
                 var oddChunkNumValues = new List<int>();
-                if (gameCode.Equals(GameCodes.ff132) && filelistVariables.TotalChunks > 1)
+                if (gameCode == GameCodes.ff132 && filelistVariables.TotalChunks > 1)
                 {
                     var nextChunkNo = 1;
                     for (int i = 0; i < filelistVariables.TotalChunks; i++)
@@ -216,7 +216,7 @@ namespace WhiteBinTools.Repack
                                 // determine how the
                                 // path positon, chunk number
                                 // and unkValue values are written
-                                if (gameCode.Equals(GameCodes.ff132))
+                                if (gameCode == GameCodes.ff132)
                                 {
                                     if (currentData.Length < 3)
                                     {

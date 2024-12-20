@@ -12,7 +12,7 @@ namespace WhiteBinTools.Filelist
         {
             // Check for encryption header in the filelist file,
             // if the game code is set to ff13-1
-            if (gameCode.Equals(GameCodes.ff131))
+            if (gameCode == GameCodes.ff131)
             {
                 filelistVariables.IsEncrypted = CheckIfEncrypted(filelistVariables.MainFilelistFile);
 
@@ -27,7 +27,7 @@ namespace WhiteBinTools.Filelist
 
             // Check for encryption header in the filelist file,
             // if the game code is set to ff13-2
-            if (gameCode.Equals(GameCodes.ff132))
+            if (gameCode == GameCodes.ff132)
             {
                 filelistVariables.IsEncrypted = CheckIfEncrypted(filelistVariables.MainFilelistFile);
             }

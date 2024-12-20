@@ -140,7 +140,7 @@ namespace WhiteBinTools.Repack
 
                                 // Adjust path position value
                                 // when code is set to ff13-2
-                                if (gameCode.Equals(GameCodes.ff132))
+                                if (gameCode == GameCodes.ff132)
                                 {
                                     fixedEntryWriterPos -= 2;
 

@@ -63,7 +63,7 @@ namespace WhiteBinTools.Repack
             // the odd number chunks if the code
             // is set to 2
             var oddChunkNumValues = new List<int>();
-            if (gameCode.Equals(GameCodes.ff132) && filelistVariables.TotalChunks > 1)
+            if (gameCode == GameCodes.ff132 && filelistVariables.TotalChunks > 1)
             {
                 var nextChunkNo = 1;
                 for (int i = 0; i < filelistVariables.TotalChunks; i++)
@@ -100,7 +100,7 @@ namespace WhiteBinTools.Repack
                                 entriesWriter.BaseStream.Position = entriesWriterPos;
                                 entriesWriter.WriteBytesUInt32(uint.Parse(stringData[0]), false);
 
-                                if (gameCode.Equals(GameCodes.ff132))
+                                if (gameCode == GameCodes.ff132)
                                 {
                                     if (oddChunkNumValues.Contains(c))
                                     {

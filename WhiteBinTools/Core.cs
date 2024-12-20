@@ -69,7 +69,7 @@ namespace WhiteBinTools
                 {
                     using (var logWriter = new StreamWriter(logStream))
                     {
-                        if (gameCode.Equals(GameCodes.ff131))
+                        if (gameCode == GameCodes.ff131)
                         {
                             logWriter.LogMessage("GameCode is set to ff13-1");
                         }
