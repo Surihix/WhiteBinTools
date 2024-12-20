@@ -33,7 +33,7 @@ namespace WhiteBinTools.Filelist
             {
                 filelistVariables.PathStringPos = entriesReader.ReadUInt16();
                 filelistVariables.ChunkNumber = entriesReader.ReadByte();
-                filelistVariables.UnkEntryVal = entriesReader.ReadByte();
+                filelistVariables.FileTypeID = entriesReader.ReadByte();
                 filelistVariables.LastChunkNumber = filelistVariables.CurrentChunkNumber;
 
                 if (filelistVariables.PathStringPos == 0)

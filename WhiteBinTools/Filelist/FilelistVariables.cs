@@ -22,6 +22,9 @@ namespace WhiteBinTools.Filelist
         public Dictionary<int, byte[]> ChunkDataDict = new Dictionary<int, byte[]>();
 
         // Header section variables
+        public ulong SeedA { get; set; }
+        public ulong SeedB { get; set; }
+        public uint EncTag { get; set; }
         public uint ChunkInfoSectionOffset { get; set; }
         public uint ChunkDataSectionOffset { get; set; }
         public uint TotalFiles { get; set; }
@@ -34,7 +37,7 @@ namespace WhiteBinTools.Filelist
         public uint FileCode { get; set; }
         public int ChunkNumber { get; set; }
         public ushort PathStringPos { get; set; }
-        public byte UnkEntryVal { get; set; }
+        public byte FileTypeID { get; set; }
 
         // Program variables
         // (For a string in chunk)

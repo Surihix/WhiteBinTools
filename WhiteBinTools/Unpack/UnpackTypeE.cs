@@ -114,7 +114,7 @@ namespace WhiteBinTools.Unpack
 
                                 outJsonWriter.Write("               { \"fileCode\": ");
                                 outJsonWriter.Write($"{filelistVariables.FileCode}, ");
-                                outJsonWriter.Write($"\"unkValue\": {filelistVariables.UnkEntryVal}, ");
+                                outJsonWriter.Write($"\"unkValue\": {filelistVariables.FileTypeID}, ");
                             }
 
                             outJsonWriter.Write($"\"filePath\": \"{filelistVariables.PathString}\"");
