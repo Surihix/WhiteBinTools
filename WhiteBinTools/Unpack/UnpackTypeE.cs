@@ -15,12 +15,6 @@ namespace WhiteBinTools.Unpack
 
             FilelistProcesses.PrepareFilelistVars(filelistVariables, filelistFile);
 
-            var filelistOutName = Path.GetFileName(filelistFile);
-            var outJsonFile = Path.Combine(filelistVariables.MainFilelistDirectory, filelistOutName + ".json");
-
-            IOhelpers.IfFileExistsDel(outJsonFile);
-
-
             FilelistCrypto.DecryptProcess(gameCode, filelistVariables, logWriter);
 
             using (var filelistStream = new FileStream(filelistVariables.MainFilelistFile, FileMode.Open, FileAccess.Read))
@@ -37,9 +31,6 @@ namespace WhiteBinTools.Unpack
                 filelistVariables.CurrentChunkNumber = -1;
             }
 
-            var seedA = ulong.MinValue;
-            var seedB = ulong.MinValue;
-            var encTag = uint.MinValue;
             if (filelistVariables.IsEncrypted)
             {
                 IOhelpers.IfFileExistsDel(filelistVariables.TmpDcryptFilelistFile);
@@ -48,13 +39,18 @@ namespace WhiteBinTools.Unpack
                 using (var encDataReader = new BinaryReader(File.Open(filelistFile, FileMode.Open, FileAccess.Read)))
                 {
                     encDataReader.BaseStream.Position = 0;
-                    seedA = encDataReader.ReadUInt64();
-                    seedB = encDataReader.ReadUInt64();
+                    filelistVariables.SeedA = encDataReader.ReadUInt64();
+                    filelistVariables.SeedB = encDataReader.ReadUInt64();
 
                     encDataReader.BaseStream.Position += 4;
-                    encTag = encDataReader.ReadUInt32();
+                    filelistVariables.EncTag = encDataReader.ReadUInt32();
                 }
             }
+
+            var filelistOutName = Path.GetFileName(filelistFile);
+            var outJsonFile = Path.Combine(filelistVariables.MainFilelistDirectory, filelistOutName + ".json");
+
+            IOhelpers.IfFileExistsDel(outJsonFile);
 
 
             // Write all file paths strings
@@ -62,21 +58,23 @@ namespace WhiteBinTools.Unpack
             using (var outJsonWriter = new StreamWriter(outJsonFile, true))
             {
                 outJsonWriter.WriteLine("{");
-                if (filelistVariables.IsEncrypted)
+
+                if (gameCode == GameCodes.ff132)
                 {
-                    outJsonWriter.WriteLine($"  \"encrypted\": true,");
-                    outJsonWriter.WriteLine($"  \"seedA\": {seedA},");
-                    outJsonWriter.WriteLine($"  \"seedB\": {seedB},");
-                    outJsonWriter.WriteLine($"  \"encryptionTag\": {encTag},");
+                    outJsonWriter.WriteLine($"  \"encrypted\": {filelistVariables.IsEncrypted.ToString().ToLower()},");
+
+                    if (filelistVariables.IsEncrypted)
+                    {
+                        outJsonWriter.WriteLine($"  \"seedA\": {filelistVariables.SeedA},");
+                        outJsonWriter.WriteLine($"  \"seedB\": {filelistVariables.SeedB},");
+                        outJsonWriter.WriteLine($"  \"encryptionTag(DO_NOT_CHANGE)\": {filelistVariables.EncTag},");
+                    }
                 }
-                else
-                {
-                    outJsonWriter.WriteLine($"  \"encrypted\": false,");
-                }
+
                 outJsonWriter.WriteLine($"  \"fileCount\": {filelistVariables.TotalFiles},");
                 outJsonWriter.WriteLine($"  \"chunkCount\": {filelistVariables.TotalChunks},");
                 outJsonWriter.WriteLine("  \"data\": {");
-                outJsonWriter.WriteLine("             \"Chunk_0\": [");
+                outJsonWriter.WriteLine("    \"Chunk_0\": [");
 
                 using (var entriesStream = new MemoryStream())
                 {
@@ -104,32 +102,32 @@ namespace WhiteBinTools.Unpack
                                 DetermineArrayClosure(chunkNumberJson, filelistVariables.ChunkNumber, outJsonWriter);
                                 chunkNumberJson = filelistVariables.ChunkNumber;
 
-                                outJsonWriter.Write("               { \"fileCode\": ");
-                                outJsonWriter.Write($"{filelistVariables.FileCode}, ");
+                                outJsonWriter.WriteLine("      {");
+                                outJsonWriter.WriteLine("        \"fileCode\": " + $"{filelistVariables.FileCode},");
                             }
                             else
                             {
                                 DetermineArrayClosure(chunkNumberJson, filelistVariables.CurrentChunkNumber, outJsonWriter);
                                 chunkNumberJson = filelistVariables.CurrentChunkNumber;
 
-                                outJsonWriter.Write("               { \"fileCode\": ");
-                                outJsonWriter.Write($"{filelistVariables.FileCode}, ");
-                                outJsonWriter.Write($"\"unkValue\": {filelistVariables.FileTypeID}, ");
+                                outJsonWriter.WriteLine("      {");
+                                outJsonWriter.WriteLine("        \"fileCode\": " + $"{filelistVariables.FileCode},");
+                                outJsonWriter.WriteLine("        \"fileTypeID\": " + $"{filelistVariables.FileTypeID},");
                             }
 
-                            outJsonWriter.Write($"\"filePath\": \"{filelistVariables.PathString}\"");
+                            outJsonWriter.WriteLine("        \"filePath\": " + $"\"{filelistVariables.PathString}\"");
 
                             if (f == lastFile)
                             {
-                                outJsonWriter.WriteLine(" }");
-                                outJsonWriter.WriteLine("             ]");
+                                outJsonWriter.WriteLine("      }");
+                                outJsonWriter.WriteLine("    ]");
                             }
                         }
                     }
                 }
 
                 outJsonWriter.WriteLine("  }");
-                outJsonWriter.WriteLine("}");
+                outJsonWriter.Write("}");
             }
 
             logWriter.LogMessage($"\n\nFinished writing filelist data to \"{Path.GetFileName(outJsonFile)}\"");
@@ -142,15 +140,14 @@ namespace WhiteBinTools.Unpack
             {
                 if (chunkNumberJson != -1)
                 {
-                    outJsonWriter.WriteLine(" }");
-                    outJsonWriter.WriteLine("             ],");
-                    outJsonWriter.WriteLine();
-                    outJsonWriter.WriteLine($"             \"Chunk_{chunkNumberProcess}\": [");
+                    outJsonWriter.WriteLine("      }");
+                    outJsonWriter.WriteLine("    ],");
+                    outJsonWriter.WriteLine($"    \"Chunk_{chunkNumberProcess}\": [");
                 }
             }
             else
             {
-                outJsonWriter.WriteLine(" },");
+                outJsonWriter.WriteLine("      },");
             }
         }
     }
