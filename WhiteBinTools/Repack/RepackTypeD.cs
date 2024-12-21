@@ -13,20 +13,85 @@ namespace WhiteBinTools.Repack
         {
             IOhelpers.CheckDirExists(extractedFilelistDir, logWriter, "Error: Unpacked filelist directory specified in the argument is missing");
 
-            var encHeaderFile = Path.Combine(extractedFilelistDir, "~EncryptionHeader_(DON'T DELETE)");
-            var countsFile = Path.Combine(extractedFilelistDir, "~Counts.txt");
+            var infoFile = Path.Combine(extractedFilelistDir, "#info.txt");
+            IOhelpers.CheckFileExists(infoFile, logWriter, "Error: Unable to locate '#info.txt' file in the unpacked filelist folder");
 
-            IOhelpers.CheckFileExists(countsFile, logWriter, "Error: Unable to locate the '~Counts.txt' file");
+            var infoFileLines = File.ReadAllLines(infoFile);
 
-            // Assume the filelist is supposed to be 
-            // encrypted if the encHeader file exists
             var filelistVariables = new FilelistVariables();
-            if (File.Exists(encHeaderFile))
+
+            // Get all the necessary information
+            // from the #info.txt file
+            if (gameCode == GameCodes.ff131)
             {
-                filelistVariables.IsEncrypted = true;
-                filelistVariables.EncryptedHeaderData = new byte[32];
-                filelistVariables.EncryptedHeaderData = File.ReadAllBytes(encHeaderFile);
+                if (infoFileLines.Length < 2)
+                {
+                    IOhelpers.ErrorExit("Error: Not enough data present in the #info.txt file");
+                }
+
+                CheckPropertyInInfoFile(infoFileLines[0], "fileCount: ", "Uint");
+                filelistVariables.TotalFiles = uint.Parse(infoFileLines[0].Split(' ')[1]);
+
+                CheckPropertyInInfoFile(infoFileLines[1], "chunkCount: ", "Uint");
+                filelistVariables.TotalChunks = uint.Parse(infoFileLines[1].Split(' ')[1]);
             }
+            else if (gameCode == GameCodes.ff132)
+            {
+                if (infoFileLines.Length < 3)
+                {
+                    IOhelpers.ErrorExit("Not enough data present in the #info.txt file");
+                }
+
+                CheckPropertyInInfoFile(infoFileLines[0], "encrypted: ", "Boolean");
+                filelistVariables.IsEncrypted = bool.Parse(infoFileLines[0].Split(' ')[1]);
+
+                if (filelistVariables.IsEncrypted)
+                {
+                    CheckPropertyInInfoFile(infoFileLines[1], "seedA: ", "Ulong");
+                    filelistVariables.SeedA = ulong.Parse(infoFileLines[1].Split(' ')[1]);
+
+                    CheckPropertyInInfoFile(infoFileLines[2], "seedB: ", "Ulong");
+                    filelistVariables.SeedB = ulong.Parse(infoFileLines[2].Split(' ')[1]);
+
+                    CheckPropertyInInfoFile(infoFileLines[3], "encryptionTag(DO_NOT_CHANGE): ", "Uint");
+                    filelistVariables.EncTag = uint.Parse(infoFileLines[3].Split(' ')[1]);
+
+                    CheckPropertyInInfoFile(infoFileLines[4], "fileCount: ", "Uint");
+                    filelistVariables.TotalFiles = uint.Parse(infoFileLines[4].Split(' ')[1]);
+
+                    CheckPropertyInInfoFile(infoFileLines[5], "chunkCount: ", "Uint");
+                    filelistVariables.TotalChunks = uint.Parse(infoFileLines[5].Split(' ')[1]);
+
+                    using (var encHeaderStream = new MemoryStream())
+                    {
+                        using (var encHeaderWriter = new BinaryWriter(encHeaderStream))
+                        {
+                            encHeaderStream.Seek(0, SeekOrigin.Begin);
+
+                            encHeaderWriter.WriteBytesUInt64(filelistVariables.SeedA, false);
+                            encHeaderWriter.WriteBytesUInt64(filelistVariables.SeedB, false);
+                            encHeaderWriter.WriteBytesUInt32(0, false);
+                            encHeaderWriter.WriteBytesUInt32(filelistVariables.EncTag, false);
+                            encHeaderWriter.WriteBytesUInt64(0, false);
+
+                            encHeaderStream.Seek(0, SeekOrigin.Begin);
+                            filelistVariables.EncryptedHeaderData = new byte[32];
+                            filelistVariables.EncryptedHeaderData = encHeaderStream.ToArray();
+                        }
+                    }
+                }
+                else
+                {
+                    CheckPropertyInInfoFile(infoFileLines[1], "fileCount: ", "Uint");
+                    filelistVariables.TotalFiles = uint.Parse(infoFileLines[1].Split(' ')[1]);
+
+                    CheckPropertyInInfoFile(infoFileLines[2], "chunkCount: ", "Uint");
+                    filelistVariables.TotalChunks = uint.Parse(infoFileLines[2].Split(' ')[1]);
+                }
+            }
+
+            logWriter.LogMessage("TotalChunks: " + filelistVariables.TotalChunks);
+            logWriter.LogMessage("No of files: " + filelistVariables.TotalFiles + "\n");
 
             var repackVariables = new RepackVariables();
             repackVariables.NewFilelistFile = Path.Combine(Path.GetDirectoryName(extractedFilelistDir), Path.GetFileName(extractedFilelistDir).Remove(0, 1));
@@ -42,15 +107,6 @@ namespace WhiteBinTools.Repack
             }
 
             IOhelpers.IfFileExistsDel(repackVariables.NewFilelistFile);
-
-            using (var countsReader = new StreamReader(countsFile))
-            {
-                filelistVariables.TotalFiles = uint.Parse(countsReader.ReadLine());
-                filelistVariables.TotalChunks = uint.Parse(countsReader.ReadLine());
-
-                logWriter.LogMessage("TotalChunks: " + filelistVariables.TotalChunks);
-                logWriter.LogMessage("No of files: " + filelistVariables.TotalFiles + "\n");
-            }
 
             logWriter.LogMessage("\n\nBuilding filelist....");
 
@@ -76,77 +132,103 @@ namespace WhiteBinTools.Repack
                 }
             }
 
-
-            filelistVariables.LastChunkNumber = 0;
-
             using (var entriesStream = new MemoryStream())
             {
                 using (var entriesWriter = new BinaryWriter(entriesStream))
-                {                
-                    
+                {
+
                     // Process each path in chunks
-                    var chunkFilePath = Path.Combine(extractedFilelistDir, "Chunk_");
+                    var currentChunkFile = string.Empty;
+                    var currentChunkData = new string[] { };
+                    var currentEntryData = new string[] { };
+                    var oddChunkCounter = 0;
                     long entriesWriterPos = 0;
+
                     for (int c = 0; c < filelistVariables.TotalChunks; c++)
                     {
-                        using (var currentChunkReader = new StreamReader(chunkFilePath + c + ".txt", Encoding.UTF8))
+                        filelistVariables.LastChunkNumber = c;
+                        currentChunkFile = Path.Combine(extractedFilelistDir, $"Chunk_{c}.txt");
+
+                        currentChunkData = File.ReadAllLines(currentChunkFile);
+
+                        for (int l = 0; l < currentChunkData.Length; l++)
                         {
-                            string line;
-                            while ((line = currentChunkReader.ReadLine()) != null)
+                            currentEntryData = currentChunkData[l].Split('|');
+
+                            if (gameCode == GameCodes.ff131)
                             {
-                                var stringData = line.Split('|');
+                                if (currentEntryData.Length < 2)
+                                {
+                                    IOhelpers.ErrorExit($"Error: Not enough data specified for the entry at line_{l} in 'Chunk_{c}.txt' file. check if the entry contains valid data for the game code specified in the argument.");
+                                }
+
+                                CheckChunkEntryData(currentEntryData[0], "Uint", c, l);
+                                filelistVariables.FileCode = uint.Parse(currentEntryData[0]);
 
                                 // Write filecode
                                 entriesWriter.BaseStream.Position = entriesWriterPos;
-                                entriesWriter.WriteBytesUInt32(uint.Parse(stringData[0]), false);
+                                entriesWriter.WriteBytesUInt32(filelistVariables.FileCode, false);
 
-                                if (gameCode == GameCodes.ff132)
+                                // Write chunk number
+                                entriesWriter.BaseStream.Position = entriesWriterPos + 4;
+                                entriesWriter.WriteBytesUInt16((ushort)c, false);
+
+                                // Write zero as path number
+                                entriesWriter.BaseStream.Position = entriesWriterPos + 6;
+                                entriesWriter.WriteBytesUInt16(0, false);
+
+                                filelistVariables.PathString = currentEntryData[1];
+                            }
+                            else if (gameCode == GameCodes.ff132)
+                            {
+                                if (currentEntryData.Length < 3)
                                 {
-                                    if (oddChunkNumValues.Contains(c))
-                                    {
-                                        // Write the 32768 position value
-                                        // to indicate that the chunk
-                                        // number is odd
-                                        entriesWriter.BaseStream.Position = entriesWriterPos + 4;
-                                        entriesWriter.WriteBytesUInt16(32768, false);
-                                    }
-                                    else
-                                    {
-                                        // Write zero as path number
-                                        entriesWriter.BaseStream.Position = entriesWriterPos + 4;
-                                        entriesWriter.WriteBytesUInt16(0, false);
-                                    }
+                                    IOhelpers.ErrorExit($"Error: Not enough data specified for the entry at line_{l} in 'Chunk_{c}.txt' file. check if the entry contains valid data for the game code specified in the argument.");
+                                }
 
-                                    // Write chunk number
-                                    entriesWriter.BaseStream.Position = entriesWriterPos + 6;
-                                    entriesWriter.Write(byte.Parse(stringData[1]));
+                                CheckChunkEntryData(currentEntryData[0], "Uint", c, l);
+                                filelistVariables.FileCode = uint.Parse(currentEntryData[0]);
 
-                                    // Write UnkEntryVal
-                                    entriesWriter.BaseStream.Position = entriesWriterPos + 7;
-                                    entriesWriter.Write(byte.Parse(stringData[2]));
+                                CheckChunkEntryData(currentEntryData[1], "Byte", c, l);
+                                filelistVariables.FileTypeID = byte.Parse(currentEntryData[1]);
 
-                                    // Add path to dictionary
-                                    newChunksDict[c].AddRange(Encoding.UTF8.GetBytes(stringData[3] + "\0"));
+                                entriesWriter.BaseStream.Position = entriesWriterPos;
+                                entriesWriter.WriteBytesUInt32(filelistVariables.FileCode, false);
+
+                                entriesWriter.BaseStream.Position = entriesWriterPos + 4;
+
+                                if (oddChunkNumValues.Contains(c))
+                                {
+                                    // Write the 32768 position value
+                                    // to indicate that the chunk
+                                    // number is odd
+                                    oddChunkCounter = oddChunkNumValues.IndexOf(c);
+                                    entriesWriter.WriteBytesUInt16(32768, false);
                                 }
                                 else
                                 {
-                                    // Write chunk number
-                                    entriesWriter.BaseStream.Position = entriesWriterPos + 4;
-                                    entriesWriter.WriteBytesUInt16(ushort.Parse(stringData[1]), false);
-
                                     // Write zero as path number
-                                    entriesWriter.BaseStream.Position = entriesWriterPos + 6;
                                     entriesWriter.WriteBytesUInt16(0, false);
-
-                                    // Add path to dictionary
-                                    newChunksDict[c].AddRange(Encoding.UTF8.GetBytes(stringData[2] + "\0"));
                                 }
 
-                                entriesWriterPos += 8;
+                                // Write chunk number
+                                entriesWriter.BaseStream.Position = entriesWriterPos + 6;
+                                entriesWriter.Write((byte)oddChunkCounter);
+
+                                // Write FileTypeID
+                                entriesWriter.BaseStream.Position = entriesWriterPos + 7;
+                                entriesWriter.Write(filelistVariables.FileTypeID);
+
+                                filelistVariables.PathString = currentEntryData[2];
                             }
+
+                            // Add path to dictionary
+                            newChunksDict[c].AddRange(Encoding.UTF8.GetBytes(filelistVariables.PathString + "\0"));
+
+                            entriesWriterPos += 8;
                         }
 
-                        filelistVariables.LastChunkNumber = c;
+                        oddChunkCounter++;
                     }
 
                     filelistVariables.EntriesData = new byte[entriesStream.Length];
@@ -154,7 +236,6 @@ namespace WhiteBinTools.Repack
                     entriesStream.Read(filelistVariables.EntriesData, 0, filelistVariables.EntriesData.Length);
                 }
             }
-
 
             RepackFilelistData.BuildFilelist(filelistVariables, newChunksDict, repackVariables, gameCode);
 
@@ -164,6 +245,63 @@ namespace WhiteBinTools.Repack
             }
 
             logWriter.LogMessage($"\n\nFinished repacking filelist data to \"{Path.GetFileName(repackVariables.NewFilelistFile)}\"");
+        }
+
+
+        private static void CheckPropertyInInfoFile(string propertyDataRead, string expectedPropertyName, string valueType)
+        {
+            if (!propertyDataRead.StartsWith(expectedPropertyName))
+            {
+                IOhelpers.ErrorExit($"Error: The '{expectedPropertyName}' property in '#info.txt' file is invalid. Please check if the property is specified correctly as well as check if you have set the correct game code.");
+            }
+
+            var isValidVal = true;
+
+            switch (valueType)
+            {
+                case "Boolean":
+                    isValidVal = bool.TryParse(propertyDataRead.Split(' ')[1], out _);
+                    break;
+
+                case "Uint":
+                    isValidVal = uint.TryParse(propertyDataRead.Split(' ')[1], out _);
+                    break;
+
+                case "Ulong":
+                    isValidVal = ulong.TryParse(propertyDataRead.Split(' ')[1], out _);
+                    break;
+            }
+
+            if (!isValidVal)
+            {
+                IOhelpers.ErrorExit($"Error: Invalid value specified for '{expectedPropertyName}' property in the #info.txt file");
+            }
+        }
+
+
+        public static void CheckChunkEntryData(string currentLine, string entryValueType, int chunkId, int lineNo)
+        {
+            var isValidVal = true;
+
+            switch (entryValueType)
+            {
+                case "Byte":
+                    isValidVal = byte.TryParse(currentLine, out _);
+                    break;
+
+                case "Ushort":
+                    isValidVal = ushort.TryParse(currentLine, out _);
+                    break;
+
+                case "Uint":
+                    isValidVal = uint.TryParse(currentLine, out _);
+                    break;
+            }
+
+            if (!isValidVal)
+            {
+                IOhelpers.ErrorExit($"Invalid data found when parsing line_{lineNo} in 'Chunk_{chunkId}'.txt file. Please check if the line is specified correctly as well as check if you have selected the correct game in this tool");
+            }
         }
     }
 }
