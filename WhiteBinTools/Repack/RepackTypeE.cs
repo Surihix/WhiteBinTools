@@ -16,86 +16,53 @@ namespace WhiteBinTools.Repack
 
             var filelistVariables = new FilelistVariables();
 
-            object tmpValueRead = string.Empty;
             using (var jsonReader = new StreamReader(jsonFile))
             {
                 _ = jsonReader.ReadLine();
 
-                // Determine encryption status
-                tmpValueRead = CheckParseJsonProperty(jsonReader, "\"encrypted\":", "Error: encrypted status string in the json file is invalid");
-
-                if (!bool.TryParse(tmpValueRead.ToString().Split(':')[1].TrimEnd(','), out bool isEncrypted))
+                if (gameCode == GameCodes.ff132)
                 {
-                    IOhelpers.ErrorExit("Error: unable to parse encrypted property's value");
-                }
+                    // Determine encryption status
+                    filelistVariables.IsEncrypted = bool.Parse(CheckGetMainProperty(jsonReader, "\"encrypted\"", "Boolean"));
 
-                filelistVariables.IsEncrypted = isEncrypted;
-
-                // Get seed values if encrypted
-                // and create the encryptedHeaderData
-                // variable
-                if (filelistVariables.IsEncrypted)
-                {
-                    tmpValueRead = CheckParseJsonProperty(jsonReader, "\"seedA\":", "Error: seedA property string in the json file is invalid");
-                    if (!ulong.TryParse(tmpValueRead.ToString().Split(':')[1].TrimEnd(','), out ulong seedA))
+                    if (filelistVariables.IsEncrypted)
                     {
-                        IOhelpers.ErrorExit("Error: unable to parse seedA property's value");
-                    }
+                        filelistVariables.SeedA = ulong.Parse(CheckGetMainProperty(jsonReader, "\"seedA\"", "Ulong"));
+                        filelistVariables.SeedB = ulong.Parse(CheckGetMainProperty(jsonReader, "\"seedB\"", "Ulong"));
+                        filelistVariables.EncTag = uint.Parse(CheckGetMainProperty(jsonReader, "\"encryptionTag(DO_NOT_CHANGE)\"", "Uint"));
 
-                    tmpValueRead = CheckParseJsonProperty(jsonReader, "\"seedB\":", "Error: seedB property string in the json file is invalid");
-                    if (!ulong.TryParse(tmpValueRead.ToString().Split(':')[1].TrimEnd(','), out ulong seedB))
-                    {
-                        IOhelpers.ErrorExit("Error: unable to parse seedB property's value");
-                    }
-
-                    tmpValueRead = CheckParseJsonProperty(jsonReader, "\"encryptionTag\":", "Error: encryptionTag property string in the json file is invalid");
-                    if (!uint.TryParse(tmpValueRead.ToString().Split(':')[1].TrimEnd(','), out uint encTag))
-                    {
-                        IOhelpers.ErrorExit("Error: unable to parse encTag property's value");
-                    }
-
-                    using (var encHeaderStream = new MemoryStream())
-                    {
-                        using (var encHeaderWriter = new BinaryWriter(encHeaderStream))
+                        using (var encHeaderStream = new MemoryStream())
                         {
-                            encHeaderStream.Seek(0, SeekOrigin.Begin);
+                            using (var encHeaderWriter = new BinaryWriter(encHeaderStream))
+                            {
+                                encHeaderStream.Seek(0, SeekOrigin.Begin);
 
-                            encHeaderWriter.WriteBytesUInt64(seedA, false);
-                            encHeaderWriter.WriteBytesUInt64(seedB, false);
-                            encHeaderWriter.WriteBytesUInt32(0, false);
-                            encHeaderWriter.WriteBytesUInt32(encTag, false);
-                            encHeaderWriter.WriteBytesUInt64(0, false);
+                                encHeaderWriter.WriteBytesUInt64(filelistVariables.SeedA, false);
+                                encHeaderWriter.WriteBytesUInt64(filelistVariables.SeedB, false);
+                                encHeaderWriter.WriteBytesUInt32(0, false);
+                                encHeaderWriter.WriteBytesUInt32(filelistVariables.EncTag, false);
+                                encHeaderWriter.WriteBytesUInt64(0, false);
 
-                            encHeaderStream.Seek(0, SeekOrigin.Begin);
-                            filelistVariables.EncryptedHeaderData = new byte[32];
-                            filelistVariables.EncryptedHeaderData = encHeaderStream.ToArray();
+                                encHeaderStream.Seek(0, SeekOrigin.Begin);
+                                filelistVariables.EncryptedHeaderData = new byte[32];
+                                filelistVariables.EncryptedHeaderData = encHeaderStream.ToArray();
+                            }
                         }
                     }
                 }
 
-                // Get fileCount and chunkCount values
-                tmpValueRead = CheckParseJsonProperty(jsonReader, "\"fileCount\":", "Error: fileCount property string in the json file is invalid");
-                if (!uint.TryParse(tmpValueRead.ToString().Split(':')[1].TrimEnd(','), out uint fileCount))
-                {
-                    IOhelpers.ErrorExit("Error: unable to parse fileCount property's value");
-                }
-
-                tmpValueRead = CheckParseJsonProperty(jsonReader, "\"chunkCount\":", "Error: chunkCount property string in the json file is invalid");
-                if (!uint.TryParse(tmpValueRead.ToString().Split(':')[1].TrimEnd(','), out uint chunkCount))
-                {
-                    IOhelpers.ErrorExit("Error: unable to parse chunkCount property's value");
-                }
-
-                filelistVariables.TotalFiles = fileCount;
-                filelistVariables.TotalChunks = chunkCount;
-
+                filelistVariables.TotalFiles = uint.Parse(CheckGetMainProperty(jsonReader, "\"fileCount\"", "Uint"));
+                filelistVariables.TotalChunks = uint.Parse(CheckGetMainProperty(jsonReader, "\"chunkCount\"", "Uint"));
                 logWriter.LogMessage("TotalChunks: " + filelistVariables.TotalChunks);
                 logWriter.LogMessage("No of files: " + filelistVariables.TotalFiles + "\n");
 
+                if (!jsonReader.ReadLine().TrimStart(' ').StartsWith("\"data\": {"))
+                {
+                    IOhelpers.ErrorExit("Error: data property specified in the json file is invalid");
+                }
 
                 // Begin building the filelist
                 logWriter.LogMessage("\n\nBuilding filelist....\n");
-                tmpValueRead = CheckParseJsonProperty(jsonReader, "\"data\": {", "Error: data property string in the json file is invalid");
 
                 var repackVariables = new RepackVariables();
                 repackVariables.NewFilelistFile = Path.Combine(Path.GetDirectoryName(jsonFile), Path.GetFileNameWithoutExtension(jsonFile));
@@ -134,183 +101,116 @@ namespace WhiteBinTools.Repack
                     }
                 }
 
-
-                // Process each path in chunks
-
                 using (var entriesStream = new MemoryStream())
                 {
                     using (var entriesWriter = new BinaryWriter(entriesStream))
                     {
-                        var runMainLoop = true;
-                        var endLoopNext = false;
 
+                        // Process each path in chunks
                         var currentChunk = string.Empty;
-                        var chunkStringStartChara = "\"Chunk_";
-                        var chunkCounter = 0;
+                        var currentJsonLine = string.Empty;
+                        var currentEntryPropertyValue = string.Empty;
                         var oddChunkCounter = 0;
+                        var splitChara = new string[] { "\": " };
                         long entriesWriterPos = 0;
 
-                        var currentData = new string[] { };
-                        var splitChara = new string[] { ", " };
-                        var splitChara2 = new string[] { "\": " };
-                        var fileCodeData = string.Empty;
-                        var unkValueData = string.Empty;
-
-                        uint fileCounter = uint.MinValue;
-                        var lastFile = filelistVariables.TotalFiles;
-
-                        while (runMainLoop)
+                        for (int c = 0; c < filelistVariables.TotalChunks; c++)
                         {
-                            filelistVariables.LastChunkNumber = chunkCounter;
-                            currentChunk = chunkStringStartChara + chunkCounter + "\"";
-                            tmpValueRead = CheckParseJsonProperty(jsonReader, currentChunk, $"Error: {currentChunk} property string in the json file is invalid");
+                            filelistVariables.LastChunkNumber = c;
+                            currentChunk = $"Chunk_{c}";
 
-                            endLoopNext = false;
+                            if (!jsonReader.ReadLine().TrimStart(' ').StartsWith($"\"{currentChunk}\": ["))
+                            {
+                                IOhelpers.ErrorExit($"Error: {currentChunk} property string specified in the json file is missing or invalid");
+                            }
 
                             while (true)
                             {
-                                if (endLoopNext)
+                                currentJsonLine = jsonReader.ReadLine().TrimStart(' ').TrimEnd(' ');
+
+                                // Determine how to end
+                                // processing the
+                                // current chunk
+                                if (currentJsonLine == "}")
                                 {
-                                    chunkCounter++;
-                                    oddChunkCounter++;
-                                    _ = jsonReader.ReadLine();
                                     _ = jsonReader.ReadLine();
                                     break;
                                 }
-
-                                tmpValueRead = jsonReader.ReadLine().TrimStart(' ').TrimEnd(' ');
-
-                                // Assume that the chunk
-                                // is going to end if the
-                                // string is ending with '}' chara
-                                if (tmpValueRead.ToString().EndsWith("}"))
+                                else if (currentJsonLine == "},")
                                 {
-                                    endLoopNext = true;
+                                    continue;
                                 }
 
-                                // Assume that we have the
-                                // data at this stage
-                                currentData = tmpValueRead.ToString().Split(splitChara, StringSplitOptions.None);
-                                if (currentData.Length < 2)
+                                // Process entry
+                                if (currentJsonLine == "{")
                                 {
-                                    IOhelpers.ErrorExit($"Error: Unable to parse data. occured when parsing {currentChunk}.");
-                                }
+                                    currentJsonLine = jsonReader.ReadLine().TrimStart(' ').TrimEnd(' ');
+                                    currentEntryPropertyValue = CheckGetChunkEntryProperty(currentJsonLine, "\"fileCode\"", c, "Uint");
+                                    filelistVariables.FileCode = uint.Parse(currentEntryPropertyValue);
 
-                                // filecode
-                                fileCodeData = currentData[0].ToString();
+                                    // Write filecode
+                                    entriesWriter.BaseStream.Position = entriesWriterPos;
+                                    entriesWriter.WriteBytesUInt32(filelistVariables.FileCode, false);
 
-                                if (!fileCodeData.StartsWith("{ \"fileCode\":"))
-                                {
-                                    IOhelpers.ErrorExit($"Error: fileCode property string in the json file was invalid. occured when parsing {currentChunk}.");
-                                }
-
-                                if (!uint.TryParse(fileCodeData.Split(splitChara2, StringSplitOptions.None)[1], out uint fileCode))
-                                {
-                                    IOhelpers.ErrorExit($"Error: unable to parse fileCode property's value. occured when parsing {currentChunk}.");
-                                }
-
-                                entriesWriter.BaseStream.Position = entriesWriterPos;
-                                entriesWriter.WriteBytesUInt32(fileCode, false);
-
-                                // According to the gameCode
-                                // determine how the
-                                // path positon, chunk number
-                                // and unkValue values are written
-                                if (gameCode == GameCodes.ff132)
-                                {
-                                    if (currentData.Length < 3)
+                                    if (gameCode == GameCodes.ff131)
                                     {
-                                        IOhelpers.ErrorExit($"Error: Unable to parse data. occured at position {jsonReader.BaseStream.Position}.");
-                                    }
-
-                                    // unkValue
-                                    unkValueData = currentData[1].ToString();
-
-                                    if (!unkValueData.StartsWith("\"unkValue\":"))
-                                    {
-                                        IOhelpers.ErrorExit($"Error: unkValue property string in the json file was invalid. occured when parsing {currentChunk}.");
-                                    }
-
-                                    if (!byte.TryParse(unkValueData.Split(splitChara2, StringSplitOptions.None)[1].TrimEnd(','), out byte unkValue))
-                                    {
-                                        IOhelpers.ErrorExit($"Error: unable to parse unkValue property's value. occured when parsing {currentChunk}.");
-                                    }
-
-                                    // path position
-                                    if (oddChunkNumValues.Contains(chunkCounter))
-                                    {
-                                        oddChunkCounter = oddChunkNumValues.IndexOf(chunkCounter);
-
-                                        // Write the 32768 position value
-                                        // to indicate that the chunk
-                                        // number is odd
+                                        // Write chunk number
                                         entriesWriter.BaseStream.Position = entriesWriterPos + 4;
-                                        entriesWriter.WriteBytesUInt16(32768, false);
-                                    }
-                                    else
-                                    {
+                                        entriesWriter.WriteBytesUInt16((ushort)c, false);
+
                                         // Write zero as path number
-                                        entriesWriter.BaseStream.Position = entriesWriterPos + 4;
+                                        entriesWriter.BaseStream.Position = entriesWriterPos + 6;
                                         entriesWriter.WriteBytesUInt16(0, false);
                                     }
-
-                                    // chunk number
-                                    entriesWriter.BaseStream.Position = entriesWriterPos + 6;
-                                    entriesWriter.Write((byte)oddChunkCounter);
-
-                                    // unkValue
-                                    entriesWriter.BaseStream.Position = entriesWriterPos + 7;
-                                    entriesWriter.Write(unkValue);
-
-                                    // Add path to dictionary
-                                    var pathRead = currentData[2];
-                                    if (!pathRead.StartsWith("\"filePath\":"))
+                                    else if (gameCode == GameCodes.ff132)
                                     {
-                                        IOhelpers.ErrorExit($"Error: filePath property string in the json file was invalid. occured when parsing {currentChunk}.");
+                                        currentJsonLine = jsonReader.ReadLine().TrimStart(' ').TrimEnd(' ');
+                                        currentEntryPropertyValue = CheckGetChunkEntryProperty(currentJsonLine, "\"fileTypeID\"", c, "Byte");
+                                        filelistVariables.FileTypeID = byte.Parse(currentEntryPropertyValue);
+
+                                        entriesWriter.BaseStream.Position = entriesWriterPos + 4;
+
+                                        if (oddChunkNumValues.Contains(c))
+                                        {
+                                            // Write the 32768 position value
+                                            // to indicate that the chunk
+                                            // number is odd
+                                            oddChunkCounter = oddChunkNumValues.IndexOf(c);
+                                            entriesWriter.WriteBytesUInt16(32768, false);
+                                        }
+                                        else
+                                        {
+                                            // Write zero as path number
+                                            entriesWriter.WriteBytesUInt16(0, false);
+                                        }
+
+                                        // Write chunk number
+                                        entriesWriter.BaseStream.Position = entriesWriterPos + 6;
+                                        entriesWriter.Write((byte)oddChunkCounter);
+
+                                        // Write FileTypeID
+                                        entriesWriter.BaseStream.Position = entriesWriterPos + 7;
+                                        entriesWriter.Write(filelistVariables.FileTypeID);
                                     }
 
-                                    pathRead = pathRead.Split(splitChara2, StringSplitOptions.None)[1];
-                                    pathRead = pathRead.Remove(0, 1);
-                                    pathRead = ProcessPathString(pathRead);
-
-                                    newChunksDict[chunkCounter].AddRange(Encoding.UTF8.GetBytes(pathRead + "\0"));
-                                }
-                                else
-                                {
-                                    // Write chunk number
-                                    entriesWriter.BaseStream.Position = entriesWriterPos + 4;
-                                    entriesWriter.WriteBytesUInt16((ushort)chunkCounter, false);
-
-                                    // Write zero as path number
-                                    entriesWriter.BaseStream.Position = entriesWriterPos + 6;
-                                    entriesWriter.WriteBytesUInt16(0, false);
-
                                     // Add path to dictionary
-                                    var pathRead = currentData[1];
-                                    if (!pathRead.StartsWith("\"filePath\":"))
+                                    currentJsonLine = jsonReader.ReadLine().TrimStart(' ').TrimEnd(' ');
+                                    var filePathProperty = currentJsonLine.Split(splitChara, StringSplitOptions.None);
+
+                                    if (!filePathProperty[0].StartsWith("\"filePath"))
                                     {
-                                        IOhelpers.ErrorExit($"Error: filePath property string in the json file was invalid. occured when parsing {currentChunk}.");
+                                        IOhelpers.ErrorExit($"Error: Missing filePath property at expected position. occured when parsing Chunk_{c}.");
                                     }
 
-                                    pathRead = pathRead.Split(splitChara2, StringSplitOptions.None)[1];
-                                    pathRead = pathRead.Remove(0, 1);
-                                    pathRead = ProcessPathString(pathRead);
+                                    filelistVariables.PathString = filePathProperty[1].Replace("\"", "");
 
-                                    newChunksDict[chunkCounter].AddRange(Encoding.UTF8.GetBytes(pathRead + "\0"));
-                                }
+                                    newChunksDict[c].AddRange(Encoding.UTF8.GetBytes(filelistVariables.PathString + "\0"));
 
-                                entriesWriterPos += 8;
-                                fileCounter++;
-
-                                // End the loop if the 
-                                // filecounter value is
-                                // same as the last file
-                                if (fileCounter == filelistVariables.TotalFiles)
-                                {
-                                    runMainLoop = false;
-                                    break;
+                                    entriesWriterPos += 8;
                                 }
                             }
+
+                            oddChunkCounter++;
                         }
 
                         filelistVariables.EntriesData = new byte[entriesStream.Length];
@@ -318,7 +218,6 @@ namespace WhiteBinTools.Repack
                         entriesStream.Read(filelistVariables.EntriesData, 0, filelistVariables.EntriesData.Length);
                     }
                 }
-
 
                 RepackFilelistData.BuildFilelist(filelistVariables, newChunksDict, repackVariables, gameCode);
 
@@ -332,35 +231,93 @@ namespace WhiteBinTools.Repack
         }
 
 
-        private static string CheckParseJsonProperty(StreamReader jsonReader, string propertyValue, string errorMsg)
+        private static string CheckGetMainProperty(StreamReader jsonReader, string expectedPropertyName, string valueType)
         {
-            var valueRead = jsonReader.ReadLine().TrimStart(' ');
+            var jsonPropertyVal = string.Empty;
 
-            if (!valueRead.StartsWith(propertyValue))
+            var propertyDataRead = jsonReader.ReadLine().Split(':');
+
+            if (!propertyDataRead[0].TrimStart(' ').StartsWith(expectedPropertyName))
             {
-                IOhelpers.ErrorExit(errorMsg);
+                IOhelpers.ErrorExit($"Error: Missing {expectedPropertyName} property at expected position");
             }
 
-            return valueRead;
+            var isValidVal = true;
+
+            switch (valueType)
+            {
+                case "Boolean":
+                    if (bool.TryParse(propertyDataRead[1].TrimEnd(','), out bool boolVal))
+                    {
+                        isValidVal = true;
+                        jsonPropertyVal = boolVal.ToString();
+                    }
+                    break;
+
+                case "Uint":
+                    if (uint.TryParse(propertyDataRead[1].TrimEnd(','), out uint uintVal))
+                    {
+                        isValidVal = true;
+                        jsonPropertyVal = uintVal.ToString();
+                    }
+                    break;
+
+                case "Ulong":
+                    if (ulong.TryParse(propertyDataRead[1].TrimEnd(','), out ulong ulongVal))
+                    {
+                        isValidVal = true;
+                        jsonPropertyVal = ulongVal.ToString();
+                    }
+                    break;
+            }
+
+            if (!isValidVal)
+            {
+                IOhelpers.ErrorExit($"Error: Invalid value specified for '{expectedPropertyName}' property in the #info.txt file");
+            }
+
+            return jsonPropertyVal;
         }
 
 
-        private static string ProcessPathString(string pathRead)
+        private static string CheckGetChunkEntryProperty(string currentJsonLine, string expectedPropertyName, int chunkCounter, string valueType)
         {
-            var pathString = string.Empty;
-            for (int s = 0; s < pathRead.Length; s++)
+            var chunkEntryPropertyValue = string.Empty;
+
+            var propertyDataRead = currentJsonLine.Split(':');
+
+            if (!propertyDataRead[0].StartsWith(expectedPropertyName))
             {
-                if (pathRead[s] == '"')
-                {
-                    break;
-                }
-                else
-                {
-                    pathString += pathRead[s];
-                }
+                IOhelpers.ErrorExit($"Error: Missing {expectedPropertyName} property at expected position. occured when parsing Chunk_{chunkCounter}.");
             }
 
-            return pathString;
+            var isValidVal = false;
+
+            switch (valueType)
+            {
+                case "Uint":
+                    if (uint.TryParse(propertyDataRead[1].TrimEnd(','), out uint uintVal))
+                    {
+                        isValidVal = true;
+                        chunkEntryPropertyValue = uintVal.ToString();
+                    }
+                    break;
+
+                case "Byte":
+                    if (byte.TryParse(propertyDataRead[1].TrimEnd(','), out byte byteVal))
+                    {
+                        isValidVal = true;
+                        chunkEntryPropertyValue = byteVal.ToString();
+                    }
+                    break;
+            }
+
+            if (!isValidVal)
+            {
+                IOhelpers.ErrorExit($"Error: Invalid value specified for '{expectedPropertyName}' property. occured when parsing Chunk_{chunkCounter}.");
+            }
+
+            return chunkEntryPropertyValue;
         }
     }
 }
