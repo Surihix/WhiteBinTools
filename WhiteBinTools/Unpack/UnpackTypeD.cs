@@ -57,7 +57,7 @@ namespace WhiteBinTools.Unpack
                 if (gameCode == GameCodes.ff132)
                 {
                     filelistVariables.CurrentChunkNumber = -1;
-                    infoStreamWriter.WriteLine($"encrypted: {filelistVariables.IsEncrypted}");
+                    infoStreamWriter.WriteLine($"encrypted: {filelistVariables.IsEncrypted.ToString().ToLower()}");
 
                     if (filelistVariables.IsEncrypted)
                     {
