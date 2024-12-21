@@ -279,7 +279,7 @@ namespace WhiteBinTools.Repack
         }
 
 
-        public static void CheckChunkEntryData(string currentLine, string entryValueType, int chunkId, int lineNo)
+        private static void CheckChunkEntryData(string currentLine, string entryValueType, int chunkId, int lineNo)
         {
             var isValidVal = true;
 
