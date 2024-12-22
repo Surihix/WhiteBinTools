@@ -29,10 +29,10 @@ namespace WhiteBinTools.Repack
                     IOhelpers.ErrorExit("Error: Not enough data present in the #info.txt file");
                 }
 
-                CheckPropertyInInfoFile(infoFileLines[0], "fileCount: ", "Uint");
+                CheckPropertyInInfoFile(infoFileLines[0], "fileCount: ", ValueTypes.Uint);
                 filelistVariables.TotalFiles = uint.Parse(infoFileLines[0].Split(' ')[1]);
 
-                CheckPropertyInInfoFile(infoFileLines[1], "chunkCount: ", "Uint");
+                CheckPropertyInInfoFile(infoFileLines[1], "chunkCount: ", ValueTypes.Uint);
                 filelistVariables.TotalChunks = uint.Parse(infoFileLines[1].Split(' ')[1]);
             }
             else if (gameCode == GameCodes.ff132)
@@ -42,24 +42,24 @@ namespace WhiteBinTools.Repack
                     IOhelpers.ErrorExit("Not enough data present in the #info.txt file");
                 }
 
-                CheckPropertyInInfoFile(infoFileLines[0], "encrypted: ", "Boolean");
+                CheckPropertyInInfoFile(infoFileLines[0], "encrypted: ", ValueTypes.Boolean);
                 filelistVariables.IsEncrypted = bool.Parse(infoFileLines[0].Split(' ')[1]);
 
                 if (filelistVariables.IsEncrypted)
                 {
-                    CheckPropertyInInfoFile(infoFileLines[1], "seedA: ", "Ulong");
+                    CheckPropertyInInfoFile(infoFileLines[1], "seedA: ", ValueTypes.Ulong);
                     filelistVariables.SeedA = ulong.Parse(infoFileLines[1].Split(' ')[1]);
 
-                    CheckPropertyInInfoFile(infoFileLines[2], "seedB: ", "Ulong");
+                    CheckPropertyInInfoFile(infoFileLines[2], "seedB: ", ValueTypes.Ulong);
                     filelistVariables.SeedB = ulong.Parse(infoFileLines[2].Split(' ')[1]);
 
-                    CheckPropertyInInfoFile(infoFileLines[3], "encryptionTag(DO_NOT_CHANGE): ", "Uint");
+                    CheckPropertyInInfoFile(infoFileLines[3], "encryptionTag(DO_NOT_CHANGE): ", ValueTypes.Uint);
                     filelistVariables.EncTag = uint.Parse(infoFileLines[3].Split(' ')[1]);
 
-                    CheckPropertyInInfoFile(infoFileLines[4], "fileCount: ", "Uint");
+                    CheckPropertyInInfoFile(infoFileLines[4], "fileCount: ", ValueTypes.Uint);
                     filelistVariables.TotalFiles = uint.Parse(infoFileLines[4].Split(' ')[1]);
 
-                    CheckPropertyInInfoFile(infoFileLines[5], "chunkCount: ", "Uint");
+                    CheckPropertyInInfoFile(infoFileLines[5], "chunkCount: ", ValueTypes.Uint);
                     filelistVariables.TotalChunks = uint.Parse(infoFileLines[5].Split(' ')[1]);
 
                     using (var encHeaderStream = new MemoryStream())
@@ -82,10 +82,10 @@ namespace WhiteBinTools.Repack
                 }
                 else
                 {
-                    CheckPropertyInInfoFile(infoFileLines[1], "fileCount: ", "Uint");
+                    CheckPropertyInInfoFile(infoFileLines[1], "fileCount: ", ValueTypes.Uint);
                     filelistVariables.TotalFiles = uint.Parse(infoFileLines[1].Split(' ')[1]);
 
-                    CheckPropertyInInfoFile(infoFileLines[2], "chunkCount: ", "Uint");
+                    CheckPropertyInInfoFile(infoFileLines[2], "chunkCount: ", ValueTypes.Uint);
                     filelistVariables.TotalChunks = uint.Parse(infoFileLines[2].Split(' ')[1]);
                 }
             }
@@ -163,7 +163,7 @@ namespace WhiteBinTools.Repack
                                     IOhelpers.ErrorExit($"Error: Not enough data specified for the entry at line_{l} in 'Chunk_{c}.txt' file. check if the entry contains valid data for the game code specified in the argument.");
                                 }
 
-                                CheckChunkEntryData(currentEntryData[0], "Uint", c, l);
+                                CheckChunkEntryData(currentEntryData[0], ValueTypes.Uint, c, l);
                                 filelistVariables.FileCode = uint.Parse(currentEntryData[0]);
 
                                 // Write filecode
@@ -187,10 +187,10 @@ namespace WhiteBinTools.Repack
                                     IOhelpers.ErrorExit($"Error: Not enough data specified for the entry at line_{l} in 'Chunk_{c}.txt' file. check if the entry contains valid data for the game code specified in the argument.");
                                 }
 
-                                CheckChunkEntryData(currentEntryData[0], "Uint", c, l);
+                                CheckChunkEntryData(currentEntryData[0], ValueTypes.Uint, c, l);
                                 filelistVariables.FileCode = uint.Parse(currentEntryData[0]);
 
-                                CheckChunkEntryData(currentEntryData[1], "Byte", c, l);
+                                CheckChunkEntryData(currentEntryData[1], ValueTypes.Byte, c, l);
                                 filelistVariables.FileTypeID = byte.Parse(currentEntryData[1]);
 
                                 entriesWriter.BaseStream.Position = entriesWriterPos;
@@ -249,7 +249,16 @@ namespace WhiteBinTools.Repack
         }
 
 
-        private static void CheckPropertyInInfoFile(string propertyDataRead, string expectedPropertyName, string valueType)
+        private enum ValueTypes
+        {
+            Boolean,
+            Byte,
+            Uint,
+            Ulong
+        }
+
+
+        private static void CheckPropertyInInfoFile(string propertyDataRead, string expectedPropertyName, ValueTypes valueType)
         {
             if (!propertyDataRead.StartsWith(expectedPropertyName))
             {
@@ -260,15 +269,15 @@ namespace WhiteBinTools.Repack
 
             switch (valueType)
             {
-                case "Boolean":
+                case ValueTypes.Boolean:
                     isValidVal = bool.TryParse(propertyDataRead.Split(' ')[1], out _);
                     break;
 
-                case "Uint":
+                case ValueTypes.Uint:
                     isValidVal = uint.TryParse(propertyDataRead.Split(' ')[1], out _);
                     break;
 
-                case "Ulong":
+                case ValueTypes.Ulong:
                     isValidVal = ulong.TryParse(propertyDataRead.Split(' ')[1], out _);
                     break;
             }
@@ -280,21 +289,17 @@ namespace WhiteBinTools.Repack
         }
 
 
-        private static void CheckChunkEntryData(string currentLine, string entryValueType, int chunkId, int lineNo)
+        private static void CheckChunkEntryData(string currentLine, ValueTypes entryValueType, int chunkId, int lineNo)
         {
             var isValidVal = true;
 
             switch (entryValueType)
             {
-                case "Byte":
+                case ValueTypes.Byte:
                     isValidVal = byte.TryParse(currentLine, out _);
                     break;
 
-                case "Ushort":
-                    isValidVal = ushort.TryParse(currentLine, out _);
-                    break;
-
-                case "Uint":
+                case ValueTypes.Uint:
                     isValidVal = uint.TryParse(currentLine, out _);
                     break;
             }
