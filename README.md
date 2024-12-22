@@ -34,16 +34,30 @@ This program allows you to unpack and repack the main white_img archive files fr
   1. The file will be injected at the original position, if the compressed data size (i.e if its stored compressed) or the file size (i.e if not stored compressed), is lesser than or equal to the original size of the file, that is being replaced.
   2. The file will be appended to the end of the archive, if the compressed data size (i.e if its stored compressed) or the file size (i.e if not stored compressed), is greater than the original size of the file, that is being replaced. the original file's data in the archive, will be overwritten by null bytes, thereby cleaning up the original file's data.
 
-- The `-ufl` function switch, will dump the filelist's data into multiple Chunk_ text files inside the unpacked folder. a "~Counts.txt" file will also be created inside the unpacked folder and would contain the filecount and the chunk count values. an "EncryptionHeader_(DON'T DELETE)" file will be created, if the filelist was encrypted. the presence of this file will determine whether the program should encrypt the filelist, when the `-rfl` function switch is used.
+- The `-ufl` function switch, will dump the filelist's data into multiple Chunk_ text files inside the unpacked folder. a "#info.txt" file containing some information about the filelist, will also be created inside the unpacked folder. the values in this file will determine whether how the program should pack the filelist, when the `-rfl` function switch is used.
   <br>According to the game code specified, the structure of the text data inside the Chunk_ text files will be as follows:
   1. If the game code is set to `-ff131`, then this would be the structure:
-    <br> ` FileCode | Chunk Number | Virtual Path data `
+    <br> ` FileCode | Virtual Path data `
 
   2. If the game code is set to `-ff132`, then this would be the structure:
-    <br> ` FileCode | Chunk Number | Unk Value | Virtual Path data `
-    <br> The Chunk Number value will increase only after two Chunk_## text files. so for example, if the Chunk Number is `0` in "Chunk_0.txt" file, then the number will increase to `1` in "Chunk_2.txt" file. this only applies when the gamecode is set to `-ff132`. 
+    <br> ` FileCode | File type ID | Virtual Path data `
 
-- When repacking the Json file back to filelist, ensure that the structure of the text data in the Json file is similar to what it was when dumped by the `-cfj` function switch. I strongly recommend to use VS code to edit the Json file as other text editors might add non string character bytes in between two lines, which in turn will cause this program to throw errors when it tries repacking the filelist.
+- The `-cfj` function switch, will dump the filelist's data into a single Json file.
+  <br>According to the game code specified, the structure of each file entry object in the Json file, will be as follows:
+  1. If the game code is set to `-ff131`, then this would be the structure:
+   <br>```json { 
+    "fileCode": 2826572288, 
+    "filePath": "631a7:1b4867:1b4867:sound/pack/8000/usa/music_white_e3.win32.scd" 
+    }```
+  
+  2. If the game code is set to `-ff132`, then this would be the structure:
+  <br>```json { 
+    "fileCode": 142217850, 
+    "fileTypeID": 160,
+    "filePath": "24617:92e100:92e100:sound/pack/8000/usa/music_Yasha.win32.scd"
+    }```
+
+- When repacking the Json file back to filelist, ensure that the structure of the text data in the Json file is similar to what it was when dumped by the `-cfj` function switch. I strongly recommend using VS code to edit the Json file as other text editors might add non string character bytes in between two lines, which in turn will cause this program to throw errors when it tries repacking the filelist from the Json file.
 
 ## For developers
 - The following package's Zlib classes were used for Zlib compression and decompression:
