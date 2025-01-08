@@ -64,7 +64,7 @@ This program allows you to unpack and repack the main white_img archive files fr
 - The following package's Zlib classes were used for Zlib compression and decompression:
 <br>**DotNetZip** - https://github.com/haf/DotNetZip.Semverd
 
-- Refer to this [page](https://github.com/LR-Research-Team/Datalog/wiki/White-Image-BIN-files) for information about the structure of the filelist file.
+- Refer to this [page](https://github.com/LR-Research-Team/Datalog/wiki/White-BIN-files) for information about the structure of the filelist file.
 - The functions of this program can also be used in C# based projects via this [reference library](https://github.com/Surihix/WhiteBinTools_dll).
 
 ## Special Thanks
