@@ -25,7 +25,7 @@ namespace WhiteBinTools.Repack
             var newFilelistFile = filelistFile;
             var newWhiteBinName = Path.GetFileName(unpackedDir);
 
-            if (newWhiteBinName.StartsWith("_white"))
+            if (newWhiteBinName.StartsWith("_"))
             {
                 newWhiteBinName = newWhiteBinName.Remove(0, 1);
             }
