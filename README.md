@@ -2,7 +2,8 @@
 This program allows you to unpack and repack the main white_img archive files from the FF13 game trilogy as well as the KEL.DAT archive from Dirge of Cerberus. the program should be launched from command prompt with a few argument switches to perform a function. the list of valid argument switches are given below:
 
 **Game Codes:**
-<br>``-ff131`` For FF13-1 and Dirge Of Cerberus files
+<br>``-dirge`` For Dirge Of Cerberus files
+<br>``-ff131`` For FF13-1 files 
 <br>``-ff132`` For FF13-2 and FF13-LR 's files
 
 
@@ -46,7 +47,7 @@ This program allows you to unpack and repack the main white_img archive files fr
      ```json
      {
        "fileCode": 2826572288,
-       "filePath": "631a7:1b4867:1b4867:sound/pack/8000/usa/music_white_e3.win32.scd"
+       "fileInfo": "631a7:1b4867:1b4867:sound/pack/8000/usa/music_white_e3.win32.scd"
      }
      ```  
   2. If the game code is set to `-ff132`, then this would be the structure of each file entry object in the Json file:
@@ -54,11 +55,13 @@ This program allows you to unpack and repack the main white_img archive files fr
      { 
        "fileCode": 142217850, 
        "fileTypeID": 160,
-       "filePath": "24617:92e100:92e100:sound/pack/8000/usa/music_Yasha.win32.scd"
+       "fileInfo": "24617:92e100:92e100:sound/pack/8000/usa/music_Yasha.win32.scd"
      }
      ```
 
 - When repacking the Json file back to filelist, ensure that the structure of the text data in the Json file is similar to what it was when dumped by the `-cfj` function switch. I strongly recommend using VS code to edit the Json file as other text editors might add non string character bytes in between two lines, which in turn will cause this program to throw errors when it tries repacking the filelist from the Json file.
+
+- Starting from version 2.0.0, WhiteBinTools can generate filepaths for files that do not have a filepath specified in the filelist from Dirge of Cerberus. this will only work if the gamecode switch is set to `-dirge` and when you do a full unpack with the `-u` function, an `KEL.DAT_unpacked_paths.txt` file should be created next to the unpacked folder. this file should contain information such as the filecode, whether the path was generated or not and the filepath for every file.
 
 ## For developers
 - The following package's Zlib classes were used for Zlib compression and decompression:
