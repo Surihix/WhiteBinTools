@@ -1,154 +1,130 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.IO;
 using WhiteBinTools.Filelist;
 using WhiteBinTools.Support;
-using static WhiteBinTools.Support.ProgramEnums;
+using WhiteBinTools.Support.Structures;
+using static WhiteBinTools.Support.Enumerators;
 
 namespace WhiteBinTools.Repack
 {
     internal class RepackTypeC
     {
-        public static void RepackMultiple(GameCodes gameCode, string filelistFile, string whiteBinFile, string whiteExtractedDir, StreamWriter logWriter)
+        public static void RepackMultiple(GameCode gameCode, string filelistFile, string whiteBinFile, string whiteExtractedDir, StreamWriter logWriter)
         {
-            IOhelpers.CheckFileExists(filelistFile, logWriter, "Error: Filelist file specified in the argument is missing");
-            IOhelpers.CheckFileExists(whiteBinFile, logWriter, "Error: Image bin file specified in the argument is missing");
-            IOhelpers.CheckDirExists(whiteExtractedDir, logWriter, "Error: Unpacked directory specified in the argument is missing");
+            SharedFunctions.CheckFileExists(filelistFile, logWriter, "Error: Filelist file specified in the argument is missing");
+            SharedFunctions.CheckFileExists(whiteBinFile, logWriter, "Error: Image bin file specified in the argument is missing");
+            SharedFunctions.CheckDirExists(whiteExtractedDir, logWriter, "Error: Unpacked directory specified in the argument is missing");
 
-            var filelistVariables = new FilelistVariables();
-            var repackVariables = new RepackVariables();
+            var filelistLoadData = FilelistLoader.LoadFilelist(gameCode, filelistFile, logWriter);
 
-            FilelistProcesses.PrepareFilelistVars(filelistVariables, filelistFile);
-            RepackProcesses.PrepareRepackVars(repackVariables, filelistFile, filelistVariables, whiteExtractedDir);
+            var filelistCryptHeader = filelistLoadData.FilelistCryptHeader;
+            var filelistHeader = filelistLoadData.FilelistHeader;
+            var filelistEntryV1Table = filelistLoadData.FilelistEntryV1Table;
+            var filelistEntryV2Table = filelistLoadData.FilelistEntryV2Table;
+            var filelistChunks = filelistLoadData.FilelistChunks;
+
+            var newFilelistFile = filelistFile;
+            var whiteBinName = Path.GetFileName(whiteBinFile);
 
             if (Core.ShouldBckup)
             {
                 logWriter.LogMessage("\nBacking up filelist and image bin files....\n");
-                RepackProcesses.CreateFilelistBackup(filelistFile, repackVariables);
-                RepackProcesses.CreateWhiteBinBackup(whiteBinFile, repackVariables);
+                SharedFunctions.IfFileExistsDel($"{newFilelistFile}.bak");
+                File.Move(newFilelistFile, $"{newFilelistFile}.bak");
+
+                SharedFunctions.IfFileExistsDel($"{whiteBinFile}.bak");
+                File.Copy(whiteBinFile, $"{whiteBinFile}.bak");
             }
 
+            FilelistEntryV1[] newEntryV1Table = Array.Empty<FilelistEntryV1>();
+            FilelistEntryV2[] newEntryV2Table = Array.Empty<FilelistEntryV2>();
 
-            FilelistCrypto.DecryptProcess(gameCode, filelistVariables, logWriter);
-
-            using (var filelistStream = new FileStream(filelistVariables.MainFilelistFile, FileMode.Open, FileAccess.Read))
+            if (gameCode == GameCode.ff131 || gameCode == GameCode.dirge)
             {
-                using (var filelistReader = new BinaryReader(filelistStream))
-                {
-                    FilelistChunksPrep.GetFilelistOffsets(filelistReader, logWriter, filelistVariables);
-                    FilelistChunksPrep.BuildChunks(filelistStream, filelistVariables);
-
-                    if (filelistVariables.IsEncrypted)
-                    {
-                        filelistStream.Seek(0, SeekOrigin.Begin);
-                        filelistVariables.EncryptedHeaderData = new byte[32];
-                        filelistStream.Read(filelistVariables.EncryptedHeaderData, 0, 32);
-
-                        filelistStream.Dispose();
-                        File.Delete(filelistVariables.MainFilelistFile);
-                    }
-                }
-            }
-
-            IOhelpers.IfFileExistsDel(filelistFile);
-
-            if (gameCode == GameCodes.ff132)
-            {
-                filelistVariables.CurrentChunkNumber = -1;
-            }
-
-            // Build an empty dictionary
-            // for the chunks 
-            var newChunksDict = new Dictionary<int, List<byte>>();
-            RepackProcesses.CreateEmptyNewChunksDict(filelistVariables, newChunksDict);
-
-
-            var hasPacked = false;
-
-            using (var entriesStream = new MemoryStream())
-            {
-                entriesStream.Write(filelistVariables.EntriesData, 0, filelistVariables.EntriesData.Length);
-                entriesStream.Seek(0, SeekOrigin.Begin);
-
-                using (var entriesReader = new BinaryReader(entriesStream))
-                {
-
-                    // Repacking files section
-                    long entriesReadPos = 0;
-                    var packedAs = "";
-                    for (int f = 0; f < filelistVariables.TotalFiles; f++)
-                    {
-                        FilelistProcesses.GetCurrentFileEntry(gameCode, entriesReader, entriesReadPos, filelistVariables);
-                        entriesReadPos += 8;
-
-                        RepackProcesses.GetPackedState(filelistVariables.PathString, repackVariables, whiteExtractedDir);
-
-                        repackVariables.AsciiFilePos = repackVariables.ConvertedOgStringData[0];
-                        repackVariables.AsciiUnCmpSize = repackVariables.ConvertedOgStringData[1];
-                        repackVariables.AsciiCmpSize = repackVariables.ConvertedOgStringData[2];
-
-                        // Repack a specific file
-                        var currentFileInProcess = Path.Combine(repackVariables.OgDirectoryPath, repackVariables.OgFileName);
-                        if (File.Exists(Path.Combine(whiteExtractedDir, currentFileInProcess)))
-                        {
-                            if (repackVariables.WasCompressed)
-                            {
-                                RepackProcesses.CleanOldFile(repackVariables.NewWhiteBinFile, repackVariables.OgFilePos, repackVariables.OgCmpSize);
-
-                                var zlibTmpCmpData = ZlibMethods.ZlibCompress(repackVariables.OgFullFilePath);
-                                var zlibCmpFileSize = (uint)zlibTmpCmpData.Length;
-
-                                if (zlibCmpFileSize < repackVariables.OgCmpSize || zlibCmpFileSize == repackVariables.OgCmpSize)
-                                {
-                                    RepackProcesses.InjectProcess(repackVariables, ref packedAs);
-                                }
-                                else
-                                {
-                                    RepackProcesses.AppendProcess(repackVariables, ref packedAs);
-                                }
-                            }
-                            else
-                            {
-                                RepackProcesses.CleanOldFile(repackVariables.NewWhiteBinFile, repackVariables.OgFilePos, repackVariables.OgUnCmpSize);
-
-                                var dummyFileSize = (uint)new FileInfo(repackVariables.OgFullFilePath).Length;
-
-                                if (dummyFileSize < repackVariables.OgUnCmpSize || dummyFileSize == repackVariables.OgUnCmpSize)
-                                {
-                                    RepackProcesses.InjectProcess(repackVariables, ref packedAs);
-                                }
-                                else
-                                {
-                                    RepackProcesses.AppendProcess(repackVariables, ref packedAs);
-                                }
-                            }
-
-                            hasPacked = true;
-
-                            logWriter.LogMessage(repackVariables.RepackState + " " + Path.Combine(repackVariables.NewWhiteBinFileName, repackVariables.RepackLogMsg) + " " + packedAs);
-                        }
-
-                        RepackProcesses.BuildPathForChunk(repackVariables, gameCode, filelistVariables, newChunksDict);
-                    }
-                }
-            }
-
-
-            logWriter.LogMessage("\nBuilding filelist....");
-            RepackFilelistData.BuildFilelist(filelistVariables, newChunksDict, repackVariables, gameCode);
-
-            if (filelistVariables.IsEncrypted)
-            {
-                FilelistCrypto.EncryptProcess(repackVariables, logWriter);
-            }
-
-            if (hasPacked)
-            {
-                logWriter.LogMessage($"\nFinished repacking multiple files into \"{repackVariables.NewWhiteBinFileName}\"");
+                newEntryV1Table = new FilelistEntryV1[filelistHeader.FileCount];
             }
             else
             {
-                logWriter.LogMessage("Specified directory does not exist. please specify the correct directory.");
+                newEntryV2Table = new FilelistEntryV2[filelistHeader.FileCount];
             }
+
+            var fileInfoStringPackTable = new FileInfoStringPack[filelistHeader.FileCount];
+
+            var noPathCounter = 0;
+
+            for (int i = 0; i < filelistHeader.FileCount; i++)
+            {
+                string whiteFileInfoString;
+                uint fileCode;
+                ushort chunkID;
+
+                if (gameCode == GameCode.ff131 || gameCode == GameCode.dirge)
+                {
+                    var filelistEntryV1 = filelistEntryV1Table[i];
+                    newEntryV1Table[i] = filelistEntryV1;
+
+                    whiteFileInfoString = FilelistLoader.GetWhiteFileInfoString(filelistEntryV1.FileInfoPos, filelistChunks, filelistEntryV1.ChunkID);
+                    fileCode = filelistEntryV1.FileCode;
+                    chunkID = filelistEntryV1.ChunkID;
+                }
+                else
+                {
+                    var filelistEntryV2 = filelistEntryV2Table[i];
+                    newEntryV2Table[i] = filelistEntryV2;
+
+                    whiteFileInfoString = FilelistLoader.GetWhiteFileInfoString(filelistEntryV2.FileInfoPos, filelistChunks, filelistEntryV2.ChunkID);
+                    fileCode = filelistEntryV2.FileCode;
+                    chunkID = filelistEntryV2.ChunkID;
+                }
+
+                var whiteFileInfoData = FilelistLoader.GetWhiteFileInfoData(whiteFileInfoString, gameCode, fileCode, ref noPathCounter);
+
+                if (File.Exists(Path.Combine(whiteExtractedDir, whiteFileInfoData.FilePath)))
+                {
+                    var outFile = Path.Combine(whiteExtractedDir, whiteFileInfoData.FilePath);
+                    var shouldInject = RepackHelpers.DetermineInject(whiteFileInfoData, outFile);
+                    var repackedState = new RepackedState();
+                    string pathString;
+                    string packedState;
+
+                    if (shouldInject)
+                    {
+                        using (var whiteBinStream = new FileStream(whiteBinFile, FileMode.Open, FileAccess.Write))
+                        {
+                            RepackHelpers.CleanOldFile(whiteBinStream, whiteFileInfoData.FilePosition, whiteFileInfoData.CmpSize);
+                            pathString = RepackHelpers.RepackInject(whiteFileInfoData, outFile, whiteBinStream, ref repackedState);
+                            packedState = "(Injected)";
+                        }
+                    }
+                    else
+                    {
+                        using (var whiteBinStream = new FileStream(whiteBinFile, FileMode.Append, FileAccess.Write))
+                        {
+                            RepackHelpers.CleanOldFile(whiteBinStream, whiteFileInfoData.FilePosition, whiteFileInfoData.CmpSize);
+                            pathString = RepackHelpers.RepackAppend(ref repackedState, whiteFileInfoData, outFile, whiteBinStream);
+                            packedState = "(Appended)";
+                        }
+                    }
+
+                    fileInfoStringPackTable[i] = new FileInfoStringPack() { ChunkID = chunkID, FileInfoString = pathString };
+
+                    logWriter.LogMessage($"{repackedState} _{Path.Combine(whiteBinName, whiteFileInfoData.FilePath)} {packedState}");
+                }
+                else
+                {
+                    fileInfoStringPackTable[i] = new FileInfoStringPack() { ChunkID = chunkID, FileInfoString = whiteFileInfoString + "\0" };
+                }
+            }
+
+            logWriter.LogMessage("\nBuilding filelist....");
+            FilelistBuilder.BuildFilelist(filelistCryptHeader, filelistHeader, gameCode, newEntryV1Table, newEntryV2Table, fileInfoStringPackTable, newFilelistFile);
+
+            if (filelistCryptHeader.HasCryptHeader)
+            {
+                FilelistCrypto.EncryptProcess(newFilelistFile, logWriter);
+            }
+
+            logWriter.LogMessage($"\nFinished repacking file(s) to \"{whiteBinName}\"");
         }
     }
 }

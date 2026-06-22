@@ -3,7 +3,7 @@ using System.IO;
 
 namespace WhiteBinTools.Support
 {
-    internal class ZlibMethods
+    internal class ZlibFunctions
     {
         public static void ZlibDecompress(Stream cmpStreamName, Stream outStreamName)
         {
@@ -13,11 +13,10 @@ namespace WhiteBinTools.Support
             }
         }
 
-        public static byte[] ZlibDecompressBuffer(MemoryStream cmpStreamName)
+        public static byte[] ZlibDecompressBuffer(byte[] cmpData)
         {
-            return ZlibStream.UncompressBuffer(cmpStreamName.ToArray());
+            return ZlibStream.UncompressBuffer(cmpData);
         }
-
 
         public static byte[] ZlibCompress(string fileToCmp)
         {

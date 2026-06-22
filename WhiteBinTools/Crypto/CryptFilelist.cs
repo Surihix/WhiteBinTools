@@ -1,13 +1,13 @@
 ﻿using System;
 using System.IO;
 using WhiteBinTools.Support;
-using static WhiteBinTools.Support.ProgramEnums;
+using static WhiteBinTools.Support.Enumerators;
 
 namespace WhiteBinTools.Crypto
 {
     internal class CryptFilelist
     {
-        public static void ProcessFilelist(CryptActions cryptAction, string inFile)
+        public static void ProcessFilelist(CryptAction cryptAction, string inFile)
         {
             using (var inFileReader = new BinaryReader(File.Open(inFile, FileMode.Open, FileAccess.Read)))
             {
@@ -41,8 +41,8 @@ namespace WhiteBinTools.Crypto
 
                 switch (cryptAction)
                 {
-                    case CryptActions.d:
-                        IOhelpers.IfFileExistsDel(inFile + ".dec");
+                    case CryptAction.decrypt:
+                        SharedFunctions.IfFileExistsDel(inFile + ".dec");
 
                         using (var decryptedStreamBinWriter = new BinaryWriter(File.Open(inFile + ".dec", FileMode.Append, FileAccess.Write)))
                         {
@@ -61,8 +61,8 @@ namespace WhiteBinTools.Crypto
                         CreateFinalFile(inFile, inFile + ".dec");
                         break;
 
-                    case CryptActions.e:
-                        IOhelpers.IfFileExistsDel(inFile + ".tmp2");
+                    case CryptAction.encrypt:
+                        SharedFunctions.IfFileExistsDel(inFile + ".tmp2");
 
                         using (var chkSumStreamBinWriter = new BinaryWriter(File.Open(inFile + ".tmp2", FileMode.Append, FileAccess.Write)))
                         {
@@ -85,7 +85,7 @@ namespace WhiteBinTools.Crypto
 
                         inFileReader.Dispose();
 
-                        IOhelpers.IfFileExistsDel(inFile + ".enc");
+                        SharedFunctions.IfFileExistsDel(inFile + ".enc");
 
                         using (var inFileReaderTmp = new BinaryReader(File.Open(inFile + ".tmp2", FileMode.Open, FileAccess.Read)))
                         {
@@ -102,7 +102,7 @@ namespace WhiteBinTools.Crypto
                             }
                         }
 
-                        IOhelpers.IfFileExistsDel(inFile + ".tmp2");
+                        SharedFunctions.IfFileExistsDel(inFile + ".tmp2");
 
                         CreateFinalFile(inFile, inFile + ".enc");
                         break;

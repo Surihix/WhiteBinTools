@@ -1,128 +1,123 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Text;
 using WhiteBinTools.Filelist;
 using WhiteBinTools.Support;
-using static WhiteBinTools.Support.ProgramEnums;
+using WhiteBinTools.Support.Structures;
+using static WhiteBinTools.Support.Enumerators;
 
 namespace WhiteBinTools.Unpack
 {
     internal class UnpackTypeE
     {
-        public static void UnpackFilelistJson(GameCodes gameCode, string filelistFile, StreamWriter logWriter)
+        public static void UnpackFilelistJson(GameCode gameCode, string filelistFile, StreamWriter logWriter)
         {
-            IOhelpers.CheckFileExists(filelistFile, logWriter, "Error: Filelist file specified in the argument is missing");
+            SharedFunctions.CheckFileExists(filelistFile, logWriter, "Error: Filelist file specified in the argument is missing");
 
-            var filelistVariables = new FilelistVariables();
+            var filelistLoadData = FilelistLoader.LoadFilelist(gameCode, filelistFile, logWriter);
 
-            FilelistProcesses.PrepareFilelistVars(filelistVariables, filelistFile);
+            var filelistCryptHeader = filelistLoadData.FilelistCryptHeader;
+            var filelistHeader = filelistLoadData.FilelistHeader;
+            var filelistEntryV1Table = filelistLoadData.FilelistEntryV1Table;
+            var filelistEntryV2Table = filelistLoadData.FilelistEntryV2Table;
+            var filelistChunks = filelistLoadData.FilelistChunks;
 
-            FilelistCrypto.DecryptProcess(gameCode, filelistVariables, logWriter);
+            var outJsonFile = $"{filelistFile}.json";
 
-            using (var filelistStream = new FileStream(filelistVariables.MainFilelistFile, FileMode.Open, FileAccess.Read))
-            {
-                using (var filelistReader = new BinaryReader(filelistStream))
-                {
-                    FilelistChunksPrep.GetFilelistOffsets(filelistReader, logWriter, filelistVariables);
-                    FilelistChunksPrep.BuildChunks(filelistStream, filelistVariables);
-                }
-            }
+            SharedFunctions.IfFileExistsDel(outJsonFile);
 
-            if (gameCode == GameCodes.ff132)
-            {
-                filelistVariables.CurrentChunkNumber = -1;
-            }
-
-            if (filelistVariables.IsEncrypted)
-            {
-                IOhelpers.IfFileExistsDel(filelistVariables.TmpDcryptFilelistFile);
-                filelistVariables.MainFilelistFile = filelistFile;
-
-                using (var encDataReader = new BinaryReader(File.Open(filelistFile, FileMode.Open, FileAccess.Read)))
-                {
-                    encDataReader.BaseStream.Position = 0;
-                    filelistVariables.SeedA = encDataReader.ReadUInt64();
-                    filelistVariables.SeedB = encDataReader.ReadUInt64();
-
-                    encDataReader.BaseStream.Position += 4;
-                    filelistVariables.EncTag = encDataReader.ReadUInt32();
-                }
-            }
-
-            var filelistOutName = Path.GetFileName(filelistFile);
-            var outJsonFile = Path.Combine(filelistVariables.MainFilelistDirectory, filelistOutName + ".json");
-
-            IOhelpers.IfFileExistsDel(outJsonFile);
-
-
-            // Write all file paths strings
-            // to a json file
             using (var outJsonWriter = new StreamWriter(outJsonFile, true))
             {
                 outJsonWriter.WriteLine("{");
 
-                if (gameCode == GameCodes.ff132)
+                if (gameCode == GameCode.ff132)
                 {
-                    outJsonWriter.WriteLine($"  \"encrypted\": {filelistVariables.IsEncrypted.ToString().ToLower()},");
+                    outJsonWriter.WriteLine($"  \"encrypted\": {filelistCryptHeader.HasCryptHeader.ToString().ToLowerInvariant()},");
 
-                    if (filelistVariables.IsEncrypted)
+                    if (filelistCryptHeader.HasCryptHeader)
                     {
-                        outJsonWriter.WriteLine($"  \"seedA\": {filelistVariables.SeedA},");
-                        outJsonWriter.WriteLine($"  \"seedB\": {filelistVariables.SeedB},");
-                        outJsonWriter.WriteLine($"  \"encryptionTag(DO_NOT_CHANGE)\": {filelistVariables.EncTag},");
+                        var seedA = BitConverter.ToUInt64(filelistCryptHeader.MD5Hash, 0);
+                        var seedB = BitConverter.ToUInt64(filelistCryptHeader.MD5Hash, 8);
+
+                        outJsonWriter.WriteLine($"  \"seedA\": {seedA},");
+                        outJsonWriter.WriteLine($"  \"seedB\": {seedB},");
+                        outJsonWriter.WriteLine($"  \"encryptionTag(DO_NOT_CHANGE)\": {filelistCryptHeader.EncryptionTag},");
                     }
                 }
 
-                outJsonWriter.WriteLine($"  \"fileCount\": {filelistVariables.TotalFiles},");
-                outJsonWriter.WriteLine($"  \"chunkCount\": {filelistVariables.TotalChunks},");
+                outJsonWriter.WriteLine($"  \"fileCount\": {filelistHeader.FileCount},");
+                outJsonWriter.WriteLine($"  \"chunkCount\": {filelistHeader.ChunkCount},");
                 outJsonWriter.WriteLine("  \"data\": {");
-                outJsonWriter.WriteLine("    \"Chunk_0\": [");
 
-                using (var entriesStream = new MemoryStream())
+                var fileInfoStringPackTable = new FileInfoStringPack[filelistHeader.FileCount];
+                var stringsCountTable = new int[filelistHeader.ChunkCount];
+
+                for (int i = 0; i < filelistHeader.FileCount; i++)
                 {
-                    entriesStream.Write(filelistVariables.EntriesData, 0, filelistVariables.EntriesData.Length);
-                    entriesStream.Seek(0, SeekOrigin.Begin);
+                    string whiteFileInfoString;
+                    var entryAndPathDataString = new StringBuilder();
+                    ushort currentChunkID;
 
-                    using (var entriesReader = new BinaryReader(entriesStream))
+                    if (gameCode == GameCode.ff131 || gameCode == GameCode.dirge)
                     {
+                        var filelistEntryV1 = filelistEntryV1Table[i];
+                        whiteFileInfoString = FilelistLoader.GetWhiteFileInfoString(filelistEntryV1.FileInfoPos, filelistChunks, filelistEntryV1.ChunkID);
 
-                        // Process each file entry from 
-                        // the entry section
-                        int chunkNumberJson = -1;
-                        long entriesReadPos = 0;
-                        var lastChunkNumber = (int)filelistVariables.TotalChunks - 1;
-                        var currentPathData = new string[4];
-                        var lastFile = filelistVariables.TotalFiles - 1;
+                        entryAndPathDataString.Append($"        \"fileCode\": {filelistEntryV1.FileCode},\r\n");
+                        entryAndPathDataString.Append($"        \"fileInfo\": \"{whiteFileInfoString}\"\r\n");
 
-                        for (int f = 0; f < filelistVariables.TotalFiles; f++)
+                        fileInfoStringPackTable[i] = new FileInfoStringPack() { ChunkID = filelistEntryV1.ChunkID, FileInfoString = entryAndPathDataString.ToString() };
+                        currentChunkID = filelistEntryV1.ChunkID;
+                    }
+                    else
+                    {
+                        var filelistEntryV2 = filelistEntryV2Table[i];
+                        whiteFileInfoString = FilelistLoader.GetWhiteFileInfoString(filelistEntryV2.FileInfoPos, filelistChunks, filelistEntryV2.ChunkID);
+
+                        entryAndPathDataString.Append($"        \"fileCode\": {filelistEntryV2.FileCode},\r\n");
+                        entryAndPathDataString.Append($"        \"fileTypeID\": {filelistEntryV2.FileTypeID},\r\n");
+                        entryAndPathDataString.Append($"        \"fileInfo\": \"{whiteFileInfoString}\"\r\n");
+
+                        fileInfoStringPackTable[i] = new FileInfoStringPack() { ChunkID = filelistEntryV2.ChunkID, FileInfoString = entryAndPathDataString.ToString() };
+                        currentChunkID = filelistEntryV2.ChunkID;
+                    }
+
+                    stringsCountTable[currentChunkID] = stringsCountTable[currentChunkID] + 1;
+                }
+
+                for (int i = 0; i < filelistHeader.ChunkCount; i++)
+                {
+                    outJsonWriter.WriteLine($"    \"Chunk_{i}\": [");
+                    var currentChunkStringsCount = stringsCountTable[i];
+                    int stringsProcessed = 0;
+
+                    for (int j = 0; j < filelistHeader.FileCount; j++)
+                    {
+                        if (fileInfoStringPackTable[j].ChunkID == i)
                         {
-                            FilelistProcesses.GetCurrentFileEntry(gameCode, entriesReader, entriesReadPos, filelistVariables);
-                            entriesReadPos += 8;
+                            outJsonWriter.WriteLine("      {");
+                            outJsonWriter.Write(fileInfoStringPackTable[j].FileInfoString);
 
-                            if (gameCode == GameCodes.ff131)
+                            if (stringsProcessed + 1 == currentChunkStringsCount)
                             {
-                                DetermineArrayClosure(chunkNumberJson, filelistVariables.ChunkNumber, outJsonWriter);
-                                chunkNumberJson = filelistVariables.ChunkNumber;
-
-                                outJsonWriter.WriteLine("      {");
-                                outJsonWriter.WriteLine("        \"fileCode\": " + $"{filelistVariables.FileCode},");
+                                outJsonWriter.WriteLine("      }");
                             }
                             else
                             {
-                                DetermineArrayClosure(chunkNumberJson, filelistVariables.CurrentChunkNumber, outJsonWriter);
-                                chunkNumberJson = filelistVariables.CurrentChunkNumber;
-
-                                outJsonWriter.WriteLine("      {");
-                                outJsonWriter.WriteLine("        \"fileCode\": " + $"{filelistVariables.FileCode},");
-                                outJsonWriter.WriteLine("        \"fileTypeID\": " + $"{filelistVariables.FileTypeID},");
+                                outJsonWriter.WriteLine("      },");
                             }
 
-                            outJsonWriter.WriteLine("        \"filePath\": " + $"\"{filelistVariables.PathString}\"");
-
-                            if (f == lastFile)
-                            {
-                                outJsonWriter.WriteLine("      }");
-                                outJsonWriter.WriteLine("    ]");
-                            }
+                            stringsProcessed++;
                         }
+                    }
+
+                    if ((i + 1) == filelistHeader.ChunkCount)
+                    {
+                        outJsonWriter.WriteLine("    ]");
+                    }
+                    else
+                    {
+                        outJsonWriter.WriteLine("    ],");
                     }
                 }
 
@@ -131,24 +126,6 @@ namespace WhiteBinTools.Unpack
             }
 
             logWriter.LogMessage($"\n\nFinished writing filelist data to \"{Path.GetFileName(outJsonFile)}\"");
-        }
-
-
-        private static void DetermineArrayClosure(int chunkNumberJson, int chunkNumberProcess, StreamWriter outJsonWriter)
-        {
-            if (chunkNumberJson != chunkNumberProcess)
-            {
-                if (chunkNumberJson != -1)
-                {
-                    outJsonWriter.WriteLine("      }");
-                    outJsonWriter.WriteLine("    ],");
-                    outJsonWriter.WriteLine($"    \"Chunk_{chunkNumberProcess}\": [");
-                }
-            }
-            else
-            {
-                outJsonWriter.WriteLine("      },");
-            }
         }
     }
 }

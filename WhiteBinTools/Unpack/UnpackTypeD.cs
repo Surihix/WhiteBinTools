@@ -1,134 +1,93 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.IO;
 using System.Text;
 using WhiteBinTools.Filelist;
 using WhiteBinTools.Support;
-using static WhiteBinTools.Support.ProgramEnums;
+using WhiteBinTools.Support.Structures;
+using static WhiteBinTools.Support.Enumerators;
 
 namespace WhiteBinTools.Unpack
 {
     internal class UnpackTypeD
     {
-        public static void UnpackFilelist(GameCodes gameCode, string filelistFile, StreamWriter logWriter)
+        public static void UnpackFilelist(GameCode gameCode, string filelistFile, StreamWriter logWriter)
         {
-            IOhelpers.CheckFileExists(filelistFile, logWriter, "Error: Filelist file specified in the argument is missing");
+            SharedFunctions.CheckFileExists(filelistFile, logWriter, "Error: Filelist file specified in the argument is missing");
 
-            var filelistVariables = new FilelistVariables();
+            var filelistLoadData = FilelistLoader.LoadFilelist(gameCode, filelistFile, logWriter);
 
-            FilelistProcesses.PrepareFilelistVars(filelistVariables, filelistFile);
-
-            FilelistCrypto.DecryptProcess(gameCode, filelistVariables, logWriter);
-
-            using (var filelistStream = new FileStream(filelistVariables.MainFilelistFile, FileMode.Open, FileAccess.Read))
-            {
-                using (var filelistReader = new BinaryReader(filelistStream))
-                {
-                    FilelistChunksPrep.GetFilelistOffsets(filelistReader, logWriter, filelistVariables);
-                    FilelistChunksPrep.BuildChunks(filelistStream, filelistVariables);
-                }
-            }
-
-            if (filelistVariables.IsEncrypted)
-            {
-                IOhelpers.IfFileExistsDel(filelistVariables.TmpDcryptFilelistFile);
-                filelistVariables.MainFilelistFile = filelistFile;
-
-                using (var encDataReader = new BinaryReader(File.Open(filelistFile, FileMode.Open, FileAccess.Read)))
-                {
-                    encDataReader.BaseStream.Position = 0;
-                    filelistVariables.SeedA = encDataReader.ReadUInt64();
-                    filelistVariables.SeedB = encDataReader.ReadUInt64();
-
-                    encDataReader.BaseStream.Position += 4;
-                    filelistVariables.EncTag = encDataReader.ReadUInt32();
-                }
-            }
+            var filelistCryptHeader = filelistLoadData.FilelistCryptHeader;
+            var filelistHeader = filelistLoadData.FilelistHeader;
+            var filelistEntryV1Table = filelistLoadData.FilelistEntryV1Table;
+            var filelistEntryV2Table = filelistLoadData.FilelistEntryV2Table;
+            var filelistChunks = filelistLoadData.FilelistChunks;
 
             var filelistOutName = Path.GetFileName(filelistFile);
-            var extractedFilelistDir = Path.Combine(filelistVariables.MainFilelistDirectory, "_" + filelistOutName);
+            var extractedFilelistDir = Path.Combine(Path.GetDirectoryName(filelistFile), $"_{filelistOutName}");
             var infoFile = Path.Combine(extractedFilelistDir, "#info.txt");
             var chunkTxtFilePathPrefix = Path.Combine(extractedFilelistDir, $"Chunk_");
 
-            IOhelpers.IfDirExistsDel(extractedFilelistDir);
+            SharedFunctions.IfDirExistsDel(extractedFilelistDir);
             Directory.CreateDirectory(extractedFilelistDir);
 
             using (var infoStreamWriter = new StreamWriter(infoFile, true))
             {
-                if (gameCode == GameCodes.ff132)
+                if (gameCode == GameCode.ff132)
                 {
-                    filelistVariables.CurrentChunkNumber = -1;
-                    infoStreamWriter.WriteLine($"encrypted: {filelistVariables.IsEncrypted.ToString().ToLower()}");
+                    infoStreamWriter.WriteLine($"encrypted: {filelistCryptHeader.HasCryptHeader.ToString().ToLowerInvariant()}");
 
-                    if (filelistVariables.IsEncrypted)
+                    if (filelistCryptHeader.HasCryptHeader)
                     {
-                        infoStreamWriter.WriteLine($"seedA: {filelistVariables.SeedA}");
-                        infoStreamWriter.WriteLine($"seedB: {filelistVariables.SeedB}");
-                        infoStreamWriter.WriteLine($"encryptionTag(DO_NOT_CHANGE): {filelistVariables.EncTag}");
+                        var seedA = BitConverter.ToUInt64(filelistCryptHeader.MD5Hash, 0);
+                        var seedB = BitConverter.ToUInt64(filelistCryptHeader.MD5Hash, 8);
+
+                        infoStreamWriter.WriteLine($"seedA: {seedA}");
+                        infoStreamWriter.WriteLine($"seedB: {seedB}");
+                        infoStreamWriter.WriteLine($"encryptionTag(DO_NOT_CHANGE): {filelistCryptHeader.EncryptionTag}");
                     }
                 }
 
-                infoStreamWriter.WriteLine($"fileCount: {filelistVariables.TotalFiles}");
-                infoStreamWriter.WriteLine($"chunkCount: {filelistVariables.TotalChunks}");
+                infoStreamWriter.WriteLine($"fileCount: {filelistHeader.FileCount}");
+                infoStreamWriter.WriteLine($"chunkCount: {filelistHeader.ChunkCount}");
             }
 
-            // Build an empty dictionary
-            var outChunksDict = new Dictionary<int, List<string>>();
-            for (int c = 0; c < filelistVariables.TotalChunks; c++)
-            {
-                var chunkDataList = new List<string>();
-                outChunksDict.Add(c, chunkDataList);
-            }
+            var fileInfoStringPackTable = new FileInfoStringPack[filelistHeader.FileCount];
 
-            // Collect all of the chunk data into
-            // the empty dictionary
-            using (var entriesStream = new MemoryStream())
-            {
-                entriesStream.Write(filelistVariables.EntriesData, 0, filelistVariables.EntriesData.Length);
-                entriesStream.Seek(0, SeekOrigin.Begin);
+            logWriter.LogMessage("Parsing filepaths....");
 
-                using (var entriesReader = new BinaryReader(entriesStream))
+            for (int i = 0; i < filelistHeader.FileCount; i++)
+            {
+                string whiteFileInfoString;
+                var entryAndInfoDataString = new StringBuilder();
+
+                if (gameCode == GameCode.ff131 || gameCode == GameCode.dirge)
                 {
-                    // Process each file entry from 
-                    // the entry section
-                    long entriesReadPos = 0;
-                    var stringData = "";
+                    var filelistEntryV1 = filelistEntryV1Table[i];
+                    whiteFileInfoString = FilelistLoader.GetWhiteFileInfoString(filelistEntryV1.FileInfoPos, filelistChunks, filelistEntryV1.ChunkID);
 
-                    for (int f = 0; f < filelistVariables.TotalFiles; f++)
-                    {
-                        FilelistProcesses.GetCurrentFileEntry(gameCode, entriesReader, entriesReadPos, filelistVariables);
-                        entriesReadPos += 8;
+                    entryAndInfoDataString.Append($"{filelistEntryV1.FileCode}|{whiteFileInfoString}");
+                    fileInfoStringPackTable[i] = new FileInfoStringPack() { ChunkID = filelistEntryV1.ChunkID, FileInfoString = entryAndInfoDataString.ToString() };
+                }
+                else
+                {
+                    var filelistEntryV2 = filelistEntryV2Table[i];
+                    whiteFileInfoString = FilelistLoader.GetWhiteFileInfoString(filelistEntryV2.FileInfoPos, filelistChunks, filelistEntryV2.ChunkID);
 
-                        stringData = "";
-
-                        if (gameCode == GameCodes.ff131)
-                        {
-                            stringData += filelistVariables.FileCode + "|";
-                            stringData += filelistVariables.PathString;
-
-                            outChunksDict[filelistVariables.ChunkNumber].Add(stringData);
-                        }
-                        else
-                        {
-                            stringData += filelistVariables.FileCode + "|";
-                            stringData += filelistVariables.FileTypeID + "|";
-                            stringData += filelistVariables.PathString;
-
-                            outChunksDict[filelistVariables.CurrentChunkNumber].Add(stringData);
-                        }
-                    }
+                    entryAndInfoDataString.Append($"{filelistEntryV2.FileCode}|{filelistEntryV2.FileTypeID}|{whiteFileInfoString}");
+                    fileInfoStringPackTable[i] = new FileInfoStringPack() { ChunkID = filelistEntryV2.ChunkID, FileInfoString = entryAndInfoDataString.ToString() };
                 }
             }
 
-            // Write all of the collected data from
-            // the dictionary into multiple txt
-            // files
-            for (int d = 0; d < filelistVariables.TotalChunks; d++)
+            for (int i = 0; i < filelistHeader.ChunkCount; i++)
             {
-                using (var chunkWriter = new StreamWriter(chunkTxtFilePathPrefix + d + ".txt", true, new UTF8Encoding(false)))
+                using (var chunkWriter = new StreamWriter($"{chunkTxtFilePathPrefix}{i}.txt", true, new UTF8Encoding(false)))
                 {
-                    foreach (var stringData in outChunksDict[d])
+                    for (int j = 0; j < filelistHeader.FileCount; j++)
                     {
-                        chunkWriter.WriteLine(stringData);
+                        if (fileInfoStringPackTable[j].ChunkID == i)
+                        {
+                            chunkWriter.WriteLine(fileInfoStringPackTable[j].FileInfoString);
+                        }
                     }
                 }
             }

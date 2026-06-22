@@ -1,244 +1,170 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using WhiteBinTools.Filelist;
 using WhiteBinTools.Support;
-using static WhiteBinTools.Support.ProgramEnums;
+using WhiteBinTools.Support.Structures;
+using static WhiteBinTools.Support.Enumerators;
 
 namespace WhiteBinTools.Repack
 {
     internal class RepackTypeE
     {
-        public static void RepackJsonFilelist(GameCodes gameCode, string jsonFile, StreamWriter logWriter)
+        public static void RepackJsonFilelist(GameCode gameCode, string jsonFile, StreamWriter logWriter)
         {
-            IOhelpers.CheckFileExists(jsonFile, logWriter, "Error: JSON file specified in the argument is missing");
+            SharedFunctions.CheckFileExists(jsonFile, logWriter, "Error: JSON file specified in the argument is missing");
 
-            var filelistVariables = new FilelistVariables();
+            var newFilelistFileName = $"{Path.GetFileNameWithoutExtension(jsonFile)}";
+            var newFilelistFile = Path.Combine(Path.GetDirectoryName(jsonFile), newFilelistFileName);
+
+            if (Core.ShouldBckup)
+            {
+                logWriter.LogMessage("\nBacking up filelist bin file....\n");
+                SharedFunctions.IfFileExistsDel($"{newFilelistFile}.bak");
+                File.Move(newFilelistFile, $"{newFilelistFile}.bak");
+            }
+
+            logWriter.LogMessage("\nParsing json file....");
 
             using (var jsonReader = new StreamReader(jsonFile))
             {
                 _ = jsonReader.ReadLine();
 
-                if (gameCode == GameCodes.ff132)
+                var filelistHeader = new FilelistHeader();
+                var filelistCryptHeader = new FilelistCryptHeader();
+
+                if (gameCode == GameCode.ff132)
                 {
                     // Determine encryption status
-                    filelistVariables.IsEncrypted = bool.Parse(CheckGetMainProperty(jsonReader, "\"encrypted\"",  ValueTypes.Boolean));
+                    filelistCryptHeader.HasCryptHeader = bool.Parse(CheckGetMainProperty(jsonReader, "\"encrypted\"", ValueTypes.Boolean));
 
-                    if (filelistVariables.IsEncrypted)
+                    if (filelistCryptHeader.HasCryptHeader)
                     {
-                        filelistVariables.SeedA = ulong.Parse(CheckGetMainProperty(jsonReader, "\"seedA\"", ValueTypes.Ulong));
-                        filelistVariables.SeedB = ulong.Parse(CheckGetMainProperty(jsonReader, "\"seedB\"", ValueTypes.Ulong));
-                        filelistVariables.EncTag = uint.Parse(CheckGetMainProperty(jsonReader, "\"encryptionTag(DO_NOT_CHANGE)\"", ValueTypes.Uint));
+                        var seedA = ulong.Parse(CheckGetMainProperty(jsonReader, "\"seedA\"", ValueTypes.Ulong));
+                        var seedB = ulong.Parse(CheckGetMainProperty(jsonReader, "\"seedB\"", ValueTypes.Ulong));
 
-                        using (var encHeaderStream = new MemoryStream())
-                        {
-                            using (var encHeaderWriter = new BinaryWriter(encHeaderStream))
-                            {
-                                encHeaderStream.Seek(0, SeekOrigin.Begin);
+                        filelistCryptHeader.MD5Hash = new byte[16];
+                        Array.Copy(BitConverter.GetBytes(seedA), 0, filelistCryptHeader.MD5Hash, 0, 8);
+                        Array.Copy(BitConverter.GetBytes(seedB), 0, filelistCryptHeader.MD5Hash, 8, 8);
 
-                                encHeaderWriter.WriteBytesUInt64(filelistVariables.SeedA, false);
-                                encHeaderWriter.WriteBytesUInt64(filelistVariables.SeedB, false);
-                                encHeaderWriter.WriteBytesUInt32(0, false);
-                                encHeaderWriter.WriteBytesUInt32(filelistVariables.EncTag, false);
-                                encHeaderWriter.WriteBytesUInt64(0, false);
-
-                                encHeaderStream.Seek(0, SeekOrigin.Begin);
-                                filelistVariables.EncryptedHeaderData = new byte[32];
-                                filelistVariables.EncryptedHeaderData = encHeaderStream.ToArray();
-                            }
-                        }
+                        filelistCryptHeader.EncryptionTag = uint.Parse(CheckGetMainProperty(jsonReader, "\"encryptionTag(DO_NOT_CHANGE)\"", ValueTypes.Uint));
                     }
                 }
 
-                filelistVariables.TotalFiles = uint.Parse(CheckGetMainProperty(jsonReader, "\"fileCount\"", ValueTypes.Uint));
-                filelistVariables.TotalChunks = uint.Parse(CheckGetMainProperty(jsonReader, "\"chunkCount\"", ValueTypes.Uint));
-                logWriter.LogMessage("TotalChunks: " + filelistVariables.TotalChunks);
-                logWriter.LogMessage("No of files: " + filelistVariables.TotalFiles + "\n");
+                filelistHeader.FileCount = uint.Parse(CheckGetMainProperty(jsonReader, "\"fileCount\"", ValueTypes.Uint));
+                filelistHeader.ChunkCount = int.Parse(CheckGetMainProperty(jsonReader, "\"chunkCount\"", ValueTypes.Int));
+
+                logWriter.LogMessage("TotalChunks: " + filelistHeader.ChunkCount);
+                logWriter.LogMessage("No of files: " + filelistHeader.FileCount + "\n");
 
                 if (!jsonReader.ReadLine().TrimStart(' ').StartsWith("\"data\": {"))
                 {
-                    IOhelpers.ErrorExit("Error: data property specified in the json file is invalid");
+                    SharedFunctions.ErrorExit("Error: data property specified in the json file is invalid");
                 }
 
                 // Begin building the filelist
-                logWriter.LogMessage("\n\nBuilding filelist....\n");
+                FilelistEntryV1[] newEntryV1Table = Array.Empty<FilelistEntryV1>();
+                FilelistEntryV2[] newEntryV2Table = Array.Empty<FilelistEntryV2>();
 
-                var repackVariables = new RepackVariables();
-                repackVariables.NewFilelistFile = Path.Combine(Path.GetDirectoryName(jsonFile), Path.GetFileNameWithoutExtension(jsonFile));
-
-                if (Core.ShouldBckup)
+                if (gameCode == GameCode.ff131 || gameCode == GameCode.dirge)
                 {
-                    if (File.Exists(repackVariables.NewFilelistFile))
-                    {
-                        IOhelpers.IfFileExistsDel(repackVariables.NewFilelistFile + ".bak");
-
-                        File.Copy(repackVariables.NewFilelistFile, repackVariables.NewFilelistFile + ".bak");
-                    }
+                    newEntryV1Table = new FilelistEntryV1[filelistHeader.FileCount];
+                }
+                else
+                {
+                    newEntryV2Table = new FilelistEntryV2[filelistHeader.FileCount];
                 }
 
-                IOhelpers.IfFileExistsDel(repackVariables.NewFilelistFile);
+                var fileInfoStringPackTable = new FileInfoStringPack[filelistHeader.FileCount];
 
-                // Build an empty dictionary
-                // for the chunks 
-                var newChunksDict = new Dictionary<int, List<byte>>();
-                RepackProcesses.CreateEmptyNewChunksDict(filelistVariables, newChunksDict);
+                logWriter.LogMessage("Parsing filepaths....");
 
-                // Build a number list containing all
-                // the odd number chunks if the code
-                // is set to 2
-                var oddChunkNumValues = new List<int>();
-                if (gameCode == GameCodes.ff132 && filelistVariables.TotalChunks > 1)
+                // Process each path in chunks
+                var currentEntryPropertyValue = string.Empty;
+                var fileIndex = 0;
+                var splitChara = new string[] { "\": " };
+
+                for (int i = 0; i < filelistHeader.ChunkCount; i++)
                 {
-                    var nextChunkNo = 1;
-                    for (int i = 0; i < filelistVariables.TotalChunks; i++)
+                    var currentChunk = $"Chunk_{i}";
+
+                    if (!jsonReader.ReadLine().TrimStart(' ').StartsWith($"\"{currentChunk}\": ["))
                     {
-                        if (i == nextChunkNo)
+                        SharedFunctions.ErrorExit($"Error: {currentChunk} property string specified in the json file is missing or invalid");
+                    }
+
+                    while (true)
+                    {
+                        var currentJsonLine = jsonReader.ReadLine().TrimStart(' ').TrimEnd(' ');
+
+                        // Determine how to end processing the current chunk
+                        if (currentJsonLine == "}")
                         {
-                            oddChunkNumValues.Add(i);
-                            nextChunkNo += 2;
+                            _ = jsonReader.ReadLine();
+                            break;
                         }
-                    }
-                }
-
-                using (var entriesStream = new MemoryStream())
-                {
-                    using (var entriesWriter = new BinaryWriter(entriesStream))
-                    {
-
-                        // Process each path in chunks
-                        var currentChunk = string.Empty;
-                        var currentJsonLine = string.Empty;
-                        var currentEntryPropertyValue = string.Empty;
-                        var oddChunkCounter = 0;
-                        var splitChara = new string[] { "\": " };
-                        long entriesWriterPos = 0;
-
-                        for (int c = 0; c < filelistVariables.TotalChunks; c++)
+                        else if (currentJsonLine == "},")
                         {
-                            filelistVariables.LastChunkNumber = c;
-                            currentChunk = $"Chunk_{c}";
-
-                            if (!jsonReader.ReadLine().TrimStart(' ').StartsWith($"\"{currentChunk}\": ["))
-                            {
-                                IOhelpers.ErrorExit($"Error: {currentChunk} property string specified in the json file is missing or invalid");
-                            }
-
-                            while (true)
-                            {
-                                currentJsonLine = jsonReader.ReadLine().TrimStart(' ').TrimEnd(' ');
-
-                                // Determine how to end
-                                // processing the
-                                // current chunk
-                                if (currentJsonLine == "}")
-                                {
-                                    _ = jsonReader.ReadLine();
-                                    break;
-                                }
-                                else if (currentJsonLine == "},")
-                                {
-                                    continue;
-                                }
-
-                                // Process entry
-                                if (currentJsonLine == "{")
-                                {
-                                    currentJsonLine = jsonReader.ReadLine().TrimStart(' ').TrimEnd(' ');
-                                    currentEntryPropertyValue = CheckGetChunkEntryProperty(currentJsonLine, "\"fileCode\"", c, ValueTypes.Uint);
-                                    filelistVariables.FileCode = uint.Parse(currentEntryPropertyValue);
-
-                                    // Write filecode
-                                    entriesWriter.BaseStream.Position = entriesWriterPos;
-                                    entriesWriter.WriteBytesUInt32(filelistVariables.FileCode, false);
-
-                                    if (gameCode == GameCodes.ff131)
-                                    {
-                                        // Write chunk number
-                                        entriesWriter.BaseStream.Position = entriesWriterPos + 4;
-                                        entriesWriter.WriteBytesUInt16((ushort)c, false);
-
-                                        // Write zero as path number
-                                        entriesWriter.BaseStream.Position = entriesWriterPos + 6;
-                                        entriesWriter.WriteBytesUInt16(0, false);
-                                    }
-                                    else if (gameCode == GameCodes.ff132)
-                                    {
-                                        currentJsonLine = jsonReader.ReadLine().TrimStart(' ').TrimEnd(' ');
-                                        currentEntryPropertyValue = CheckGetChunkEntryProperty(currentJsonLine, "\"fileTypeID\"", c, ValueTypes.Byte);
-                                        filelistVariables.FileTypeID = byte.Parse(currentEntryPropertyValue);
-
-                                        entriesWriter.BaseStream.Position = entriesWriterPos + 4;
-
-                                        if (oddChunkNumValues.Contains(c))
-                                        {
-                                            // Write the 32768 position value
-                                            // to indicate that the chunk
-                                            // number is odd
-                                            oddChunkCounter = oddChunkNumValues.IndexOf(c);
-                                            entriesWriter.WriteBytesUInt16(32768, false);
-                                        }
-                                        else
-                                        {
-                                            // Write zero as path number
-                                            entriesWriter.WriteBytesUInt16(0, false);
-                                        }
-
-                                        // Write chunk number
-                                        entriesWriter.BaseStream.Position = entriesWriterPos + 6;
-                                        entriesWriter.Write((byte)oddChunkCounter);
-
-                                        // Write FileTypeID
-                                        entriesWriter.BaseStream.Position = entriesWriterPos + 7;
-                                        entriesWriter.Write(filelistVariables.FileTypeID);
-                                    }
-
-                                    // Add path to dictionary
-                                    currentJsonLine = jsonReader.ReadLine().TrimStart(' ').TrimEnd(' ');
-                                    var filePathProperty = currentJsonLine.Split(splitChara, StringSplitOptions.None);
-
-                                    if (!filePathProperty[0].StartsWith("\"filePath"))
-                                    {
-                                        IOhelpers.ErrorExit($"Error: Missing filePath property at expected position. occured when parsing Chunk_{c}.");
-                                    }
-
-                                    filelistVariables.PathString = filePathProperty[1].Replace("\"", "");
-
-                                    newChunksDict[c].AddRange(Encoding.UTF8.GetBytes(filelistVariables.PathString + "\0"));
-
-                                    entriesWriterPos += 8;
-                                }
-                            }
-
-                            oddChunkCounter++;
+                            continue;
                         }
 
-                        filelistVariables.EntriesData = new byte[entriesStream.Length];
-                        entriesStream.Seek(0, SeekOrigin.Begin);
-                        entriesStream.Read(filelistVariables.EntriesData, 0, filelistVariables.EntriesData.Length);
+                        // Process entry
+                        if (currentJsonLine == "{")
+                        {
+                            currentJsonLine = jsonReader.ReadLine().TrimStart(' ').TrimEnd(' ');
+                            currentEntryPropertyValue = CheckGetChunkEntryProperty(currentJsonLine, "\"fileCode\"", i, ValueTypes.Uint);
+                        }
+
+                        if (gameCode == GameCode.ff131 || gameCode == GameCode.dirge)
+                        {
+                            var filelistEntryV1 = new FilelistEntryV1
+                            {
+                                FileCode = uint.Parse(currentEntryPropertyValue),
+                                ChunkID = (ushort)i
+                            };
+
+                            newEntryV1Table[fileIndex] = filelistEntryV1;
+                        }
+                        else
+                        {
+                            var filelistEntryV2 = new FilelistEntryV2()
+                            {
+                                FileCode = uint.Parse(currentEntryPropertyValue),
+                                ChunkID = (ushort)i
+                            };
+
+                            currentJsonLine = jsonReader.ReadLine().TrimStart(' ').TrimEnd(' ');
+                            currentEntryPropertyValue = CheckGetChunkEntryProperty(currentJsonLine, "\"fileTypeID\"", i, ValueTypes.Byte);
+                            filelistEntryV2.FileTypeID = byte.Parse(currentEntryPropertyValue);
+
+                            newEntryV2Table[fileIndex] = filelistEntryV2;
+                        }
+
+                        currentJsonLine = jsonReader.ReadLine().TrimStart(' ').TrimEnd(' ');
+                        var fileInfoProperty = currentJsonLine.Split(splitChara, StringSplitOptions.None);
+
+                        if (!fileInfoProperty[0].StartsWith("\"fileInfo"))
+                        {
+                            SharedFunctions.ErrorExit($"Error: Missing fileInfo property at expected position. occured when parsing Chunk_{i}.");
+                        }
+
+                        var whiteFileInfoString = fileInfoProperty[1].Replace("\"", "");
+
+                        fileInfoStringPackTable[fileIndex] = new FileInfoStringPack() { ChunkID = (ushort)i, FileInfoString = $"{whiteFileInfoString}\0" };
+                        fileIndex++;
                     }
                 }
 
-                RepackFilelistData.BuildFilelist(filelistVariables, newChunksDict, repackVariables, gameCode);
+                logWriter.LogMessage("\nBuilding filelist....");
+                FilelistBuilder.BuildFilelist(filelistCryptHeader, filelistHeader, gameCode, newEntryV1Table, newEntryV2Table, fileInfoStringPackTable, newFilelistFile);
 
-                if (filelistVariables.IsEncrypted)
+                if (filelistCryptHeader.HasCryptHeader)
                 {
-                    FilelistCrypto.EncryptProcess(repackVariables, logWriter);
+                    FilelistCrypto.EncryptProcess(newFilelistFile, logWriter);
                 }
-
-                logWriter.LogMessage($"\n\nFinished repacking JSON data to \"{Path.GetFileName(repackVariables.NewFilelistFile)}\"");
             }
+
+            logWriter.LogMessage($"\n\nFinished repacking JSON data to \"{Path.GetFileName(newFilelistFileName)}\"");
         }
-
-
-        private enum ValueTypes
-        {
-            Boolean,
-            Byte,
-            Uint,
-            Ulong
-        }
-
 
         private static string CheckGetMainProperty(StreamReader jsonReader, string expectedPropertyName, ValueTypes valueType)
         {
@@ -248,7 +174,7 @@ namespace WhiteBinTools.Repack
 
             if (!propertyDataRead[0].TrimStart(' ').StartsWith(expectedPropertyName))
             {
-                IOhelpers.ErrorExit($"Error: Missing {expectedPropertyName} property at expected position");
+                SharedFunctions.ErrorExit($"Error: Missing {expectedPropertyName} property at expected position");
             }
 
             var isValidVal = true;
@@ -260,6 +186,14 @@ namespace WhiteBinTools.Repack
                     {
                         isValidVal = true;
                         jsonPropertyVal = boolVal.ToString();
+                    }
+                    break;
+
+                case ValueTypes.Int:
+                    if (int.TryParse(propertyDataRead[1].TrimEnd(','), out int intVal))
+                    {
+                        isValidVal = true;
+                        jsonPropertyVal = intVal.ToString();
                     }
                     break;
 
@@ -282,12 +216,11 @@ namespace WhiteBinTools.Repack
 
             if (!isValidVal)
             {
-                IOhelpers.ErrorExit($"Error: Invalid value specified for '{expectedPropertyName}' property in the #info.txt file");
+                SharedFunctions.ErrorExit($"Error: Invalid value specified for '{expectedPropertyName}' property in the #info.txt file");
             }
 
             return jsonPropertyVal;
         }
-
 
         private static string CheckGetChunkEntryProperty(string currentJsonLine, string expectedPropertyName, int chunkCounter, ValueTypes valueType)
         {
@@ -297,7 +230,7 @@ namespace WhiteBinTools.Repack
 
             if (!propertyDataRead[0].StartsWith(expectedPropertyName))
             {
-                IOhelpers.ErrorExit($"Error: Missing {expectedPropertyName} property at expected position. occured when parsing Chunk_{chunkCounter}.");
+                SharedFunctions.ErrorExit($"Error: Missing {expectedPropertyName} property at expected position. occured when parsing Chunk_{chunkCounter}.");
             }
 
             var isValidVal = false;
@@ -323,7 +256,7 @@ namespace WhiteBinTools.Repack
 
             if (!isValidVal)
             {
-                IOhelpers.ErrorExit($"Error: Invalid value specified for '{expectedPropertyName}' property. occured when parsing Chunk_{chunkCounter}.");
+                SharedFunctions.ErrorExit($"Error: Invalid value specified for '{expectedPropertyName}' property. occured when parsing Chunk_{chunkCounter}.");
             }
 
             return chunkEntryPropertyValue;

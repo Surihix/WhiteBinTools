@@ -1,35 +1,37 @@
 ﻿using System.IO;
 using WhiteBinTools.Crypto;
-using WhiteBinTools.Repack;
 using WhiteBinTools.Support;
-using static WhiteBinTools.Support.ProgramEnums;
+using WhiteBinTools.Support.Structures;
+using static WhiteBinTools.Support.Enumerators;
 
 namespace WhiteBinTools.Filelist
 {
     internal class FilelistCrypto
     {
-        public static void DecryptProcess(GameCodes gameCode, FilelistVariables filelistVariables, StreamWriter logWriter)
+        public static bool DecryptProcess(GameCode gameCode, ref string filelistFile, FilelistCryptHeader filelistCryptHeader, StreamWriter logWriter)
         {
-            // Check for encryption header in the filelist file,
-            // if the game code is set to ff13-1
-            if (gameCode == GameCodes.ff131)
-            {
-                filelistVariables.IsEncrypted = CheckIfEncrypted(filelistVariables.MainFilelistFile);
+            bool hasDecrypted = false;
 
-                if (filelistVariables.IsEncrypted)
+            // Check for encryption header in the filelist file,
+            // if the game code is set to ff13-1/dirge
+            if (gameCode == GameCode.ff131 || gameCode == GameCode.dirge)
+            {
+                filelistCryptHeader.HasCryptHeader = CheckEncryptionTag(filelistFile);
+
+                if (filelistCryptHeader.HasCryptHeader)
                 {
                     logWriter.LogMessage("Error: Detected encrypted filelist file. set the game code to '-ff132' for handling this type of filelist");
 
                     logWriter.DisposeIfLogStreamOpen();
-                    IOhelpers.ErrorExit("");
+                    SharedFunctions.ErrorExit("");
                 }
             }
 
             // Check for encryption header in the filelist file,
             // if the game code is set to ff13-2
-            if (gameCode == GameCodes.ff132)
+            if (gameCode == GameCode.ff132)
             {
-                filelistVariables.IsEncrypted = CheckIfEncrypted(filelistVariables.MainFilelistFile);
+                filelistCryptHeader.HasCryptHeader = CheckEncryptionTag(filelistFile);
             }
 
             // Check if the filelist is in decrypted
@@ -40,14 +42,17 @@ namespace WhiteBinTools.Filelist
             // If the filelist is encrypted then
             // decrypt the filelist file by first
             // creating a temp copy of the filelist.            
-            if (filelistVariables.IsEncrypted)
+            if (filelistCryptHeader.HasCryptHeader)
             {
-                var wasDecrypted = false;
+                var isDecrypted = false;
 
-                using (var encCheckReader = new BinaryReader(File.Open(filelistVariables.MainFilelistFile, FileMode.Open, FileAccess.Read)))
+                using (var encCheckReader = new BinaryReader(File.Open(filelistFile, FileMode.Open, FileAccess.Read)))
                 {
-                    encCheckReader.BaseStream.Position = 16;
-                    var cryptBodySize = encCheckReader.ReadBytesUInt32(true);
+                    filelistCryptHeader.MD5Hash = encCheckReader.ReadBytes(16);
+                    filelistCryptHeader.FilelistDataSizeBE = encCheckReader.ReadBytesUInt32(true);
+                    filelistCryptHeader.EncryptionTag = encCheckReader.ReadUInt32();
+
+                    var cryptBodySize = filelistCryptHeader.FilelistDataSizeBE;
                     cryptBodySize += 8;
 
                     if (cryptBodySize % 8 != 0)
@@ -55,7 +60,7 @@ namespace WhiteBinTools.Filelist
                         logWriter.LogMessage("Error: Length of the body to decrypt/encrypt is not valid");
 
                         logWriter.DisposeIfLogStreamOpen();
-                        IOhelpers.ErrorExit("");
+                        SharedFunctions.ErrorExit("");
                     }
 
                     encCheckReader.BaseStream.Position = 32 + cryptBodySize - 8;
@@ -63,60 +68,57 @@ namespace WhiteBinTools.Filelist
 
                     if (encCheckReader.ReadUInt32() == cryptBodySize)
                     {
-                        wasDecrypted = true;
+                        isDecrypted = true;
                     }
                 }
 
-                switch (wasDecrypted)
+                var cryptFilelist = filelistFile + ".crypt";
+
+                if (!isDecrypted)
                 {
-                    case true:
-                        IOhelpers.IfFileExistsDel(filelistVariables.TmpDcryptFilelistFile);
-                        File.Copy(filelistVariables.MainFilelistFile, filelistVariables.TmpDcryptFilelistFile);
+                    SharedFunctions.IfFileExistsDel(cryptFilelist);
+                    File.Copy(filelistFile, cryptFilelist);
 
-                        filelistVariables.MainFilelistFile = filelistVariables.TmpDcryptFilelistFile;
-                        break;
+                    logWriter.LogMessage("\nDecrypting filelist file....");
+                    CryptFilelist.ProcessFilelist(CryptAction.decrypt, cryptFilelist);
 
-                    case false:
-                        IOhelpers.IfFileExistsDel(filelistVariables.TmpDcryptFilelistFile);
-                        File.Copy(filelistVariables.MainFilelistFile, filelistVariables.TmpDcryptFilelistFile);
+                    using (var decFilelistReader = new BinaryReader(File.Open(cryptFilelist, FileMode.Open, FileAccess.Read)))
+                    {
+                        decFilelistReader.BaseStream.Position = 16;
+                        var filelistDataSize = decFilelistReader.ReadBytesUInt32(true);
+                        var hashOffset = 32 + filelistDataSize + 4;
 
-                        logWriter.LogMessage("\nDecrypting filelist file....");
-                        CryptFilelist.ProcessFilelist(CryptActions.d, filelistVariables.TmpDcryptFilelistFile);
+                        decFilelistReader.BaseStream.Position = hashOffset;
+                        var filelistHash = decFilelistReader.ReadUInt32();
 
-                        using (var decFilelistReader = new BinaryReader(File.Open(filelistVariables.TmpDcryptFilelistFile, FileMode.Open, FileAccess.Read)))
+                        if (filelistHash != CryptoFunctions.ComputeCheckSum(decFilelistReader, filelistDataSize / 4, 32))
                         {
-                            decFilelistReader.BaseStream.Position = 16;
-                            var filelistDataSize = decFilelistReader.ReadBytesUInt32(true);
-                            var hashOffset = 32 + filelistDataSize + 4;
+                            decFilelistReader.Dispose();
 
-                            decFilelistReader.BaseStream.Position = hashOffset;
-                            var filelistHash = decFilelistReader.ReadUInt32();
+                            var errorMsg = "Error: Filelist was not decrypted correctly";
 
-                            if (filelistHash != CryptoFunctions.ComputeCheckSum(decFilelistReader, filelistDataSize / 4, 32))
-                            {
-                                decFilelistReader.Dispose();
+                            logWriter.LogMessage(errorMsg);
+                            logWriter.DisposeIfLogStreamOpen();
 
-                                var errorMsg = "Error: Filelist was not decrypted correctly";
-
-                                logWriter.LogMessage(errorMsg);
-                                logWriter.DisposeIfLogStreamOpen();
-
-                                IOhelpers.ErrorExit(errorMsg);
-                            }
+                            SharedFunctions.ErrorExit(errorMsg);
                         }
+                    }
 
-                        logWriter.LogMessage("Finished decrypting filelist file\n");
+                    logWriter.LogMessage("Finished decrypting filelist file\n");
 
-                        filelistVariables.MainFilelistFile = filelistVariables.TmpDcryptFilelistFile;
-                        break;
+                    hasDecrypted = true;
+                    filelistFile = cryptFilelist;
                 }
             }
+
+            return hasDecrypted;
         }
 
 
-        private static bool CheckIfEncrypted(string filelistFile)
+        private static bool CheckEncryptionTag(string filelistFile)
         {
-            var isEncrypted = false;
+            var hasCryptHeader = false;
+
             using (var encStream = new FileStream(filelistFile, FileMode.Open, FileAccess.Read))
             {
                 using (var encStreamReader = new BinaryReader(encStream))
@@ -124,26 +126,26 @@ namespace WhiteBinTools.Filelist
                     encStreamReader.BaseStream.Position = 20;
                     var encHeaderNumber = encStreamReader.ReadUInt32();
 
-                    if (encHeaderNumber == 501232760)
+                    if (encHeaderNumber == FilelistCryptHeader.EncryptionTagConstant)
                     {
-                        isEncrypted = true;
+                        hasCryptHeader = true;
                     }
                 }
             }
 
-            return isEncrypted;
+            return hasCryptHeader;
         }
 
 
-        public static void EncryptProcess(RepackVariables repackVariables, StreamWriter logWriter)
+        public static void EncryptProcess(string newFilelistFile, StreamWriter logWriter)
         {
-            var filelistDataSize = (uint)0;
+            uint filelistDataSize = 0;
 
             // Check filelist size if divisibile by 8
             // and pad in null bytes if not divisible.
             // Then write some null bytes for the size 
             // and hash offsets
-            using (var preEncryptedfilelist = new FileStream(repackVariables.NewFilelistFile, FileMode.Append, FileAccess.Write))
+            using (var preEncryptedfilelist = new FileStream(newFilelistFile, FileMode.Append, FileAccess.Write))
             {
                 filelistDataSize = (uint)preEncryptedfilelist.Length - 32;
 
@@ -175,7 +177,7 @@ namespace WhiteBinTools.Filelist
                 preEncryptedfilelist.PadNull(16);
             }
 
-            using (var filelistToEncrypt = new FileStream(repackVariables.NewFilelistFile, FileMode.Open, FileAccess.Write))
+            using (var filelistToEncrypt = new FileStream(newFilelistFile, FileMode.Open, FileAccess.Write))
             {
                 using (var filelistToEncryptWriter = new BinaryWriter(filelistToEncrypt))
                 {
@@ -190,7 +192,7 @@ namespace WhiteBinTools.Filelist
             }
 
             // Encrypt the filelist file
-            CryptFilelist.ProcessFilelist(CryptActions.e, repackVariables.NewFilelistFile);
+            CryptFilelist.ProcessFilelist(CryptAction.encrypt, newFilelistFile);
             logWriter.LogMessage("\nFinished encrypting new filelist");
         }
     }

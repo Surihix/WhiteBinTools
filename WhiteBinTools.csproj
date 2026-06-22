@@ -84,6 +84,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="WhiteBinTools\Core.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WhiteBinTools\Crypto\CryptFilelist.cs" />
     <Compile Include="WhiteBinTools\Crypto\CryptoBase.cs" />
     <Compile Include="WhiteBinTools\Crypto\CryptoFunctions.cs" />
@@ -91,36 +93,16 @@
     <Compile Include="WhiteBinTools\Crypto\Encryption.cs" />
     <Compile Include="WhiteBinTools\Crypto\Generator.cs" />
     <Compile Include="WhiteBinTools\Crypto\IntegersArray.cs" />
+    <Compile Include="WhiteBinTools\Filelist\DirgePathHelpers\PathCategories\ChrCategory.cs" />
+    <Compile Include="WhiteBinTools\Filelist\DirgePathHelpers\PathCategories\EventCategory.cs" />
+    <Compile Include="WhiteBinTools\Filelist\DirgePathHelpers\PathCategories\ZoneCategory.cs" />
+    <Compile Include="WhiteBinTools\Filelist\DirgePathHelpers\PathGenerator.cs" />
+    <Compile Include="WhiteBinTools\Filelist\DirgePathHelpers\PathGenMethods.cs" />
+    <Compile Include="WhiteBinTools\Filelist\DirgePathHelpers\PathStructures.cs" />
+    <Compile Include="WhiteBinTools\Filelist\FilelistBuilder.cs" />
     <Compile Include="WhiteBinTools\Filelist\FilelistCrypto.cs" />
-    <Compile Include="WhiteBinTools\Repack\RepackTypeD.cs" />
-    <Compile Include="WhiteBinTools\Repack\RepackTypeE.cs" />
-    <Compile Include="WhiteBinTools\Support\Extensions\BinaryReaderHelpers.cs" />
-    <Compile Include="WhiteBinTools\Support\Extensions\BinaryWriterHelpers.cs" />
-    <Compile Include="WhiteBinTools\Support\Extensions\LoggingHelpers.cs" />
-    <Compile Include="WhiteBinTools\Support\Extensions\StreamHelpers.cs" />
-    <Compile Include="WhiteBinTools\Unpack\UnpackTypeA.cs" />
-    <Compile Include="WhiteBinTools\Unpack\UnpackTypeD.cs" />
-    <Compile Include="WhiteBinTools\Core.cs" />
-    <Compile Include="WhiteBinTools\Filelist\FilelistVariables.cs" />
-    <Compile Include="WhiteBinTools\Filelist\FilelistProcesses.cs" />
-    <Compile Include="WhiteBinTools\Filelist\FilelistChunksPrep.cs" />
-    <Compile Include="WhiteBinTools\Repack\RepackFilelistData.cs" />
-    <Compile Include="WhiteBinTools\Support\ProgramEnums.cs" />
-    <Compile Include="WhiteBinTools\Support\IOhelpers.cs" />
-    <Compile Include="WhiteBinTools\Repack\RepackTypeA.cs" />
-    <Compile Include="WhiteBinTools\Repack\RepackTypeB.cs" />
-    <Compile Include="WhiteBinTools\Repack\RepackTypeC.cs" />
-    <Compile Include="WhiteBinTools\Repack\RepackVariables.cs" />
-    <Compile Include="WhiteBinTools\Repack\RepackProcesses.cs" />
-    <Compile Include="WhiteBinTools\Support\ZlibMethods.cs" />
-    <Compile Include="WhiteBinTools\Unpack\UnpackTypePaths.cs" />
-    <Compile Include="WhiteBinTools\Unpack\UnpackTypeE.cs" />
-    <Compile Include="WhiteBinTools\Unpack\UnpackVariables.cs" />
-    <Compile Include="WhiteBinTools\Unpack\UnpackProcesses.cs" />
-    <Compile Include="WhiteBinTools\Unpack\UnpackTypeB.cs" />
-    <Compile Include="WhiteBinTools\Unpack\UnpackTypeC.cs" />
+    <Compile Include="WhiteBinTools\Filelist\FilelistLoader.cs" />
     <Compile Include="WhiteBinTools\Help.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WhiteBinTools\Ionic\Crc\CRC32.cs" />
     <Compile Include="WhiteBinTools\Ionic\Zlib\Deflate.cs" />
     <Compile Include="WhiteBinTools\Ionic\Zlib\DeflateStream.cs" />
@@ -134,6 +116,36 @@
     <Compile Include="WhiteBinTools\Ionic\Zlib\ZlibCodec.cs" />
     <Compile Include="WhiteBinTools\Ionic\Zlib\ZlibConstants.cs" />
     <Compile Include="WhiteBinTools\Ionic\Zlib\ZlibStream.cs" />
+    <Compile Include="WhiteBinTools\Repack\RepackHelpers.cs" />
+    <Compile Include="WhiteBinTools\Repack\RepackTypeA.cs" />
+    <Compile Include="WhiteBinTools\Repack\RepackTypeB.cs" />
+    <Compile Include="WhiteBinTools\Repack\RepackTypeC.cs" />
+    <Compile Include="WhiteBinTools\Repack\RepackTypeD.cs" />
+    <Compile Include="WhiteBinTools\Repack\RepackTypeE.cs" />
+    <Compile Include="WhiteBinTools\Support\Enumerators.cs" />
+    <Compile Include="WhiteBinTools\Support\Extensions\BinaryReaderHelpers.cs" />
+    <Compile Include="WhiteBinTools\Support\Extensions\BinaryWriterHelpers.cs" />
+    <Compile Include="WhiteBinTools\Support\Extensions\LoggingHelpers.cs" />
+    <Compile Include="WhiteBinTools\Support\Extensions\StreamHelpers.cs" />
+    <Compile Include="WhiteBinTools\Support\SharedFunctions.cs" />
+    <Compile Include="WhiteBinTools\Support\Structures\ChunkPack.cs" />
+    <Compile Include="WhiteBinTools\Support\Structures\FileInfoStringPack.cs" />
+    <Compile Include="WhiteBinTools\Support\Structures\FilelistChunk.cs" />
+    <Compile Include="WhiteBinTools\Support\Structures\FilelistCryptHeader.cs" />
+    <Compile Include="WhiteBinTools\Support\Structures\FilelistEntryV1.cs" />
+    <Compile Include="WhiteBinTools\Support\Structures\FilelistEntryV2.cs" />
+    <Compile Include="WhiteBinTools\Support\Structures\FilelistHeader.cs" />
+    <Compile Include="WhiteBinTools\Support\Structures\FilelistLoadData.cs" />
+    <Compile Include="WhiteBinTools\Support\Structures\FilelistPathChunkInfo.cs" />
+    <Compile Include="WhiteBinTools\Support\Structures\WhiteFileInfoData.cs" />
+    <Compile Include="WhiteBinTools\Support\ZlibFunctions.cs" />
+    <Compile Include="WhiteBinTools\Unpack\UnpackHelper.cs" />
+    <Compile Include="WhiteBinTools\Unpack\UnpackTypeA.cs" />
+    <Compile Include="WhiteBinTools\Unpack\UnpackTypeB.cs" />
+    <Compile Include="WhiteBinTools\Unpack\UnpackTypeC.cs" />
+    <Compile Include="WhiteBinTools\Unpack\UnpackTypeD.cs" />
+    <Compile Include="WhiteBinTools\Unpack\UnpackTypeE.cs" />
+    <Compile Include="WhiteBinTools\Unpack\UnpackTypePaths.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -150,5 +162,6 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

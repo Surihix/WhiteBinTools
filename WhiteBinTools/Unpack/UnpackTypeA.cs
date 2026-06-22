@@ -1,101 +1,100 @@
 ﻿using System.IO;
+using System.Text;
 using WhiteBinTools.Filelist;
 using WhiteBinTools.Support;
-using static WhiteBinTools.Support.ProgramEnums;
+using static WhiteBinTools.Support.Enumerators;
 
 namespace WhiteBinTools.Unpack
 {
     internal class UnpackTypeA
     {
-        public static void UnpackFull(GameCodes gameCode, string filelistFile, string whiteBinFile, StreamWriter logWriter)
+        public static void UnpackFull(GameCode gameCode, string filelistFile, string whiteBinFile, StreamWriter logWriter)
         {
-            IOhelpers.CheckFileExists(filelistFile, logWriter, "Error: Filelist file specified in the argument is missing");
-            IOhelpers.CheckFileExists(whiteBinFile, logWriter, "Error: Image bin file specified in the argument is missing");
+            SharedFunctions.CheckFileExists(filelistFile, logWriter, "Error: Filelist file specified in the argument is missing");
+            SharedFunctions.CheckFileExists(whiteBinFile, logWriter, "Error: Image bin file specified in the argument is missing");
 
-            var filelistVariables = new FilelistVariables();
-            var unpackVariables = new UnpackVariables();
+            var filelistLoadData = FilelistLoader.LoadFilelist(gameCode, filelistFile, logWriter);
 
-            FilelistProcesses.PrepareFilelistVars(filelistVariables, filelistFile);
-            UnpackProcesses.PrepareBinVars(whiteBinFile, unpackVariables);
+            var filelistHeader = filelistLoadData.FilelistHeader;
+            var filelistEntryV1Table = filelistLoadData.FilelistEntryV1Table;
+            var filelistEntryV2Table = filelistLoadData.FilelistEntryV2Table;
+            var filelistChunks = filelistLoadData.FilelistChunks;
 
-            if (Directory.Exists(unpackVariables.ExtractDir))
+            var whiteBinName = Path.GetFileName(whiteBinFile);
+            var unpackDir = Path.Combine(Path.GetDirectoryName(whiteBinFile), $"_{whiteBinName}");
+
+            if (Directory.Exists(unpackDir))
             {
-                logWriter.LogMessage("Detected previous unpack. deleting....");
-                IOhelpers.IfDirExistsDel(unpackVariables.ExtractDir);
+                logWriter.LogMessage("Detected previous unpack. deleting....\n");
+                SharedFunctions.IfDirExistsDel(unpackDir);
             }
 
-            Directory.CreateDirectory(unpackVariables.ExtractDir);
+            Directory.CreateDirectory(unpackDir);
 
-
-            FilelistCrypto.DecryptProcess(gameCode, filelistVariables, logWriter);
-
-            using (var filelistStream = new FileStream(filelistVariables.MainFilelistFile, FileMode.Open, FileAccess.Read))
-            {
-                using (var filelistReader = new BinaryReader(filelistStream))
-                {
-                    FilelistChunksPrep.GetFilelistOffsets(filelistReader, logWriter, filelistVariables);
-                    FilelistChunksPrep.BuildChunks(filelistStream, filelistVariables);
-                }
-            }
-
-            if (gameCode == GameCodes.ff132)
-            {
-                filelistVariables.CurrentChunkNumber = -1;
-            }
-
-            if (filelistVariables.IsEncrypted)
-            {
-                IOhelpers.IfFileExistsDel(filelistVariables.TmpDcryptFilelistFile);
-                filelistVariables.MainFilelistFile = filelistFile;
-            }
-
+            var duplicateCounter = 0;
+            var dirgePathsLog = new string[filelistHeader.FileCount];
 
             using (var whiteBinStream = new FileStream(whiteBinFile, FileMode.Open, FileAccess.Read))
             {
-                using (var entriesStream = new MemoryStream())
+                var noPathCounter = 0;
+
+                for (int i = 0; i < filelistHeader.FileCount; i++)
                 {
-                    entriesStream.Write(filelistVariables.EntriesData, 0, filelistVariables.EntriesData.Length);
-                    entriesStream.Seek(0, SeekOrigin.Begin);
+                    string whiteFileInfoString;
+                    uint fileCode;
 
-                    using (var entriesReader = new BinaryReader(entriesStream))
+                    if (gameCode == GameCode.ff131 || gameCode == GameCode.dirge)
                     {
+                        var filelistEntryV1 = filelistEntryV1Table[i];
+                        whiteFileInfoString = FilelistLoader.GetWhiteFileInfoString(filelistEntryV1.FileInfoPos, filelistChunks, filelistEntryV1.ChunkID);
+                        fileCode = filelistEntryV1.FileCode;
+                    }
+                    else
+                    {
+                        var filelistEntryV2 = filelistEntryV2Table[i];
+                        whiteFileInfoString = FilelistLoader.GetWhiteFileInfoString(filelistEntryV2.FileInfoPos, filelistChunks, filelistEntryV2.ChunkID);
+                        fileCode = filelistEntryV2.FileCode;
+                    }
 
-                        // Extracting files section 
-                        long entriesReadPos = 0;
-                        unpackVariables.CountDuplicates = 0;
+                    var whiteFileInfoData = FilelistLoader.GetWhiteFileInfoData(whiteFileInfoString, gameCode, fileCode, ref noPathCounter);
+                    var unpackedState = UnpackHelper.UnpackFile(whiteFileInfoData, unpackDir, ref duplicateCounter, whiteBinStream);
 
-                        for (int f = 0; f < filelistVariables.TotalFiles; f++)
+                    if (gameCode == GameCode.dirge)
+                    {
+                        var sb = new StringBuilder();
+
+                        _ = sb.Append($"FileCode:[{fileCode.ToString()}] ");
+                        _ = sb.Append($"Generated:[{whiteFileInfoData.IsPathGenerated}] ");
+                        _ = sb.Append($"Path: {whiteFileInfoData.FilePath}");
+
+                        dirgePathsLog[i] = sb.ToString();
+                    }
+
+                    logWriter.LogMessage($"{unpackedState} _{Path.Combine(whiteBinName, whiteFileInfoData.FilePath)}");
+                }
+
+                if (gameCode == GameCode.dirge)
+                {
+                    logWriter.LogMessage("\nWriting dirge unpacked paths log....\n");
+
+                    var dirgePathsTxtFile = Path.Combine(Path.GetDirectoryName(whiteBinFile), $"{whiteBinName}_unpacked_paths.txt");
+                    SharedFunctions.IfFileExistsDel(dirgePathsTxtFile);
+
+                    using (var dirgePathsLogWriter = new StreamWriter(dirgePathsTxtFile, true))
+                    {
+                        for (int i = 0; i < dirgePathsLog.Length; i++)
                         {
-                            FilelistProcesses.GetCurrentFileEntry(gameCode, entriesReader, entriesReadPos, filelistVariables);
-                            entriesReadPos += 8;
-
-                            UnpackProcesses.PrepareExtraction(filelistVariables.PathString, filelistVariables, unpackVariables.ExtractDir);
-
-                            // Extract all files
-                            if (!Directory.Exists(Path.Combine(unpackVariables.ExtractDir, filelistVariables.DirectoryPath)))
-                            {
-                                Directory.CreateDirectory(Path.Combine(unpackVariables.ExtractDir, filelistVariables.DirectoryPath));
-                            }
-                            if (File.Exists(filelistVariables.FullFilePath))
-                            {
-                                File.Delete(filelistVariables.FullFilePath);
-                                unpackVariables.CountDuplicates++;
-                            }
-
-                            UnpackProcesses.UnpackFile(filelistVariables, whiteBinStream, unpackVariables);
-
-                            logWriter.LogMessage(unpackVariables.UnpackedState + " _" + Path.Combine(unpackVariables.ExtractDirName, filelistVariables.MainPath));
+                            dirgePathsLogWriter.WriteLine(dirgePathsLog[i]);
                         }
                     }
                 }
-            }
 
+                logWriter.LogMessage($"\nFinished unpacking \"{whiteBinName}\"");
 
-            logWriter.LogMessage($"\nFinished unpacking \"{unpackVariables.WhiteBinName}\"");
-
-            if (unpackVariables.CountDuplicates > 1)
-            {
-                logWriter.LogMessage(unpackVariables.CountDuplicates + " duplicate file(s)");
+                if (duplicateCounter > 1)
+                {
+                    logWriter.LogMessage($"{duplicateCounter} duplicate file(s)");
+                }
             }
         }
     }

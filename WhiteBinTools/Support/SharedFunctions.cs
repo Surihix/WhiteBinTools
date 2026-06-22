@@ -3,7 +3,7 @@ using System.IO;
 
 namespace WhiteBinTools.Support
 {
-    internal class IOhelpers
+    internal class SharedFunctions
     {
         public static void ErrorExit(string errorMsg)
         {
@@ -47,6 +47,6 @@ namespace WhiteBinTools.Support
             {
                 Directory.Delete(directoryPath, true);
             }
-        }        
+        }
     }
 }
