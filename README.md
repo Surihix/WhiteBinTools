@@ -61,7 +61,7 @@ This program allows you to unpack and repack the main white_img archive files fr
 
 - When repacking the Json file back to filelist, ensure that the structure of the text data in the Json file is similar to what it was when dumped by the `-cfj` function switch. I strongly recommend using VS code to edit the Json file as other text editors might add non string character bytes in between two lines, which in turn will cause this program to throw errors when it tries repacking the filelist from the Json file.
 
-- Starting from version 2.0.0, WhiteBinTools can generate filepaths for files that do not have a filepath specified in the filelist from Dirge of Cerberus. this will only work if the gamecode switch is set to `-dirge` and when you do a full unpack with the `-u` function, an `KEL.DAT_unpacked_paths.txt` file should be created next to the unpacked folder. this file should contain information such as the filecode, whether the path was generated or not and the filepath for every file.
+- Starting from version 2.0.0, WhiteBinTools can generate filepaths for files that do not have a filepath specified in the filelist from Dirge of Cerberus. this will only work if the gamecode switch is set to `-dirge`. when you do a full unpack with the `-u` function, an `KEL.DAT_unpacked_paths.txt` file should be created next to the unpacked folder. this file should contain information such as the filecode, whether the path was generated or not and the filepath for every file.
 
 ## For developers
 - The following package's Zlib classes were used for Zlib compression and decompression:
